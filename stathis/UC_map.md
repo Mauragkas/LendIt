@@ -73,11 +73,7 @@
 ### Core Components
 1. Safe meeting place validation
 2. Public location verification
-3. Lighting condition monitoring
-4. Police station mapping
-5. Traffic density analysis
-6. Security camera mapping
-7. Emergency service locations
+3. Police station mapping
 
 ### Privacy Components
 1. Pre-confirmation location blur
