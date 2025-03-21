@@ -75,14 +75,6 @@
 2. Public location verification
 3. Police station mapping
 
-### Privacy Components
-1. Pre-confirmation location blur
-2. Approximate listing locations
-3. Meeting point visibility control
-4. Temporary location sharing
-5. Private address protection
-6. Location history management
-
 ## Map Integration
 ### System Features
 1. Multi-map provider support
