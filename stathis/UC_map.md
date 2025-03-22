@@ -1,100 +1,88 @@
-# Map Features
-## Search & Filter
-### Happy Path
-1. User accesses map view
-2. User enters location or uses current location
-3. User sets search radius
-4. User applies filters:
-   - Tool category
-   - Price range
-   - Availability dates
-   - Delivery available
-   - Rating threshold
-5. Map displays filtered results with pins
-6. User can toggle between map and list view
-7. User selects tool pin for quick preview
-8. User clicks through to full listing
 
-### Alternative Path 1
-2.1 Location services are disabled
-2.2 User prompted to enable location services
-2.3 User manually enters location
+## Επεξεργασία Αναζήτησης & Φίλτρων
+### Κύρια Ροή
+1. Το σύστημα φορτώνει τη διεπαφή χάρτη
+2. Το σύστημα αποκτά δεδομένα τοποθεσίας (GPS ή χειροκίνητη εισαγωγή)
+3. Το σύστημα επεξεργάζεται παραμέτρους ακτίνας αναζήτησης
+4. Το σύστημα εφαρμόζει κριτήρια φίλτρων:
+   - Αντιστοίχιση κατηγορίας εργαλείων
+   - Επικύρωση εύρους τιμών
+   - Έλεγχος διαθεσιμότητας ημερομηνιών
+   - Επαλήθευση σήμανσης παράδοσης
+   - Φιλτράρισμα ορίου αξιολόγησης
+5. Το σύστημα αποδίδει φιλτραρισμένους δείκτες χάρτη
+6. Το σύστημα διαχειρίζεται εναλλαγή προβολής χάρτη/λίστας
+7. Το σύστημα εξυπηρετεί δεδομένα γρήγορης προεπισκόπησης
+8. Το σύστημα δρομολογεί στην πλήρη προβολή καταχώρησης
 
-### Alternative Path 2
-5.1 No results found in search area
-5.2 System suggests expanding search radius
-5.3 User adjusts filters or location
+### Ροή Εξαίρεσης Τοποθεσίας
+2.1 Το σύστημα εντοπίζει απενεργοποιημένες υπηρεσίες τοποθεσίας
+2.2 Το σύστημα ενεργοποιεί προτροπή άδειας τοποθεσίας
+2.3 Το σύστημα επεξεργάζεται χειροκίνητη εισαγωγή τοποθεσίας
 
-## Meeting Place Selection
-### Happy Path
-1. After reservation confirmation, users access meeting place selector
-2. Map shows suggested neutral meeting locations:
-   - Public parking lots
-   - Shopping centers
-   - Police stations
-   - Other safe public spaces
-3. Users can suggest custom meeting points
-4. Both parties confirm meeting location
-5. System generates directions for both parties
-6. System sends meeting confirmation with map link
+### Ροή Εξαίρεσης Αποτελεσμάτων
+5.1 Το σύστημα εντοπίζει μηδενικά αποτελέσματα
+5.2 Το σύστημα προτείνει επέκταση ακτίνας
+5.3 Το σύστημα επανεπεξεργάζεται ενημερωμένες παραμέτρους
 
-### Alternative Path 1
-4.1 Parties cannot agree on meeting location
-4.2 System suggests alternative locations
-4.3 Users select new location or cancel reservation
+## Διαχείριση Σημείου Συνάντησης
+### Κύρια Ροή
+1. Το σύστημα ξεκινά επιλογέα τόπου συνάντησης μετά την κράτηση
+2. Το σύστημα εμφανίζει επιβεβαιωμένες τοποθεσίες συνάντησης:
+   - Δημόσιους χώρους στάθμευσης
+   - Εμπορικά κέντρα
+   - Αστυνομικά τμήματα
+   - Επιβεβαιωμένες ασφαλείς ζώνες
+3. Το σύστημα επεξεργάζεται αιτήματα προσαρμοσμένης τοποθεσίας
+4. Το σύστημα επιβεβαιώνει διμερή συμφωνία τοποθεσίας
+5. Το σύστημα δημιουργεί δεδομένα πλοήγησης
+6. Το σύστημα διανέμει επιβεβαιώσεις συνάντησης
 
-## Delivery Tracking
-### Happy Path
-1. Delivery provider starts delivery journey
-2. Real-time location tracking activated
-3. Map shows:
-   - Current location
-   - Destination
-   - Estimated arrival time
-   - Route
-4. Both parties receive:
-   - Progress notifications
-   - Delay alerts
-   - Arrival confirmation
-5. Delivery completed
+### Ροή Εξαίρεσης Συμφωνίας
+4.1 Το σύστημα εντοπίζει διαφωνία τοποθεσίας
+4.2 Το σύστημα δημιουργεί εναλλακτικές προτάσεις
+4.3 Το σύστημα επεξεργάζεται νέα επιλογή ή ακύρωση
 
-### Alternative Path 1
-2.1 Location tracking fails
-2.2 System switches to milestone updates
-2.3 Manual confirmation required at delivery
+## Παρακολούθηση Παράδοσης
+### Κύρια Ροή
+1. Το σύστημα αρχικοποιεί παρακολούθηση παράδοσης
+2. Το σύστημα ενεργοποιεί παρακολούθηση τοποθεσίας
+3. Το σύστημα εμφανίζει:
+   - Δεδομένα τοποθεσίας σε πραγματικό χρόνο
+   - Δείκτες προορισμού
+   - Υπολογισμούς ETA
+   - Οπτικοποίηση διαδρομής
+4. Το σύστημα δημιουργεί:
+   - Ειδοποιήσεις προόδου
+   - Ειδοποιήσεις καθυστέρησης
+   - Επιβεβαιώσεις άφιξης
+5. Το σύστημα ολοκληρώνει την κατάσταση παράδοσης
 
-### Alternative Path 2
-3.1 Delivery route deviation detected
-3.2 System alerts both parties
-3.3 New ETA calculated
+### Ροή Εξαίρεσης Παρακολούθησης
+2.1 Το σύστημα εντοπίζει αποτυχία παρακολούθησης
+2.2 Το σύστημα μεταβαίνει σε ενημερώσεις ορόσημων
+2.3 Το σύστημα απαιτεί χειροκίνητη επαλήθευση παράδοσης
 
-## Safety Features
-### Core Features
-1. Safe meeting place suggestions
-2. Public location verification
-3. Well-lit area indicators
-4. Police station locations
-5. High-traffic area markers
-6. Security camera coverage zones
-7. Emergency service locations
+### Ροή Εξαίρεσης Διαδρομής
+3.1 Το σύστημα εντοπίζει απόκλιση διαδρομής
+3.2 Το σύστημα ενεργοποιεί ειδοποιήσεις απόκλισης
+3.3 Το σύστημα ενημερώνει υπολογισμούς ETA
 
-### Privacy Features
-1. Location blur until reservation confirmed
-2. Approximate location display for listings
-3. Meeting point-only visibility
-4. Temporary location sharing
-5. Private address protection
-6. Location history auto-delete
+## Υποδομή Ασφαλείας
+### Βασικά Στοιχεία
+1. Επικύρωση ασφαλούς τόπου συνάντησης
+2. Επαλήθευση δημόσιας τοποθεσίας
+3. Χαρτογράφηση αστυνομικών τμημάτων
 
-## Map Integration
-### Features
-1. Multiple map provider support
-2. Offline map caching
-3. Turn-by-turn navigation
-4. Street view integration
-5. Satellite view option
-6. Traffic data overlay
-7. Public transit information
-8. Parking availability
-9. Weather overlay
-10. Custom map markers
+## Ενσωμάτωση Χάρτη
+### Χαρακτηριστικά Συστήματος
+1. Υποστήριξη πολλαπλών παρόχων χαρτών
+2. Προσωρινή αποθήκευση χαρτών εκτός σύνδεσης
+3. Ενσωμάτωση πλοήγησης
+4. Ενσωμάτωση προβολής δρόμου
+5. Υποστήριξη δορυφορικών εικόνων
+6. Επικάλυψη δεδομένων κυκλοφορίας
+7. Ενσωμάτωση δεδομένων μεταφοράς
+8. Δεδομένα διαθεσιμότητας στάθμευσης
+9. Επικάλυψη δεδομένων καιρού
+10. Προσαρμοσμένο σύστημα δεικτών

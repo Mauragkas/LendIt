@@ -1,45 +1,48 @@
-# Messaging
-## User Messaging
-### Happy Path
-1. User navigates to messaging section in app
-2. User selects conversation or starts new message
-3. User types and sends message
-4. User receives confirmation message was sent
-5. User receives reply notification
-6. User reads reply
-7. User continues conversation as needed
+# Αρχιτεκτονική Συστήματος Μηνυμάτων
 
-### Alternative Path 1
-2.1 User cannot find recipient to message
-2.2 User navigates to tool listing/profile to initiate conversation
-2.3 User starts new message from there
+## Επεξεργασία Μηνυμάτων
+### Κύρια Ροή
+1. Σύστημα διατηρεί νήμα συνομιλίας
+2. Σύστημα εμφανίζει διεπαφή μηνυμάτων
+3. Σύστημα φορτώνει υπάρχουσες συνομιλίες ή ενεργοποιεί δημιουργία νέου μηνύματος
+4. Σύστημα επεξεργάζεται είσοδο μηνύματος
+5. Σύστημα επικυρώνει και αποθηκεύει μήνυμα
+6. Σύστημα παραδίδει μήνυμα στον παραλήπτη
+7. Σύστημα δημιουργεί επιβεβαίωση παράδοσης
 
-### Alternative Path 2
-4.1 Message fails to send due to connection issues
-4.2 User receives error notification
-4.3 User retries sending message
+### Ροή Χειρισμού Σφαλμάτων 1
+2.1 Σύστημα δεν μπορεί να εντοπίσει παραλήπτη
+2.2 Σύστημα ανακατευθύνει σε προβολή εργαλείου/προφίλ
+2.3 Σύστημα ξεκινά αποστολή μηνυμάτων από το περιεχόμενο
 
-## Automated Messages
-### Happy Path
-1. System sends automatic messages for:
-   - Reservation requests
-   - Reservation confirmations
-   - Payment confirmations
-   - Pickup/delivery reminders
-   - Return reminders
-   - Rating reminders
-2. User receives notification of automated message
-3. User can reply to automated message if needed
+### Ροή Χειρισμού Σφαλμάτων 2
+4.1 Σύστημα εντοπίζει αποτυχία παράδοσης μηνύματος
+4.2 Σύστημα δημιουργεί ειδοποίηση σφάλματος
+4.3 Σύστημα θέτει μήνυμα σε ουρά για επανάληψη
 
-## Message Features
-### Core Features
-1. Text messaging
-2. Photo sharing
-3. Location sharing
-4. Read receipts
-5. Typing indicators
-6. Message timestamps
-7. Push notifications
-8. Message history/archive
-9. Block user capability
-10. Report user capability
+## Μηχανή Αυτοματοποιημένων Μηνυμάτων
+### Βασική Επεξεργασία
+1. Σύστημα ενεργοποιεί αυτοματοποιημένα μηνύματα για συμβάντα:
+   - Αλλαγές κατάστασης κράτησης
+   - Επεξεργασία πληρωμών
+   - Υπενθυμίσεις προγράμματος
+   - Αιτήματα αξιολόγησης
+2. Σύστημα παραδίδει ειδοποιήσεις
+3. Σύστημα ενεργοποιεί αμφίδρομη επικοινωνία
+
+## Στοιχεία Συστήματος
+### Υποδομή Μηνυμάτων
+1. Υπηρεσία επεξεργασίας κειμένου
+2. Υπηρεσία διαχείρισης πολυμέσων
+   - Επεξεργασία φωτογραφιών
+   - Διαχείριση δεδομένων τοποθεσίας
+3. Παρακολούθηση κατάστασης μηνυμάτων
+   - Επιβεβαίωση παράδοσης
+   - Κατάσταση ανάγνωσης
+   - Κατάσταση πληκτρολόγησης
+4. Διαχείριση χρονοσφραγίδων
+5. Υπηρεσία ειδοποιήσεων push
+6. Επίπεδο διατήρησης μηνυμάτων
+7. Υπηρεσίες ασφάλειας χρηστών
+   - Λειτουργία αποκλεισμού
+   - Μηχανισμός αναφοράς

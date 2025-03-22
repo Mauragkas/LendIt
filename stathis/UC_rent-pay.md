@@ -1,83 +1,112 @@
-# Renting & Payment processing
-## Renter
-### Happy Path
-1. Renter searches for a tool to rent w/ filters.
-2. Renter inspects tool details.
-3. Renter selects tool to rent.
-4. Renter makes reservation request.
-5. Renter receives confirmation and communication regarding the reservation.
-6. Renter pays for reservation upfront w/ card.
-7. Renter and Owner agree on a meeting place or delivery.
-8. Renter receives tool.
-9. Renter uses tool.
-10. Renter returns tool (meeting place or delivery).
-11. Renter confirms return.
-12. Renter rates Owner.
+# Ενοικίαση & Σύστημα Επεξεργασίας Πληρωμών
 
-### Alternative Path 1
-4.1 Renter's reservation request is denied.
-4.2 Renter receives notification of denial.
+## Ροή Ενοικιαστή
+### Κύρια Διαδρομή
+1. Αναζήτηση εργαλείων από ενοικιαστή (επεκτείνει use case search)
+2. Σύστημα καταγράφει επιλογή εργαλείου
+3. Ενοικιαστής πατάει κουμπί ενοικίασης με επιλογές ημερομηνίας
+4. Σύστημα δημιουργεί εγγραφή αιτήματος κράτησης
+5. Σύστημα στέλνει ειδοποιήσεις επιβεβαίωσης και ενεργοποιεί κανάλι επικοινωνίας (επεκτείνει use case messaging)
+6. Σύστημα εμφανίζει φόρμα εισαγωγής στοιχείων κάρτας
+7. Ενοικιαστής εισάγει στοιχεία κάρτας
+8. Σύστημα επικυρώνει στοιχεία κάρτας
+9. Σύστημα δεσμεύει το ποσό στην κάρτα
+10. Σύστημα αποθηκεύει επιβεβαίωση συναλλαγής
+11. Σύστημα στέλνει απόδειξη πληρωμής στον ενοικιαστή
+12. Σύστημα δημιουργεί επιβεβαίωση διεύθυνσης παράδοσης
+13. Σύστημα καταγράφει επιβεβαίωση παράδοσης από delivery
+14. Σύστημα παρακολουθεί περίοδο ενοικίασης
+15. Σύστημα δημιουργεί αίτημα παραλαβής για delivery
+16. Σύστημα καταγράφει επιβεβαίωση παραλαβής delivery
+17. Σύστημα καταγράφει επιβεβαίωση επιστροφής εργαλείου
+18. Σύστημα καταγράφει επιβεβαίωση επιστροφής ενοικιαστή
+19. Σύστημα αποθηκεύει αξιολόγηση ιδιοκτήτη από ενοικιαστή
 
-### Alternative Path 2
-5.1 Renter's reservation request is cancelled.
-5.2 Renter receives notification of cancellation.
+### Εναλλακτική Διαδρομή 1
+4.1 Σύστημα καταγράφει άρνηση κράτησης
+4.2 Σύστημα στέλνει ειδοποίηση άρνησης στον ενοικιαστή
 
-### Alternative Path 3
-6.1 Renter's payment is declined.
-6.2 Renter receives notification of payment failure.
-6.3 Renter prompted to retry payment from the reservation details page.
+### Εναλλακτική Διαδρομή 2
+5.1 Σύστημα καταγράφει ακύρωση κράτησης
+5.2 Σύστημα στέλνει ειδοποίηση ακύρωσης στον ενοικιαστή
 
-### Alternative Path 4
-7.1 Renter and Owner cannot agree on a meeting place or delivery.
-7.2 Renter receives notification of reservation cancellation.
+### Εναλλακτική Διαδρομή 3
+9.1 Σύστημα καταγράφει αποτυχημένη προσπάθεια πληρωμής
+9.2 Σύστημα στέλνει ειδοποίηση αποτυχίας πληρωμής
+9.3 Σύστημα ανακατευθύνει σε σελίδα επανάληψης πληρωμής
 
-### Alternative Path 5
-8.1 Renter receives tool in poor condition.
-8.2 Renter contacts Owner to resolve issue.
-8.3 Renter returns tool.
-8.4 Renter receives refund.
-8.5 Renter rates Owner.
+### Εναλλακτική Διαδρομή 4
+13.1 Σύστημα καταγράφει αίτημα τοποθεσίας συνάντησης
+13.2 Σύστημα επικυρώνει τοποθεσία συνάντησης
+13.3 Σύστημα συντονίζει χρόνο συνάντησης με τα δύο μέρη
+13.4 Σύστημα στέλνει επιβεβαιώσεις συνάντησης
+13.5 Σύστημα καταγράφει επιβεβαίωση παράδοσης εργαλείου
 
-### Alternative Path 6
-10.1 Renter does not return tool or breaks tool.
-10.2 Renter is charged for tool.
-10.3 Renter receives notification of charge.
+### Εναλλακτική Διαδρομή 5
+14.1 Σύστημα καταγράφει διαφωνία κατάστασης
+14.2 Σύστημα ενεργοποιεί κανάλι επικοινωνίας διαφωνίας
+14.3 Σύστημα επεξεργάζεται επιστροφή
+14.4 Σύστημα επεξεργάζεται συναλλαγή επιστροφής χρημάτων
+14.5 Σύστημα αποθηκεύει αξιολόγηση
 
-### Alternative Path 7
-12.1 Renter does not rate Owner.
+### Εναλλακτική Διαδρομή 6
+18.1 Σύστημα καταγράφει μη επιστροφή/ζημιά εργαλείου
+18.2 Σύστημα επεξεργάζεται χρέωση ζημιάς
+18.3 Σύστημα στέλνει ειδοποίηση χρέωσης
 
-## Owner
-### Happy Path
-1. Owner lists tool for rent.
-2. Owner receives reservation request.
-3. Owner accepts reservation request.
-4. Owner and Renter agree on a meeting place or delivery.
-5. Owner receives payment.
-6. Owner meets Renter or delivery and hands off tool.
-7. Owner receives tool back.
-8. Owner confirms return.
-9. Owner rates Renter.
+### Εναλλακτική Διαδρομή 7
+20.1 Σύστημα καταγράφει ελλιπή αξιολόγηση
 
-### Alternative Path 1
-3.1 Owner denies reservation request.
-3.2 Renter receives notification of denial.
+## Ροή Ιδιοκτήτη
+### Κύρια Διαδρομή
+1. Σύστημα δημιουργεί εγγραφή καταχώρησης εργαλείου
+2. Σύστημα ειδοποιεί ιδιοκτήτη για αίτημα κράτησης
+3. Σύστημα καταγράφει αποδοχή κράτησης
+4. Σύστημα δημιουργεί ετικέτα αποστολής για ιδιοκτήτη
+5. Ιδιοκτήτης προγραμματίζει παραλαβή delivery
+6. Σύστημα καταγράφει παράδοση πακέτου ιδιοκτήτη σε delivery
+7. Σύστημα επεξεργάζεται αρχική πληρωμή στον ιδιοκτήτη
+8. Σύστημα καταγράφει επιτυχή παράδοση
+9. Σύστημα επεξεργάζεται τελική πληρωμή στον ιδιοκτήτη
+10. Σύστημα δημιουργεί ετικέτα επιστροφής
+11. Σύστημα καταγράφει παραλαβή επιστροφής εργαλείου
+12. Σύστημα καταγράφει παράδοση επιστροφής εργαλείου
+13. Σύστημα καταγράφει επιβεβαίωση επιστροφής ιδιοκτήτη
+14. Σύστημα αποθηκεύει αξιολόγηση ενοικιαστή από ιδιοκτήτη
 
-### Alternative Path 2
-5.1 Owner does not receive payment.
-5.2 Owner receives notification of payment failure.
-5.3 Owner prompted to retry payment from the reservation details page.
+### Εναλλακτική Διαδρομή 1
+3.1 Σύστημα καταγράφει άρνηση κράτησης
+3.2 Σύστημα στέλνει ειδοποίηση άρνησης
 
-### Alternative Path 3
-7.1 Owner does not receive tool back.
-7.2 Owner contacts Renter to resolve issue.
-7.3 Owner receives tool back.
-7.4 Owner rates Renter.
+### Εναλλακτική Διαδρομή 2
+4.1 Σύστημα καταγράφει αίτημα συνάντησης
+4.2 Σύστημα επικυρώνει τοποθεσία συνάντησης
+4.3 Σύστημα συντονίζει πρόγραμμα συνάντησης
+4.4 Σύστημα στέλνει επιβεβαίωση συνάντησης
 
-### Alternative Path 4
-8.1 Owner receives tool back in poor condition.
-8.2 Owner contacts Renter to resolve issue.
-8.3 Owner receives refund.
-8.4 Owner rates Renter.
+### Εναλλακτική Διαδρομή 3
+6.1 Σύστημα καταγράφει αποτυχία πληρωμής
+6.2 Σύστημα στέλνει ειδοποίηση αποτυχίας πληρωμής
+6.3 Σύστημα ενεργοποιεί επανάληψη πληρωμής
 
-### Alternative Path 5
-9.1 Owner does not rate Renter.
+### Εναλλακτική Διαδρομή 4
+10.1 Σύστημα καταγράφει απώλεια επιστροφής εργαλείου
+10.2 Σύστημα ενεργοποιεί επικοινωνία διαφωνίας
+10.3 Σύστημα καταγράφει επιστροφή εργαλείου
+10.4 Σύστημα αποθηκεύει αξιολόγηση
+
+### Εναλλακτική Διαδρομή 5
+12.1 Σύστημα καταγράφει διαφωνία κατάστασης
+12.2 Σύστημα ενεργοποιεί επικοινωνία διαφωνίας
+12.3 Σύστημα επεξεργάζεται αποζημίωση
+12.4 Σύστημα αποθηκεύει αξιολόγηση
+
+### Εναλλακτική Διαδρομή 6
+13.1 Σύστημα καταγράφει ελλιπή αξιολόγηση
+
+## Παρακολούθηση Συστήματος
+- Σύστημα παρακολουθεί όλες τις καταστάσεις συναλλαγών
+- Σύστημα διατηρεί αρχεία καταγραφής όλων των συμβάντων
+- Σύστημα παρακολουθεί για ύποπτη δραστηριότητα
+- Σύστημα παρακολουθεί μετρήσεις επίλυσης διαφωνιών
+- Σύστημα δημιουργεί αναλύσεις μοτίβων ενοικίασης
