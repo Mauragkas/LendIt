@@ -1,48 +1,48 @@
-# Messaging System Architecture
+# Αρχιτεκτονική Συστήματος Μηνυμάτων
 
-## Message Processing
-### Primary Flow
-1. System displays messaging interface
-2. System loads existing conversations or enables new message creation
-3. System processes message input
-4. System validates and stores message
-5. System delivers message to recipient
-6. System generates delivery confirmation
-7. System maintains conversation thread
+## Επεξεργασία Μηνυμάτων
+### Κύρια Ροή
+1. Σύστημα διατηρεί νήμα συνομιλίας
+2. Σύστημα εμφανίζει διεπαφή μηνυμάτων
+3. Σύστημα φορτώνει υπάρχουσες συνομιλίες ή ενεργοποιεί δημιουργία νέου μηνύματος
+4. Σύστημα επεξεργάζεται είσοδο μηνύματος
+5. Σύστημα επικυρώνει και αποθηκεύει μήνυμα
+6. Σύστημα παραδίδει μήνυμα στον παραλήπτη
+7. Σύστημα δημιουργεί επιβεβαίωση παράδοσης
 
-### Error Handling Flow 1
-2.1 System cannot locate recipient
-2.2 System redirects to tool listing/profile view
-2.3 System initiates messaging from context
+### Ροή Χειρισμού Σφαλμάτων 1
+2.1 Σύστημα δεν μπορεί να εντοπίσει παραλήπτη
+2.2 Σύστημα ανακατευθύνει σε προβολή εργαλείου/προφίλ
+2.3 Σύστημα ξεκινά αποστολή μηνυμάτων από το περιεχόμενο
 
-### Error Handling Flow 2
-4.1 System detects message delivery failure
-4.2 System generates error notification
-4.3 System queues message for retry
+### Ροή Χειρισμού Σφαλμάτων 2
+4.1 Σύστημα εντοπίζει αποτυχία παράδοσης μηνύματος
+4.2 Σύστημα δημιουργεί ειδοποίηση σφάλματος
+4.3 Σύστημα θέτει μήνυμα σε ουρά για επανάληψη
 
-## Automated Messaging Engine
-### Core Processing
-1. System triggers automated messages for events:
-   - Reservation state changes
-   - Payment processing
-   - Schedule reminders
-   - Rating requests
-2. System delivers notifications
-3. System enables two-way communication thread
+## Μηχανή Αυτοματοποιημένων Μηνυμάτων
+### Βασική Επεξεργασία
+1. Σύστημα ενεργοποιεί αυτοματοποιημένα μηνύματα για συμβάντα:
+   - Αλλαγές κατάστασης κράτησης
+   - Επεξεργασία πληρωμών
+   - Υπενθυμίσεις προγράμματος
+   - Αιτήματα αξιολόγησης
+2. Σύστημα παραδίδει ειδοποιήσεις
+3. Σύστημα ενεργοποιεί αμφίδρομη επικοινωνία
 
-## System Components
-### Messaging Infrastructure
-1. Text processing service
-2. Media handling service
-   - Photo processing
-   - Location data handling
-3. Message status tracking
-   - Delivery confirmation
-   - Read status
-   - Typing status
-4. Timestamp management
-5. Push notification service
-6. Message persistence layer
-7. User security services
-   - Blocking functionality
-   - Reporting mechanism
+## Στοιχεία Συστήματος
+### Υποδομή Μηνυμάτων
+1. Υπηρεσία επεξεργασίας κειμένου
+2. Υπηρεσία διαχείρισης πολυμέσων
+   - Επεξεργασία φωτογραφιών
+   - Διαχείριση δεδομένων τοποθεσίας
+3. Παρακολούθηση κατάστασης μηνυμάτων
+   - Επιβεβαίωση παράδοσης
+   - Κατάσταση ανάγνωσης
+   - Κατάσταση πληκτρολόγησης
+4. Διαχείριση χρονοσφραγίδων
+5. Υπηρεσία ειδοποιήσεων push
+6. Επίπεδο διατήρησης μηνυμάτων
+7. Υπηρεσίες ασφάλειας χρηστών
+   - Λειτουργία αποκλεισμού
+   - Μηχανισμός αναφοράς

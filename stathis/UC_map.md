@@ -1,89 +1,88 @@
-# Map System Features
 
-## Search & Filter Processing
-### Primary Flow
-1. System loads map interface
-2. System acquires location data (GPS or manual input)
-3. System processes search radius parameters
-4. System applies filter criteria:
-   - Tool category mapping
-   - Price range validation
-   - Availability date checking
-   - Delivery flag verification
-   - Rating threshold filtering
-5. System renders filtered map markers
-6. System manages map/list view toggle
-7. System serves quick preview data
-8. System routes to full listing view
+## Επεξεργασία Αναζήτησης & Φίλτρων
+### Κύρια Ροή
+1. Το σύστημα φορτώνει τη διεπαφή χάρτη
+2. Το σύστημα αποκτά δεδομένα τοποθεσίας (GPS ή χειροκίνητη εισαγωγή)
+3. Το σύστημα επεξεργάζεται παραμέτρους ακτίνας αναζήτησης
+4. Το σύστημα εφαρμόζει κριτήρια φίλτρων:
+   - Αντιστοίχιση κατηγορίας εργαλείων
+   - Επικύρωση εύρους τιμών
+   - Έλεγχος διαθεσιμότητας ημερομηνιών
+   - Επαλήθευση σήμανσης παράδοσης
+   - Φιλτράρισμα ορίου αξιολόγησης
+5. Το σύστημα αποδίδει φιλτραρισμένους δείκτες χάρτη
+6. Το σύστημα διαχειρίζεται εναλλαγή προβολής χάρτη/λίστας
+7. Το σύστημα εξυπηρετεί δεδομένα γρήγορης προεπισκόπησης
+8. Το σύστημα δρομολογεί στην πλήρη προβολή καταχώρησης
 
-### Location Exception Flow
-2.1 System detects disabled location services
-2.2 System triggers location permission prompt
-2.3 System processes manual location input
+### Ροή Εξαίρεσης Τοποθεσίας
+2.1 Το σύστημα εντοπίζει απενεργοποιημένες υπηρεσίες τοποθεσίας
+2.2 Το σύστημα ενεργοποιεί προτροπή άδειας τοποθεσίας
+2.3 Το σύστημα επεξεργάζεται χειροκίνητη εισαγωγή τοποθεσίας
 
-### Results Exception Flow
-5.1 System detects zero results
-5.2 System suggests radius expansion
-5.3 System reprocesses updated parameters
+### Ροή Εξαίρεσης Αποτελεσμάτων
+5.1 Το σύστημα εντοπίζει μηδενικά αποτελέσματα
+5.2 Το σύστημα προτείνει επέκταση ακτίνας
+5.3 Το σύστημα επανεπεξεργάζεται ενημερωμένες παραμέτρους
 
-## Meeting Point Management
-### Primary Flow
-1. System initiates meeting place selector post-reservation
-2. System displays verified meeting locations:
-   - Public parking locations
-   - Commercial centers
-   - Police stations
-   - Verified safe zones
-3. System processes custom location requests
-4. System confirms bilateral location agreement
-5. System generates navigation data
-6. System distributes meeting confirmations
+## Διαχείριση Σημείου Συνάντησης
+### Κύρια Ροή
+1. Το σύστημα ξεκινά επιλογέα τόπου συνάντησης μετά την κράτηση
+2. Το σύστημα εμφανίζει επιβεβαιωμένες τοποθεσίες συνάντησης:
+   - Δημόσιους χώρους στάθμευσης
+   - Εμπορικά κέντρα
+   - Αστυνομικά τμήματα
+   - Επιβεβαιωμένες ασφαλείς ζώνες
+3. Το σύστημα επεξεργάζεται αιτήματα προσαρμοσμένης τοποθεσίας
+4. Το σύστημα επιβεβαιώνει διμερή συμφωνία τοποθεσίας
+5. Το σύστημα δημιουργεί δεδομένα πλοήγησης
+6. Το σύστημα διανέμει επιβεβαιώσεις συνάντησης
 
-### Agreement Exception Flow
-4.1 System detects location disagreement
-4.2 System generates alternative suggestions
-4.3 System processes new selection or cancellation
+### Ροή Εξαίρεσης Συμφωνίας
+4.1 Το σύστημα εντοπίζει διαφωνία τοποθεσίας
+4.2 Το σύστημα δημιουργεί εναλλακτικές προτάσεις
+4.3 Το σύστημα επεξεργάζεται νέα επιλογή ή ακύρωση
 
-## Delivery Tracking
-### Primary Flow
-1. System initializes delivery tracking
-2. System activates location monitoring
-3. System displays:
-   - Real-time location data
-   - Destination markers
-   - ETA calculations
-   - Route visualization
-4. System generates:
-   - Progress notifications
-   - Delay alerts
-   - Arrival confirmations
-5. System completes delivery status
+## Παρακολούθηση Παράδοσης
+### Κύρια Ροή
+1. Το σύστημα αρχικοποιεί παρακολούθηση παράδοσης
+2. Το σύστημα ενεργοποιεί παρακολούθηση τοποθεσίας
+3. Το σύστημα εμφανίζει:
+   - Δεδομένα τοποθεσίας σε πραγματικό χρόνο
+   - Δείκτες προορισμού
+   - Υπολογισμούς ETA
+   - Οπτικοποίηση διαδρομής
+4. Το σύστημα δημιουργεί:
+   - Ειδοποιήσεις προόδου
+   - Ειδοποιήσεις καθυστέρησης
+   - Επιβεβαιώσεις άφιξης
+5. Το σύστημα ολοκληρώνει την κατάσταση παράδοσης
 
-### Tracking Exception Flow
-2.1 System detects tracking failure
-2.2 System switches to milestone updates
-2.3 System requires manual delivery verification
+### Ροή Εξαίρεσης Παρακολούθησης
+2.1 Το σύστημα εντοπίζει αποτυχία παρακολούθησης
+2.2 Το σύστημα μεταβαίνει σε ενημερώσεις ορόσημων
+2.3 Το σύστημα απαιτεί χειροκίνητη επαλήθευση παράδοσης
 
-### Route Exception Flow
-3.1 System detects route deviation
-3.2 System triggers deviation alerts
-3.3 System updates ETA calculations
+### Ροή Εξαίρεσης Διαδρομής
+3.1 Το σύστημα εντοπίζει απόκλιση διαδρομής
+3.2 Το σύστημα ενεργοποιεί ειδοποιήσεις απόκλισης
+3.3 Το σύστημα ενημερώνει υπολογισμούς ETA
 
-## Safety Infrastructure
-### Core Components
-1. Safe meeting place validation
-2. Public location verification
-3. Police station mapping
+## Υποδομή Ασφαλείας
+### Βασικά Στοιχεία
+1. Επικύρωση ασφαλούς τόπου συνάντησης
+2. Επαλήθευση δημόσιας τοποθεσίας
+3. Χαρτογράφηση αστυνομικών τμημάτων
 
-## Map Integration
-### System Features
-1. Multi-map provider support
-2. Offline map caching
-3. Navigation integration
-4. Street view integration
-5. Satellite imagery support
-6. Traffic data overlay
-7. Transit data integration
-8. Parking availability data
-9. Weather data overlay
-10. Custom marker system
+## Ενσωμάτωση Χάρτη
+### Χαρακτηριστικά Συστήματος
+1. Υποστήριξη πολλαπλών παρόχων χαρτών
+2. Προσωρινή αποθήκευση χαρτών εκτός σύνδεσης
+3. Ενσωμάτωση πλοήγησης
+4. Ενσωμάτωση προβολής δρόμου
+5. Υποστήριξη δορυφορικών εικόνων
+6. Επικάλυψη δεδομένων κυκλοφορίας
+7. Ενσωμάτωση δεδομένων μεταφοράς
+8. Δεδομένα διαθεσιμότητας στάθμευσης
+9. Επικάλυψη δεδομένων καιρού
+10. Προσαρμοσμένο σύστημα δεικτών

@@ -1,91 +1,112 @@
-# Renting & Payment Processing System Events
+# Ενοικίαση & Σύστημα Επεξεργασίας Πληρωμών
 
-## Renter Flow
-### Happy Path
-1. System displays search results based on renter's filters
-2. System serves tool details page
-3. System logs tool selection
-4. System creates reservation request record
-5. System sends confirmation notifications and enables communication channel
-6. System processes payment transaction and logs result
-7. System logs agreed meeting/delivery details
-8. System logs tool pickup confirmation
-9. System tracks rental period
-10. System logs tool return confirmation
-11. System records renter's return verification
-12. System stores renter's rating of owner
+## Ροή Ενοικιαστή
+### Κύρια Διαδρομή
+1. Αναζήτηση εργαλείων από ενοικιαστή (επεκτείνει use case search)
+2. Σύστημα καταγράφει επιλογή εργαλείου
+3. Ενοικιαστής πατάει κουμπί ενοικίασης με επιλογές ημερομηνίας
+4. Σύστημα δημιουργεί εγγραφή αιτήματος κράτησης
+5. Σύστημα στέλνει ειδοποιήσεις επιβεβαίωσης και ενεργοποιεί κανάλι επικοινωνίας (επεκτείνει use case messaging)
+6. Σύστημα εμφανίζει φόρμα εισαγωγής στοιχείων κάρτας
+7. Ενοικιαστής εισάγει στοιχεία κάρτας
+8. Σύστημα επικυρώνει στοιχεία κάρτας
+9. Σύστημα δεσμεύει το ποσό στην κάρτα
+10. Σύστημα αποθηκεύει επιβεβαίωση συναλλαγής
+11. Σύστημα στέλνει απόδειξη πληρωμής στον ενοικιαστή
+12. Σύστημα δημιουργεί επιβεβαίωση διεύθυνσης παράδοσης
+13. Σύστημα καταγράφει επιβεβαίωση παράδοσης από delivery
+14. Σύστημα παρακολουθεί περίοδο ενοικίασης
+15. Σύστημα δημιουργεί αίτημα παραλαβής για delivery
+16. Σύστημα καταγράφει επιβεβαίωση παραλαβής delivery
+17. Σύστημα καταγράφει επιβεβαίωση επιστροφής εργαλείου
+18. Σύστημα καταγράφει επιβεβαίωση επιστροφής ενοικιαστή
+19. Σύστημα αποθηκεύει αξιολόγηση ιδιοκτήτη από ενοικιαστή
 
-### Alternative Path 1
-4.1 System logs reservation denial
-4.2 System sends denial notification to renter
+### Εναλλακτική Διαδρομή 1
+4.1 Σύστημα καταγράφει άρνηση κράτησης
+4.2 Σύστημα στέλνει ειδοποίηση άρνησης στον ενοικιαστή
 
-### Alternative Path 2
-5.1 System logs reservation cancellation
-5.2 System sends cancellation notification to renter
+### Εναλλακτική Διαδρομή 2
+5.1 Σύστημα καταγράφει ακύρωση κράτησης
+5.2 Σύστημα στέλνει ειδοποίηση ακύρωσης στον ενοικιαστή
 
-### Alternative Path 3
-6.1 System logs failed payment attempt
-6.2 System sends payment failure notification
-6.3 System redirects to payment retry page
+### Εναλλακτική Διαδρομή 3
+9.1 Σύστημα καταγράφει αποτυχημένη προσπάθεια πληρωμής
+9.2 Σύστημα στέλνει ειδοποίηση αποτυχίας πληρωμής
+9.3 Σύστημα ανακατευθύνει σε σελίδα επανάληψης πληρωμής
 
-### Alternative Path 4
-7.1 System logs failed meeting/delivery agreement
-7.2 System processes cancellation and sends notification
+### Εναλλακτική Διαδρομή 4
+13.1 Σύστημα καταγράφει αίτημα τοποθεσίας συνάντησης
+13.2 Σύστημα επικυρώνει τοποθεσία συνάντησης
+13.3 Σύστημα συντονίζει χρόνο συνάντησης με τα δύο μέρη
+13.4 Σύστημα στέλνει επιβεβαιώσεις συνάντησης
+13.5 Σύστημα καταγράφει επιβεβαίωση παράδοσης εργαλείου
 
-### Alternative Path 5
-8.1 System logs condition dispute
-8.2 System enables dispute communication channel
-8.3 System processes return
-8.4 System processes refund transaction
-8.5 System stores rating
+### Εναλλακτική Διαδρομή 5
+14.1 Σύστημα καταγράφει διαφωνία κατάστασης
+14.2 Σύστημα ενεργοποιεί κανάλι επικοινωνίας διαφωνίας
+14.3 Σύστημα επεξεργάζεται επιστροφή
+14.4 Σύστημα επεξεργάζεται συναλλαγή επιστροφής χρημάτων
+14.5 Σύστημα αποθηκεύει αξιολόγηση
 
-### Alternative Path 6
-10.1 System logs tool non-return/damage
-10.2 System processes damage charge
-10.3 System sends charge notification
+### Εναλλακτική Διαδρομή 6
+18.1 Σύστημα καταγράφει μη επιστροφή/ζημιά εργαλείου
+18.2 Σύστημα επεξεργάζεται χρέωση ζημιάς
+18.3 Σύστημα στέλνει ειδοποίηση χρέωσης
 
-### Alternative Path 7
-12.1 System logs missing rating
+### Εναλλακτική Διαδρομή 7
+20.1 Σύστημα καταγράφει ελλιπή αξιολόγηση
 
-## Owner Flow
-### Happy Path
-1. System creates tool listing record
-2. System notifies owner of reservation request
-3. System logs reservation acceptance
-4. System records meeting/delivery agreement
-5. System processes payment to owner
-6. System logs tool handoff
-7. System logs tool return
-8. System records owner's return verification
-9. System stores owner's rating of renter
+## Ροή Ιδιοκτήτη
+### Κύρια Διαδρομή
+1. Σύστημα δημιουργεί εγγραφή καταχώρησης εργαλείου
+2. Σύστημα ειδοποιεί ιδιοκτήτη για αίτημα κράτησης
+3. Σύστημα καταγράφει αποδοχή κράτησης
+4. Σύστημα δημιουργεί ετικέτα αποστολής για ιδιοκτήτη
+5. Ιδιοκτήτης προγραμματίζει παραλαβή delivery
+6. Σύστημα καταγράφει παράδοση πακέτου ιδιοκτήτη σε delivery
+7. Σύστημα επεξεργάζεται αρχική πληρωμή στον ιδιοκτήτη
+8. Σύστημα καταγράφει επιτυχή παράδοση
+9. Σύστημα επεξεργάζεται τελική πληρωμή στον ιδιοκτήτη
+10. Σύστημα δημιουργεί ετικέτα επιστροφής
+11. Σύστημα καταγράφει παραλαβή επιστροφής εργαλείου
+12. Σύστημα καταγράφει παράδοση επιστροφής εργαλείου
+13. Σύστημα καταγράφει επιβεβαίωση επιστροφής ιδιοκτήτη
+14. Σύστημα αποθηκεύει αξιολόγηση ενοικιαστή από ιδιοκτήτη
 
-### Alternative Path 1
-3.1 System logs reservation denial
-3.2 System sends denial notification
+### Εναλλακτική Διαδρομή 1
+3.1 Σύστημα καταγράφει άρνηση κράτησης
+3.2 Σύστημα στέλνει ειδοποίηση άρνησης
 
-### Alternative Path 2
-5.1 System logs payment failure
-5.2 System sends payment failure notification
-5.3 System enables payment retry
+### Εναλλακτική Διαδρομή 2
+4.1 Σύστημα καταγράφει αίτημα συνάντησης
+4.2 Σύστημα επικυρώνει τοποθεσία συνάντησης
+4.3 Σύστημα συντονίζει πρόγραμμα συνάντησης
+4.4 Σύστημα στέλνει επιβεβαίωση συνάντησης
 
-### Alternative Path 3
-7.1 System logs missing tool return
-7.2 System enables dispute communication
-7.3 System logs tool return
-7.4 System stores rating
+### Εναλλακτική Διαδρομή 3
+6.1 Σύστημα καταγράφει αποτυχία πληρωμής
+6.2 Σύστημα στέλνει ειδοποίηση αποτυχίας πληρωμής
+6.3 Σύστημα ενεργοποιεί επανάληψη πληρωμής
 
-### Alternative Path 4
-8.1 System logs condition dispute
-8.2 System enables dispute communication
-8.3 System processes compensation
-8.4 System stores rating
+### Εναλλακτική Διαδρομή 4
+10.1 Σύστημα καταγράφει απώλεια επιστροφής εργαλείου
+10.2 Σύστημα ενεργοποιεί επικοινωνία διαφωνίας
+10.3 Σύστημα καταγράφει επιστροφή εργαλείου
+10.4 Σύστημα αποθηκεύει αξιολόγηση
 
-### Alternative Path 5
-9.1 System logs missing rating
+### Εναλλακτική Διαδρομή 5
+12.1 Σύστημα καταγράφει διαφωνία κατάστασης
+12.2 Σύστημα ενεργοποιεί επικοινωνία διαφωνίας
+12.3 Σύστημα επεξεργάζεται αποζημίωση
+12.4 Σύστημα αποθηκεύει αξιολόγηση
 
-## System Monitoring
-- System tracks all transaction statuses
-- System maintains audit logs of all events
-- System monitors for suspicious activity
-- System tracks dispute resolution metrics
-- System generates analytics on rental patterns
+### Εναλλακτική Διαδρομή 6
+13.1 Σύστημα καταγράφει ελλιπή αξιολόγηση
+
+## Παρακολούθηση Συστήματος
+- Σύστημα παρακολουθεί όλες τις καταστάσεις συναλλαγών
+- Σύστημα διατηρεί αρχεία καταγραφής όλων των συμβάντων
+- Σύστημα παρακολουθεί για ύποπτη δραστηριότητα
+- Σύστημα παρακολουθεί μετρήσεις επίλυσης διαφωνιών
+- Σύστημα δημιουργεί αναλύσεις μοτίβων ενοικίασης
