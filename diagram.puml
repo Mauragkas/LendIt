@@ -1,0 +1,93 @@
+@startuml
+
+class User {
+  -userID: String
+  -name: String
+  -email: String
+  -phone: String
+  -rating: Float
+  -address: String
+}
+
+class Tool {
+  -toolID: String
+  -name: String
+  -description: String
+  -category: String
+  -condition: String
+  -price: Decimal
+}
+
+class Listing {
+  -listingID: String
+  -status: String
+  -price: Decimal
+  -availabilityDates: Date[]
+}
+
+class Rental {
+  -rentalID: String
+  -startDate: Date
+  -endDate: Date
+  -status: String
+  -totalPrice: Decimal
+}
+
+class Delivery {
+  -deliveryID: String
+  -status: String
+  -pickupLocation: String
+  -dropoffLocation: String
+  -trackingNumber: String
+}
+
+class Payment {
+  -paymentID: String
+  -amount: Decimal
+  -status: String
+  -timestamp: DateTime
+}
+
+class Review {
+  -reviewID: String
+  -rating: Integer
+  -comment: String
+  -date: DateTime
+}
+
+class Report {
+  -reportID: String
+  -type: String
+  -description: String
+  -status: String
+}
+
+class Support {
+  -ticketID: String
+  -status: String
+  -priority: String
+}
+
+class Message {
+  -messageID: String
+  -content: String
+  -timestamp: DateTime
+  -status: String
+}
+
+User "1" -- "*" Listing : owns >
+User "1" -- "*" Rental : rents >
+User "1" -- "*" Review : writes >
+User "1" -- "*" Report : submits >
+User "1" -- "*" Message : sends/receives >
+
+Listing "1" -- "1" Tool : contains >
+Listing "1" -- "*" Rental : has >
+
+Rental "1" -- "1" Delivery : has >
+Rental "1" -- "1" Payment : has >
+Rental "1" -- "*" Review : receives >
+
+Support "1" -- "*" Message : contains >
+
+@enduml
