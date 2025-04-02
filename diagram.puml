@@ -1,93 +1,85 @@
 @startuml
 
-class User {
-  -userID: String
-  -name: String
-  -email: String
-  -phone: String
-  -rating: Float
-  -address: String
+top to bottom direction
+skinparam packageStyle rectangle
+skinparam LineThickness 2
+skinparam ArrowThickness 2
+skinparam nodesep 100
+skinparam ranksep 80
+skinparam splines polyline
+
+together {
+  class User #lightblue
+  class Owner #lightgreen
+  class Renter #lightgreen
+  class Admin #pink
 }
 
-class Tool {
-  -toolID: String
-  -name: String
-  -description: String
-  -category: String
-  -condition: String
-  -price: Decimal
+together {
+  class Listing #lightyellow
+  class Category
+  class Location
+  class Archive
 }
 
-class Listing {
-  -listingID: String
-  -status: String
-  -price: Decimal
-  -availabilityDates: Date[]
+together {
+  class Rental #lightgray
+  class TimePeriod
+  class Payment
+  class Delivery
+  class Review
 }
 
-class Rental {
-  -rentalID: String
-  -startDate: Date
-  -endDate: Date
-  -status: String
-  -totalPrice: Decimal
+together {
+  class Report
+  class Message
+  class Notification
+  class FavoritesList
 }
 
-class Delivery {
-  -deliveryID: String
-  -status: String
-  -pickupLocation: String
-  -dropoffLocation: String
-  -trackingNumber: String
+together {
+  class Comparison
+  class AIAssistant
+  class PremiumPlan
+  class DeliveryPerson
+  class Bank
 }
 
-class Payment {
-  -paymentID: String
-  -amount: Decimal
-  -status: String
-  -timestamp: DateTime
-}
+Owner --|> User
+Renter --|> User
+Owner "1" -- "*" Listing : creates
+Renter "1" -- "*" Rental : rents
+Listing "1" -- "*" Rental : has
 
-class Review {
-  -reviewID: String
-  -rating: Integer
-  -comment: String
-  -date: DateTime
-}
+Rental "1" -- "1" TimePeriod : occurs in
+Listing "*" -- "1" Report : can be reported
+User "*" -- "*" Report : reports
+Report "*" -- "1" User : can target
+Admin "1" -- "*" Report : reviews
 
-class Report {
-  -reportID: String
-  -type: String
-  -description: String
-  -status: String
-}
+User "*" -- "*" Message : sends/receives
+Renter "1" -- "*" Comparison : makes
+Comparison "*" -- "*" Listing : includes
 
-class Support {
-  -ticketID: String
-  -status: String
-  -priority: String
-}
+Rental "1" -- "1" Payment : has
+Rental "1" -- "1" Delivery : has
+Rental "1" -- "1" Review : receives
 
-class Message {
-  -messageID: String
-  -content: String
-  -timestamp: DateTime
-  -status: String
-}
+User "1" -- "*" Review : writes
+User "*" -- "*" Review : can receive
+Owner "1" -- "0..1" PremiumPlan : subscribes to
+Admin "1" -- "*" Listing : can delete
+Admin "1" -- "*" User : can deactivate
 
-User "1" -- "*" Listing : owns >
-User "1" -- "*" Rental : rents >
-User "1" -- "*" Review : writes >
-User "1" -- "*" Report : submits >
-User "1" -- "*" Message : sends/receives >
-
-Listing "1" -- "1" Tool : contains >
-Listing "1" -- "*" Rental : has >
-
-Rental "1" -- "1" Delivery : has >
-Rental "1" -- "1" Payment : has >
-Rental "1" -- "*" Review : receives >
-
-Support "1" -- "*" Message : contains >
+Listing "*" -- "1" Category : belongs to
+User "1" -- "*" Location : has
+Listing "1" -- "1" Location : has
+Delivery "1" -- "1" DeliveryPerson : assigned to
+Payment "*" -- "1" Bank : processed by
+Comparison "1" -- "1" AIAssistant : uses
+User "1" -- "*" Notification : receives
+Listing "*" -- "1" Archive : moved to
+Renter "1" -- "1" FavoritesList : has
+FavoritesList "*" -- "*" Listing : contains
 
 @enduml
