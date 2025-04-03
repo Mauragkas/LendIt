@@ -9,77 +9,77 @@ skinparam ranksep 80
 skinparam splines polyline
 
 together {
-  class User #lightblue
-  class Owner #lightgreen
-  class Renter #lightgreen
-  class Admin #pink
+  class Χρήστης #lightblue
+  class Ιδιοκτήτης #lightgreen
+  class Ενοικιαστής #lightgreen
+  class Συντονιστής #pink
 }
 
 together {
-  class Listing #lightyellow
-  class Category
-  class Location
-  class Archive
+  class Αγγελία #lightyellow
+  class Κατηγορία
+  class Τοποθεσία
+  class Ιστορικό
 }
 
 together {
-  class Rental #lightgray
-  class TimePeriod
-  class Payment
-  class Delivery
-  class Review
+  class Ενοικίαση #lightgray
+  class ΧρονικήΠερίοδος
+  class Πληρωμή
+  class Μεταφορά
+  class Αξιολόγηση
 }
 
 together {
-  class Report
-  class Message
-  class Notification
-  class FavoritesList
+  class Αναφορά
+  class Μήνυμα
+  class Ειδοποίηση
+  class ΛίσταΑγαπημένων
 }
 
 together {
-  class Comparison
+  class Σύγκριση
   class AIAssistant
   class PremiumPlan
-  class DeliveryPerson
-  class Bank
+  class Διανομέας
+  class Τράπεζα
 }
 
-Owner --|> User
-Renter --|> User
-Owner "1" -- "*" Listing : creates
-Renter "1" -- "*" Rental : rents
-Listing "1" -- "*" Rental : has
+Ιδιοκτήτης --|> Χρήστης
+Ενοικιαστής --|> Χρήστης
+Ιδιοκτήτης "1" -- "*" Αγγελία : δημιουργεί
+Ενοικιαστής "1" -- "*" Ενοικίαση : νοικιάζει
+Αγγελία "1" -- "*" Ενοικίαση : έχει
 
-Rental "1" -- "1" TimePeriod : occurs in
-Listing "*" -- "1" Report : can be reported
-User "*" -- "*" Report : reports
-Report "*" -- "1" User : can target
-Admin "1" -- "*" Report : reviews
+Ενοικίαση "1" -- "1" ΧρονικήΠερίοδος : συμβαίνει σε
+Αγγελία "*" -- "1" Αναφορά : μπορεί να αναφερθεί
+Χρήστης "*" -- "*" Αναφορά : αναφέρει
+Αναφορά "*" -- "1" Χρήστης : μπορεί να στοχεύσει
+Συντονιστής "1" -- "*" Αναφορά : εξετάζει
 
-User "*" -- "*" Message : sends/receives
-Renter "1" -- "*" Comparison : makes
-Comparison "*" -- "*" Listing : includes
+Χρήστης "*" -- "*" Μήνυμα : στέλνει/λαμβάνει
+Ενοικιαστής "1" -- "*" Σύγκριση : κάνει
+Σύγκριση "*" -- "*" Αγγελία : περιλαμβάνει
 
-Rental "1" -- "1" Payment : has
-Rental "1" -- "1" Delivery : has
-Rental "1" -- "1" Review : receives
+Ενοικίαση "1" -- "1" Πληρωμή : έχει
+Ενοικίαση "1" -- "1" Μεταφορά : έχει
+Ενοικίαση "1" -- "1" Αξιολόγηση : λαμβάνει
 
-User "1" -- "*" Review : writes
-User "*" -- "*" Review : can receive
-Owner "1" -- "0..1" PremiumPlan : subscribes to
-Admin "1" -- "*" Listing : can delete
-Admin "1" -- "*" User : can deactivate
+Χρήστης "1" -- "*" Αξιολόγηση : γράφει
+Χρήστης "*" -- "*" Αξιολόγηση : μπορεί να λάβει
+Ιδιοκτήτης "1" -- "0..1" PremiumPlan : εγγράφεται σε
+Συντονιστής "1" -- "*" Αγγελία : μπορεί να διαγράψει
+Συντονιστής "1" -- "*" Χρήστης : μπορεί να απενεργοποιήσει
 
-Listing "*" -- "1" Category : belongs to
-User "1" -- "*" Location : has
-Listing "1" -- "1" Location : has
-Delivery "1" -- "1" DeliveryPerson : assigned to
-Payment "*" -- "1" Bank : processed by
-Comparison "1" -- "1" AIAssistant : uses
-User "1" -- "*" Notification : receives
-Listing "*" -- "1" Archive : moved to
-Renter "1" -- "1" FavoritesList : has
-FavoritesList "*" -- "*" Listing : contains
+Αγγελία "*" -- "1" Κατηγορία : ανήκει σε
+Χρήστης "1" -- "*" Τοποθεσία : έχει
+Αγγελία "1" -- "1" Τοποθεσία : έχει
+Μεταφορά "1" -- "1" Διανομέας : ανατίθεται σε
+Πληρωμή "*" -- "1" Τράπεζα : επεξεργάζεται από
+Σύγκριση "1" -- "1" AIAssistant : χρησιμοποιεί
+Χρήστης "1" -- "*" Ειδοποίηση : λαμβάνει
+Αγγελία "*" -- "1" Ιστορικό : μεταφέρεται σε
+Ενοικιαστής "1" -- "1" ΛίσταΑγαπημένων : έχει
+ΛίσταΑγαπημένων "*" -- "*" Αγγελία : περιέχει
 
 @enduml
