@@ -1,0 +1,99 @@
+@startuml
+title UC PAYMENT
+skinparam class {
+  BackgroundColor White
+  ArrowColor Black
+  BorderColor Black
+}
+
+skinparam package {
+  BackgroundColor White
+  BorderColor Black
+}
+
+hide methods
+hide attributes
+
+' Define elements with correct stereotypes
+actor "Ενοικιαστής" as Tenant << actor >>
+boundary "Αγγελία" as ListingPage
+boundary "Καλάθι Αγορών" as ShoppingCart
+boundary "Φόρμα Διεύθυνσης" as AddressForm
+boundary "Οθόνη Συνολικού\nΠοσού" as TotalAmountScreen
+boundary "Οθόνη Επιλογών\nΠληρωμής" as PaymentOptionsScreen
+boundary "Φόρμα Στοιχείων\nΚάρτας" as CardDetailsForm
+boundary "Οθόνη Επιβεβαίωσης" as ConfirmationScreen
+boundary "Αρχική Σελίδα" as HomePage
+
+control "Ελεγκτής Καλαθιού" as CartController
+control "Ελεγκτής Υπολογισμού\nΚόστους" as CostCalculationController
+control "Ελεγκτής Επεξεργασίας\nΠληρωμής" as PaymentProcessingController
+control "Ελεγκτής\nΚρυπτογράφησης" as EncryptionController
+control "Ελεγκτής Επικύρωσης\nΤράπεζας" as BankValidationController
+control "Ελεγκτής Απόδειξης" as ReceiptController
+control "Ελεγκτής\nΚουπονιού" as CouponController
+control "Ελεγκτής Αλλαγής\nΚατάστασης Αγγελίας" as ListingStatusController
+
+entity "Παραγγελία" as Order
+entity "Διεύθυνση" as Address
+entity "Στοιχεία Πληρωμής" as PaymentDetails
+entity "Συναλλαγή" as Transaction
+entity "Κουπόνι" as Coupon
+entity "Αγγελία" as Listing
+
+' Main Flow
+Tenant -right-> ListingPage : 1. επιλέγει προσθήκη στο καλάθι αγορών
+ListingPage -down-> CartController : 2. μεταβιβάζει στο καλάθι
+CartController -right-> ShoppingCart : 2. εμφανίζει καλάθι
+ShoppingCart -down-> AddressForm : 3. ζητάει εισαγωγή διεύθυνσης
+Tenant -right-> AddressForm : 4. συμπληρώνει διεύθυνση
+AddressForm -down-> CostCalculationController : αποθηκεύει διεύθυνση
+CostCalculationController -down-> Address : αποθηκεύει στοιχεία
+CostCalculationController -right-> TotalAmountScreen : 5. εμφανίζει συνολικό ποσό
+Tenant -right-> TotalAmountScreen : 6. επιλέγει συνέχεια προς πληρωμή
+TotalAmountScreen -down-> PaymentProcessingController : 7. μεταβιβάζει στην πληρωμή
+PaymentProcessingController -right-> PaymentOptionsScreen : 8. εμφανίζει επιλογές πληρωμής
+Tenant -right-> PaymentOptionsScreen : 9. επιλέγει τρόπο πληρωμής
+PaymentOptionsScreen -down-> PaymentProcessingController : 10. καταγράφει επιλογή
+PaymentProcessingController -right-> CardDetailsForm : 11. ζητάει στοιχεία κάρτας
+Tenant -right-> CardDetailsForm : 12. συμπληρώνει στοιχεία κάρτας
+CardDetailsForm -down-> EncryptionController : 13. κρυπτογραφεί στοιχεία
+EncryptionController -down-> PaymentDetails : αποθηκεύει κρυπτογραφημένα στοιχεία
+EncryptionController -right-> BankValidationController : 14. στέλνει αίτημα επικύρωσης
+BankValidationController -down-> Transaction : 15. αποθηκεύει επιβεβαίωση συναλλαγής
+BankValidationController -right-> ReceiptController : 16. στέλνει απόδειξη
+ReceiptController -up-> Tenant : 16. στέλνει απόδειξη πληρωμής
+ReceiptController -down-> Transaction : 17. καταγράφει ολοκλήρωση πληρωμής
+ReceiptController -right-> ListingStatusController : 18. ενημερώνει κατάσταση αγγελίας
+ListingStatusController -down-> Listing : 18. αλλάζει κατάσταση σε μη διαθέσιμη
+ReceiptController -right-> ConfirmationScreen : εμφανίζει επιβεβαίωση
+
+' Alternative Flow 1: Αποτυχία επικύρωσης στοιχείων
+BankValidationController -[#red]right-> PaymentProcessingController : 3.1.1 καταγράφει αδυναμία επικύρωσης
+PaymentProcessingController -[#red]up-> CardDetailsForm : 3.1.2 ενημερώνει για διόρθωση στοιχείων
+CardDetailsForm -[#red]left-> Tenant : 3.1.2 εμφανίζει μήνυμα λάθους
+
+' Alternative Flow 2: Ανεπαρκές Υπόλοιπο
+BankValidationController -[#red]down-> PaymentProcessingController : 3.2.1 καταγράφει αδυναμία κράτησης ποσού
+PaymentProcessingController -[#red]up-> PaymentOptionsScreen : 3.2.2 ζητάει άλλη μέθοδο πληρωμής
+PaymentOptionsScreen -[#red]left-> Tenant : 3.2.2 εμφανίζει μήνυμα λάθους
+
+' Alternative Flow 3: Ο ενοικιαστής αλλάζει γνώμη
+AddressForm -[#red]up-> CartController : 3.3.1 επιλέγει επιστροφή
+TotalAmountScreen -[#red]up-> CartController : 3.3.1 επιλέγει επιστροφή
+PaymentOptionsScreen -[#red]up-> CartController : 3.3.1 επιλέγει επιστροφή
+CardDetailsForm -[#red]up-> CartController : 3.3.1 επιλέγει επιστροφή
+CartController -[#red]left-> HomePage : 3.3.2 μεταφέρει στην αρχική σελίδα
+
+' Alternative Flow 4: Προσθήκη εκπτωτικού κουπονιού
+Tenant -[#red]down-> TotalAmountScreen : 3.4.1 εισάγει κωδικό κουπονιού
+TotalAmountScreen -[#red]right-> CouponController : 3.4.2 επαληθεύει εγκυρότητα
+CouponController -[#red]down-> Coupon : 3.4.2 ελέγχει στη βάση δεδομένων
+CouponController -[#red]right-> CostCalculationController : 3.4.3 εφαρμόζει έκπτωση
+CostCalculationController -[#red]up-> TotalAmountScreen : 3.4.4 ενημερώνει συνολικό ποσό
+
+' Alternative Flow 5: Μη έγκυρο κουπόνι
+CouponController -[#red]up-> TotalAmountScreen : 3.5.1-2 ενημερώνει ότι το κουπόνι δεν είναι έγκυρο
+TotalAmountScreen -[#red]right-> PaymentProcessingController : 3.5.3 επιστρέφει στην πληρωμή
+
+@enduml

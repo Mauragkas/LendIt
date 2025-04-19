@@ -1,0 +1,79 @@
+@startuml
+title UC MESSAGING
+skinparam class {
+  BackgroundColor White
+  ArrowColor Black
+  BorderColor Black
+}
+
+skinparam package {
+  BackgroundColor White
+  BorderColor Black
+}
+
+' Remove hide circle to allow default stereotype shapes
+' hide circle
+hide methods
+hide attributes
+
+' Define elements with correct stereotypes for visual shapes
+actor "Χρήστης\n(Ενοικιαστής/Ιδιοκτήτης)" as User << actor >>
+boundary "Διεπαφή Μηνυμάτων" as MessageInterface
+boundary "Λίστα Συνομιλιών" as ConversationList
+boundary "Προβολή Ιστορικού\nΣυνομιλίας" as ConversationView
+boundary "Φόρμα Εισαγωγής\nΜηνύματος" as MessageForm
+boundary "Αρχική Σελίδα" as HomePage
+
+control "Ελεγκτής Φόρτωσης\nΣυνομιλιών" as LoadConversationsCtrl
+control "Ελεγκτής Φόρτωσης\nΙστορικού" as LoadHistoryCtrl
+control "Ελεγκτής Επικύρωσης\nΜηνύματος" as ValidationCtrl
+control "Ελεγκτής Παράδοσης\nΜηνύματος" as DeliveryCtrl
+control "Ελεγκτής Νέας\nΣυνομιλίας" as NewConvoCtrl
+control "Ελεγκτής Ειδοποίησης\nΣφάλματος" as ErrorCtrl
+
+entity "Συνομιλία" as Conversation
+entity "Μήνυμα" as Message
+entity "Κατάσταση Παράδοσης" as DeliveryStatus
+
+' Main Flow (Adjusted directions for layout approximation)
+User -right-> MessageInterface : 1. επιλέγει την επικοινωνία μέσω μηνυμάτων
+MessageInterface -down-> LoadConversationsCtrl : 2. εμφανίζει την διεπαφή μηνυμάτων
+LoadConversationsCtrl -down-> Conversation : 3. φορτώνει τις υπάρχουσες συνομιλίες
+LoadConversationsCtrl -right-> ConversationList : 3. εμφανίζει συνομιλίες
+User -right-> ConversationList : 4. επιλέγει συνομιλία
+ConversationList -down-> LoadHistoryCtrl : 5. φορτώνει ιστορικό
+LoadHistoryCtrl -down-> Conversation : 5. ανακτά μηνύματα
+LoadHistoryCtrl -right-> ConversationView : 5. εμφανίζει ιστορικό
+User -right-> MessageForm : 6. εισάγει μήνυμα
+MessageForm -down-> ValidationCtrl : 7. επικυρώνει μήνυμα
+ValidationCtrl -down-> Message : 7. αποθηκεύει μήνυμα
+ValidationCtrl -right-> DeliveryCtrl : 8. παραδίδει μήνυμα
+DeliveryCtrl -down-> DeliveryStatus : 9. δημιουργεί επιβεβαίωση παράδοσης
+DeliveryCtrl -up-> ConversationView : ενημερώνει προβολή συνομιλίας
+User -left-> MessageInterface : 10. επιλέγει έξοδο από τα μηνύματα
+MessageInterface -down-> HomePage : 11. μεταβιβάζει στην αρχική σελίδα
+
+' Alternative Flow 1: Delivery Failure (red arrows)
+DeliveryCtrl -[#red]right-> ErrorCtrl : 12.1.1 εντοπίζει αποτυχία παράδοσης
+ErrorCtrl -[#red]up-> MessageInterface : 12.1.2 δημιουργεί ειδοποίηση σφάλματος
+DeliveryCtrl -[#red]left-> Message : 12.1.3 θέτει μήνυμα σε λίστα για επανάληψη
+
+' Alternative Flow 2: Send More Messages (red arrows)
+DeliveryCtrl -[#red]left-> MessageForm : 12.2.1 αποστολή περισσότερων μηνυμάτων
+
+' Alternative Flow 3: Exit from conversation (red arrows)
+ConversationView -[#red]up-> MessageInterface : 12.3.1 έξοδος από συνομιλία
+MessageForm -[#red]up-> MessageInterface : 12.3.1 έξοδος από συνομιλία
+
+' Alternative Flow 4: Change conversation (red arrows)
+ConversationView -[#red]up-> ConversationList : 12.4.1 αλλαγή συνομιλίας
+MessageForm -[#red]up-> ConversationList : 12.4.1 αλλαγή συνομιλίας
+
+' Alternative Flow 5: New conversation (red arrows)
+User -[#red]down-> ConversationList : 12.5.1 πληκτρολογεί όνομα χρήστη
+ConversationList -[#red]right-> NewConvoCtrl : 12.5.2 δημιουργεί νέο κανάλι επικοινωνίας
+NewConvoCtrl -[#red]down-> Conversation : 12.5.2 δημιουργεί συνομιλία
+NewConvoCtrl -[#red]right-> ConversationView : 12.5.3 εμφανίζει νέα συνομιλία
+ConversationView -[#red]down-> MessageForm : 12.5.4 έτοιμο για μήνυμα
+
+@enduml
