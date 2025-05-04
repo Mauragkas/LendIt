@@ -37,7 +37,8 @@
 
     <Button
         android:id="@+id/button"
-        style="@style/Widget.Material3.Button.IconButton.Filled"
+        style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
+        android:clickable="false"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginBottom="36dp"
@@ -53,9 +54,9 @@
         android:id="@+id/textView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="50dp"
+        android:layout_marginTop="40dp"
         android:fontFamily="sans-serif-black"
-        android:text="Σύνδεση στο LendIt"
+        android:text="LendIt"
         android:textAppearance="@style/TextAppearance.AppCompat.Large"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
