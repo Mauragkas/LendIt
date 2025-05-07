@@ -1,0 +1,9 @@
+<svg width="your_width" height="your_height" xmlns="http://www.w3.org/2000/svg">
+    <mask id="l-mask">
+        <rect x="0" y="0" width="your_width" height="your_height" fill="white"/>
+        <path d="M..." fill="black"/>
+    </mask>
+
+    <circle cx="center_x" cy="center_y" r="radius" fill="black" mask="url(#l-mask)"/>
+
+</svg>
