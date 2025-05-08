@@ -1,0 +1,68 @@
+@startuml
+actor "Ιδιοκτήτης" as Owner
+boundary "Αρχική Οθόνη" as HomeScreen
+boundary "Οθόνη Προβολής Ιστορικού" as HistoryScreen
+boundary "Οθόνη Προβολής Ιστορικού με φόρμα" as HistoryFormScreen
+boundary "Οθόνη Πλήρους Περιγραφής Αγγελίας" as ListingDetailScreen
+entity "Βάση Δεδομένων" as DB
+entity "Αρχείο προσωρινής αποθήκευσης" as TempStorage
+
+' Main Flow
+Owner -> HomeScreen : επιλέγει την προβολή του ιστορικού
+activate HomeScreen
+
+HomeScreen -> DB : ανακτά τις αγγελίες του ιδιοκτήτη(ownerId)
+activate DB
+DB --> HomeScreen : επιστροφή αγγελιών
+deactivate DB
+
+HomeScreen -> HomeScreen : φιλτράρει τα αποτελέσματα(listingStatus)
+HomeScreen -> HomeScreen : δημιουργεί τις λίστες των αποτελεσμάτων()
+HomeScreen -> HistoryScreen : φορτώνει την οθόνη προβολής ιστορικού(filteredListings)
+deactivate HomeScreen
+activate HistoryScreen
+
+Owner -> HistoryScreen : επιλέγει επαναφορά ανενεργής αγγελίας(listingId)
+HistoryScreen -> HistoryFormScreen : φορτώνει την φόρμα τροποποίησης(listingId)
+deactivate HistoryScreen
+activate HistoryFormScreen
+
+Owner -> HistoryFormScreen : αλλάζει τα στοιχεία της αγγελίας
+HistoryFormScreen -> HistoryFormScreen : ελέγχει την φόρμα τροποποίησης(formData)
+
+alt Επιτυχής έλεγχος φόρμας
+    HistoryFormScreen -> TempStorage : αποθηκεύει προσωρινά την φόρμα τροποποίησης(modifiedListing)
+    activate TempStorage
+    TempStorage --> HistoryFormScreen : επιβεβαίωση αποθήκευσης
+    deactivate TempStorage
+
+    HistoryFormScreen -> HistoryFormScreen : εμφανίζει μήνυμα επιβεβαίωσης()
+
+    Owner -> HistoryFormScreen : επιβεβαιώνει την επαναφορά της αγγελίας
+
+    HistoryFormScreen -> DB : τροποποιεί την κατάσταση της αγγελίας(listingId, 'Διαθέσιμη')
+    activate DB
+    DB --> HistoryFormScreen : επιβεβαίωση ενημέρωσης
+    deactivate DB
+
+    HistoryFormScreen -> DB : αποθηκεύει την τροποποιημένη αγγελία(modifiedListing)
+    activate DB
+    DB --> HistoryFormScreen : επιβεβαίωση αποθήκευσης
+    deactivate DB
+
+    HistoryFormScreen -> ListingDetailScreen : φορτώνει τη οθόνη της τροποποιημένης αγγελίας(listingId)
+    deactivate HistoryFormScreen
+    activate ListingDetailScreen
+
+else Αποτυχία ελέγχου φόρμας
+    HistoryFormScreen -> HistoryFormScreen : εμφανίζει ειδοποίηση λάθους()
+    HistoryFormScreen -> HistoryFormScreen : φορτώνει την φόρμα τροποποίησης(listingId)
+else Ακύρωση από τον ιδιοκτήτη
+    Owner -> HistoryFormScreen : επιλέγει την έξοδο
+    HistoryFormScreen -> HomeScreen : φορτώνει την αρχική οθόνη()
+    deactivate HistoryFormScreen
+    activate HomeScreen
+    deactivate HomeScreen
+end
+
+@enduml

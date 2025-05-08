@@ -1,0 +1,67 @@
+@startuml
+actor "Ενοικιαστής" as Tenant
+boundary "Αρχική οθόνη" as MainScreen
+boundary "Οθόνη επιλογής Αγγελίας" as ListingSelectionScreen
+boundary "Οθόνη αξιολόγησης" as ReviewScreen
+boundary "Οθόνη πλήρους περιγραφής αγγελίας" as ListingDetailScreen
+entity "Βάση Δεδομένων" as DB
+entity "Λίστα αποτελεσμάτων" as ResultsList
+
+' Main Flow
+Tenant -> MainScreen : επιλέγει την αξιολόγηση αγγελιών
+activate MainScreen
+
+MainScreen -> DB : ανακτά αγγελίες που είχε νοικιάσει στο παρελθόν(tenantId)
+activate DB
+DB --> ResultsList : δημιουργεί λίστα μη αξιολογημένων αγγελιών()
+activate ResultsList
+ResultsList --> MainScreen : επιστρέφει λίστα αγγελιών
+deactivate ResultsList
+deactivate DB
+
+MainScreen -> ListingSelectionScreen : φορτώνει την σελίδα επιλογής αγγελίας(unratedListings)
+deactivate MainScreen
+activate ListingSelectionScreen
+
+Tenant -> ListingSelectionScreen : επιλέγει αγγελία για αξιολόγηση(listingId)
+ListingSelectionScreen -> ReviewScreen : φορτώνει τη φόρμα αξιολόγησης(listingId)
+deactivate ListingSelectionScreen
+activate ReviewScreen
+
+Tenant -> ReviewScreen : συμπληρώνει βαθμολογία/κείμενο/φωτογραφίες/βίντεο
+Tenant -> ReviewScreen : επιβεβαιώνει την υποβολή(reviewData)
+ReviewScreen -> ReviewScreen : ελέγχει την υποβολή για μη αποδεκτές πρακτικές(reviewData)
+
+alt Επιτυχής έλεγχος περιεχομένου
+    ReviewScreen -> DB : αποθηκεύει τη νέα αξιολόγηση(reviewData)
+    activate DB
+    DB --> ReviewScreen : επιβεβαίωση αποθήκευσης
+    deactivate DB
+
+    ReviewScreen -> DB : προσθέτει την αξιολόγηση στην αγγελία(listingId, reviewId)
+    activate DB
+    DB --> ReviewScreen : επιβεβαίωση ενημέρωσης
+    deactivate DB
+
+    ReviewScreen -> ListingDetailScreen : φορτώνει την οθόνη της αγγελίας(listingId)
+    deactivate ReviewScreen
+    activate ListingDetailScreen
+    ListingDetailScreen --> Tenant : εμφανίζει την αγγελία με την νέα αξιολόγηση
+    deactivate ListingDetailScreen
+
+else Ακύρωση από τον ενοικιαστή
+    Tenant -> ReviewScreen : επιλέγει άκυρο
+    ReviewScreen -> MainScreen : φορτώνει την αρχική οθόνη()
+    deactivate ReviewScreen
+    activate MainScreen
+    MainScreen --> Tenant : εμφανίζει αρχική οθόνη
+    deactivate MainScreen
+
+else Αποτυχής έλεγχος περιεχομένου
+    ReviewScreen -> ReviewScreen : απορρίπτει την κριτική λόγω ακατάλληλου περιεχομένου()
+    ReviewScreen -> ReviewScreen : εμφανίζει μήνυμα απόρριψης της κριτικής()
+    ReviewScreen --> ReviewScreen : επιστρέφει στη φόρμα αξιολόγησης(listingId)
+    ReviewScreen --> Tenant : εμφανίζει την φόρμα για διόρθωση
+end
+
+@enduml
