@@ -1,0 +1,146 @@
+@startuml LendIt Domain Model
+
+class User {
+  -userID: String
+  -name: String
+  -email: String
+  -password: String
+  -phoneNumber: String
+  -location: String
+}
+
+class Renter {
+  -favorites: List<EquipmentListing>
+}
+
+class Owner {
+  -premiumStatus: Boolean
+  -ratings: Float
+}
+
+class Coordinator {
+  -staffID: String
+}
+
+class EquipmentListing {
+  -listingID: String
+  -title: String
+  -description: String
+  -category: String
+  -location: String
+  -status: ListingStatus
+  -price: Price
+  -photos: List<Media>
+  -creationDate: DateTime
+  -longTermDiscount: Float
+  +createListing()
+  +updateListing()
+  +deactivateListing()
+}
+
+class Review {
+  -reviewID: String
+  -rating: Float
+  -text: String
+  -media: List<Media>
+  -date: DateTime
+  +submitReview()
+}
+
+class Report {
+  -reportID: String
+  -reason: String
+  -comments: String
+  -attachments: List<Media>
+  -status: ReportStatus
+  -date: DateTime
+  +submitReport()
+  +processReport()
+}
+
+class PremiumPlan {
+  -planID: String
+  -duration: Duration
+  -price: Float
+  -features: List<Feature>
+  +subscribe()
+  +cancel()
+}
+
+class ShoppingCart {
+  -cartID: String
+  -items: List<CartItem>
+  -totalAmount: Float
+  +addItem()
+  +removeItem()
+  +checkout()
+}
+
+class Payment {
+  -paymentID: String
+  -amount: Float
+  -method: PaymentMethod
+  -status: PaymentStatus
+  -date: DateTime
+  +process()
+  +verify()
+}
+
+enum ListingStatus {
+  AVAILABLE
+  UNAVAILABLE
+  INACTIVE
+}
+
+enum ReportStatus {
+  PENDING
+  PROCESSED
+  REJECTED
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
+
+User "1" -- "0..1" Renter : has >
+User "1" -- "0..1" Owner : has >
+User <|-- Coordinator
+
+
+Owner "1" -- "*" EquipmentListing : owns >
+Renter "*" -- "*" EquipmentListing : favorites >
+Renter "1" -- "*" Review : creates >
+Renter "1" -- "0..1" ShoppingCart : has >
+
+
+Review "*" -- "1" EquipmentListing : reviews >
+note right on link
+  Ο χρήστης δεν μπορεί να
+  αξιολογήσει τα δικά του
+end note
+
+
+User "1" -- "*" Report : submits >
+Report "*" -- "1" EquipmentListing : reports >
+Coordinator "1" -- "*" Report : manages >
+
+
+Owner "1" -- "0..1" PremiumPlan : subscribes >
+ShoppingCart "*" -- "*" EquipmentListing : contains >
+note right on link
+  Ο χρίστης δεν μπορεί να
+  νοικιάσει τα δικά του
+end note
+Payment "1" -- "1" ShoppingCart : processes >
+
+
+EquipmentListing -- ListingStatus
+Report -- ReportStatus
+Payment -- PaymentStatus
+
+note "Ο χρήστης μπορεί να είναι και ενοικιαστής και ιδιοκτήτης" as N1
+
+@enduml
