@@ -27,6 +27,9 @@
         <!--        Main activity -->
         <activity android:name=".MainActivity" android:exported="true"/>
 
+        <!--        Search activity -->
+        <activity android:name=".SearchActivity" android:exported="true"/>
+
     </application>
 
 </manifest>
