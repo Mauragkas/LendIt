@@ -21,7 +21,7 @@
             <ImageButton
                 android:id="@+id/backButtonListing"
                 android:layout_width="64dp"
-                android:layout_height="60dp"
+                android:layout_height="64dp"
                 android:backgroundTint="#ffffff"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -146,7 +146,7 @@
                         android:textStyle="bold" />
 
                     <com.google.android.material.textfield.TextInputLayout
-                        android:layout_width="match_parent"
+                        android:layout_width="180dp"
                         android:layout_height="match_parent">
 
                         <com.google.android.material.textfield.TextInputEditText
