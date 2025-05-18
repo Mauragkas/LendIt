@@ -30,6 +30,9 @@
         <!--        Search activity -->
         <activity android:name=".SearchActivity" android:exported="true"/>
 
+        <activity android:name=".ListingActivity" android:exported="true"/>
+
+
     </application>
 
 </manifest>
