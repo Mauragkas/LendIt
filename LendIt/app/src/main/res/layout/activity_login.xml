@@ -33,7 +33,7 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/editTextTextEmailAddress"
-        app:layout_constraintVertical_bias="0.335" />
+        app:layout_constraintVertical_bias="0.2" />
 
     <Button
         android:id="@+id/button"
@@ -79,5 +79,18 @@
         android:text="Password"
         app:layout_constraintBottom_toTopOf="@+id/editTextTextPassword"
         app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/signUpButtonLogin"
+        android:layout_width="123dp"
+        android:layout_height="43dp"
+        android:layout_marginTop="20dp"
+        android:text="Εγγραφή"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.938"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/editTextTextPassword"
+        app:layout_constraintVertical_bias="0.032" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

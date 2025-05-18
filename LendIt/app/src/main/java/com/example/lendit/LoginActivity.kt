@@ -14,6 +14,9 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var passwordField: EditText
     private lateinit var loginBtn: Button
 
+    private lateinit var signupBtn: Button
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
@@ -39,6 +42,15 @@ class LoginActivity : AppCompatActivity() {
                 finish() // Close LoginActivity
             }
         }
+
+        signupBtn = findViewById<Button>(R.id.signUpButtonLogin)
+
+        signupBtn.setOnClickListener {
+            val intent = Intent(this, SignupActivity::class.java)
+            startActivity(intent)
+            finish()
+        }
+
     }
     private val loginTextWatcher = object : TextWatcher {
         override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
