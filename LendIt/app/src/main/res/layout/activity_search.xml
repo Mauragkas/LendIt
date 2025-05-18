@@ -4,7 +4,7 @@
     android:id="@+id/searchScrollView"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true"
+    android:fillViewport="false"
     android:padding="16dp">
 
     <LinearLayout
@@ -13,15 +13,16 @@
         android:orientation="vertical">
 
         <!-- Search Bar -->
+
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/searchInputLayout"
             style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginVertical="24dp"
             android:hint="Εισάγετε περιγραφή εργαλείου"
-            app:startIconDrawable="@drawable/ic_search"
             app:endIconMode="clear_text"
-            android:layout_marginVertical="24dp">
+            app:startIconDrawable="@drawable/ic_search">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/searchEditText"
@@ -35,25 +36,24 @@
             android:id="@+id/filterHeader"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:paddingBottom="8dp"
             android:text="Ημερομηνίες Ενοικίασης"
             android:textAppearance="?attr/textAppearanceTitleMedium"
-            android:textStyle="bold"
-            android:paddingBottom="8dp" />
+            android:textStyle="bold" />
 
         <!-- Availability Toggle -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
             android:gravity="center_vertical"
+            android:orientation="horizontal"
             android:padding="8dp">
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/date_button"
                 android:layout_width="wrap_content"
-                android:text="Επιλογή Ημερομηνιών"
                 android:layout_height="wrap_content"
-                />
+                android:text="Επιλογή Ημερομηνιών" />
 
         </LinearLayout>
 
@@ -62,10 +62,10 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:paddingBottom="8dp"
             android:text="Τιμή"
             android:textSize="16sp"
-            android:textStyle="bold"
-            android:paddingBottom="8dp" />
+            android:textStyle="bold" />
 
         <RadioGroup
             android:id="@+id/priceSortGroup"
@@ -76,23 +76,23 @@
 
             <RadioButton
                 android:id="@+id/radioAscending"
-                android:text="Αύξουσα"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:text="Αύξουσα" />
 
             <RadioButton
                 android:id="@+id/radioDescending"
-                android:text="Φθίνουσα"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="24dp" />
+                android:layout_marginStart="24dp"
+                android:text="Φθίνουσα" />
 
             <RadioButton
                 android:id="@+id/radioSuggested"
-                android:text="Προτεινόμενα"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="24dp" />
+                android:layout_marginStart="24dp"
+                android:text="Προτεινόμενα" />
 
         </RadioGroup>
 
@@ -100,44 +100,44 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:paddingTop="16dp"
+            android:paddingBottom="8dp"
             android:text="Εύρος Τιμών"
             android:textSize="16sp"
-            android:textStyle="bold"
-            android:paddingTop="16dp"
-            android:paddingBottom="8dp" />
+            android:textStyle="bold" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:weightSum="2"
-            android:paddingBottom="3dp">
+            android:paddingBottom="3dp"
+            android:weightSum="2">
 
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="0dp"
-                android:layout_weight="1"
                 android:layout_height="wrap_content"
-                android:hint="Από"
-                android:layout_marginEnd="2dp">
+                android:layout_marginEnd="2dp"
+                android:layout_weight="1"
+                android:hint="Από">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/priceFromEditText"
-                    android:inputType="numberDecimal"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    android:inputType="numberDecimal" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="0dp"
-                android:layout_weight="1"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:hint="Έως">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/priceToEditText"
-                    android:inputType="numberDecimal"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    android:inputType="numberDecimal" />
             </com.google.android.material.textfield.TextInputLayout>
         </LinearLayout>
 
@@ -145,82 +145,84 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:paddingBottom="8dp"
             android:text="Κατηγορία Εργαλείων"
             android:textSize="16sp"
-            android:textStyle="bold"
-            android:paddingBottom="8dp" />
+            android:textStyle="bold" />
 
-        <RadioGroup
-            android:id="@+id/categoryRadioGroup"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-            <RadioButton
-                android:id="@+id/radioManual"
-                android:text="Χειροκίνητο"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-
-            <RadioButton
-                android:id="@+id/radioElectric"
-                android:text="Ηλεκτρικό"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-        </RadioGroup>
-
-
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Απόσταση (km)"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:paddingTop="16dp"
-            android:paddingBottom="4dp" />
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_gravity="center"
-            android:gravity="center_vertical"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="horizontal">
 
-            android:layout_height="wrap_content">
+            <RadioButton
+                android:id="@+id/radioManual"
+                android:layout_width="190dp"
+                android:layout_height="wrap_content"
+                android:text="Χειροκίνητο" />
+
+            <RadioButton
+                android:id="@+id/radioElectric"
+                android:layout_width="185dp"
+                android:layout_height="wrap_content"
+                android:text="Ηλεκτρικό" />
+
+        </LinearLayout>
 
         <TextView
-            android:id="@+id/minDistanceLabel"
-            android:layout_width="wrap_content"
+            android:id="@+id/textView9"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="2"
-            android:textSize="14sp"
-            android:layout_marginEnd="8dp" />
+            android:paddingTop="16dp"
+            android:paddingBottom="4dp"
+            android:text="Απόσταση (km)"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/minDistanceLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:text="2"
+                android:textSize="14sp" />
 
             <com.google.android.material.slider.Slider
                 android:id="@+id/distanceSlider"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:valueFrom="2"
-                android:valueTo="50"
+                android:layout_weight="1"
                 android:stepSize="2"
                 android:value="2"
-                android:layout_weight="1"
-                app:tickVisible="true"
-                app:labelBehavior="floating" />
+                android:valueFrom="2"
+                android:valueTo="50"
+                app:labelBehavior="floating"
+                app:tickVisible="true" />
 
-        <TextView
-            android:id="@+id/maxDistanceLabel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:text="50"
-            android:textSize="14sp" />
+            <TextView
+                android:id="@+id/maxDistanceLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:text="50"
+                android:textSize="14sp" />
         </LinearLayout>
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/perform_search_button"
+            android:layout_marginTop="230dp"
+            android:id="@+id/materialButton4"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Αναζήτηση"/>
+            android:text="Αναζήτηση" />
 
 
     </LinearLayout>
