@@ -1,0 +1,168 @@
+    import android.content.Context
+    import androidx.room.Database
+    import androidx.room.Room
+    import androidx.room.RoomDatabase
+    import kotlinx.coroutines.CoroutineScope
+    import kotlinx.coroutines.Dispatchers
+    import kotlinx.coroutines.launch
+    import kotlinx.coroutines.withContext
+    import java.time.LocalDateTime
+
+    @Database(entities = [UserEntity::class, ListingEntity::class], version = 3)
+    abstract class AppDatabase : RoomDatabase() {
+        abstract fun userDao(): UserDao
+        abstract fun listingDao(): ListingDao
+
+        companion object {
+            @Volatile
+            private var INSTANCE: AppDatabase? = null
+
+            suspend fun getListings(context: Context): List<ListingEntity> {
+                val database = INSTANCE ?: synchronized(this) {
+                    val instance = Room.databaseBuilder(
+                        context.applicationContext,
+                        AppDatabase::class.java,
+                        "lendit-db"
+                    )
+                        .fallbackToDestructiveMigration()
+                        .build()
+                    INSTANCE = instance
+                    instance
+                }
+
+                // Wipe and insert directly for DEMO purposes
+                database.listingDao().deleteAllListings()
+                populateDatabase(database.listingDao())
+
+                // fetch and return the data
+                return database.listingDao().getAllListings()
+            }
+
+            fun getLogin(context: Context, scope: CoroutineScope): AppDatabase { // Pass in a scope
+                return INSTANCE ?: synchronized(this) {
+                    val instance = Room.databaseBuilder(
+                        context.applicationContext,
+                        AppDatabase::class.java,
+                        "lendit-db"
+                    )
+                        .fallbackToDestructiveMigration(true) // <-- add this line
+                        .build()
+                    INSTANCE = instance
+
+                    // --- DEVELOPMENT ONLY: Clear and Repopulate every time ---
+                    scope.launch(Dispatchers.IO) {
+                        INSTANCE?.let { database ->
+                            // Clear
+                            database.userDao().deleteAllUsers()
+
+                            populateDatabase(database.userDao())
+                        }
+                    }
+                    // --- END DEVELOPMENT ONLY ---
+
+                    instance
+                }
+            }
+
+            private suspend fun populateDatabase(userDao: UserDao) {
+                // insert dummy data here, e.g.:
+                val renter = UserEntity(
+                    userId = "paflou",
+                    name = "paflou Renter",
+                    email = "paflou@renter.com",
+                    password = "123",
+                    phoneNumber = "1112223333",
+                    location = "CityA",
+                    userType = "Renter",
+                    favoritesJson = "[]"
+                )
+
+                val owner = UserEntity(
+                    userId = "mavragkas",
+                    name = "mavragas owner",
+                    email = "mavragas@owner.com",
+                    password = "123",
+                    phoneNumber = "1112223333",
+                    location = "CityA",
+                    userType = "Owner",
+                    premiumStatus = true,
+                    ratings = 4.5f
+                )
+
+                val admin = UserEntity(
+                    userId = "natalia",
+                    name = "natalia admin",
+                    email = "natalia@admin.com",
+                    password = "123",
+                    phoneNumber = "1112223333",
+                    location = "CityA",
+                    userType = "Admin",
+                    staffId = "staff123"
+                )
+                userDao.insertAll(listOf(renter, owner, admin))
+            }
+
+            private suspend fun populateDatabase(listingDao: ListingDao) {
+                val photoUriStrings = listOf(
+                    "https:://image.html",
+                )
+
+                val listing1 = ListingEntity(
+                    listingId = 0,
+                    title = "Listing 1",
+                    description = "Description of listing 1",
+                    category = "Category 1",
+                    location = "Location 1",
+                    status = ListingStatus.AVAILABLE,
+                    price = 100.0,
+                    photos = Converters().fromList(photoUriStrings),
+                    creationDate = Converters().fromLocalDateTime(LocalDateTime.of(2025, 5, 15, 15, 30)),
+                    longTermDiscount = 0.0
+                )
+
+                val listing2 = ListingEntity(
+                    listingId = 0,
+                    title = "Listing 2",
+                    description = "Description of listing 2",
+                    category = "Category 2",
+                    location = "Location 2",
+                    status = ListingStatus.INACTIVE,
+                    price = 150.0,
+                    photos = Converters().fromList(listOf("https://example.com/photo2.jpg")),
+                    creationDate = Converters().fromLocalDateTime(LocalDateTime.of(2025, 5, 10, 10, 0)),
+                    longTermDiscount = 5.0
+                )
+
+                val listing3 = ListingEntity(
+                    listingId = 0,
+                    title = "Listing 3",
+                    description = "Description of listing 3",
+                    category = "Category 3",
+                    location = "Location 3",
+                    status = ListingStatus.AVAILABLE,
+                    price = 200.0,
+                    photos = Converters().fromList(listOf("https://example.com/photo3.jpg")),
+                    creationDate = Converters().fromLocalDateTime(LocalDateTime.of(2025, 5, 20, 9, 15)),
+                    longTermDiscount = 10.0
+                )
+
+                val listing4 = ListingEntity(
+                    listingId = 0,
+                    title = "Listing 4",
+                    description = "Description of listing 4",
+                    category = "Category 4",
+                    location = "Location 4",
+                    status = ListingStatus.UNAVAILABLE,
+                    price = 250.0,
+                    photos = Converters().fromList(listOf("https://example.com/photo4.jpg")),
+                    creationDate = Converters().fromLocalDateTime(LocalDateTime.of(2025, 5, 5, 8, 45)),
+                    longTermDiscount = 15.0
+                )
+                val listings = listOf<ListingEntity>(listing1, listing2, listing3, listing4)
+                listingDao.insertAll(listings)
+
+            }
+        }
+
+
+    }

@@ -34,6 +34,7 @@ class SearchActivity : AppCompatActivity() {
         val distanceSlider = binding.distanceSlider
 
         val dateButton = findViewById<MaterialButton>(R.id.date_button)
+        val perform_search_button = findViewById<MaterialButton>(R.id.perform_search_button)
 
 
         dateButton.setOnClickListener {
@@ -60,8 +61,8 @@ class SearchActivity : AppCompatActivity() {
                 dateButton.text = "$formattedStart - $formattedEnd"
             }
         }
-
-
-        // You can continue accessing other views like filters, togg    les, etc. here
+        perform_search_button.setOnClickListener {
+            finish()
+        }
     }
 }

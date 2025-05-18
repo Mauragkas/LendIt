@@ -7,7 +7,9 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import com.example.lendit.R
 import com.example.lendit.databinding.FragmentFavoritesBinding
+import com.example.lendit.ui.listing.ListingFragment
 
 class FavoritesFragment : Fragment() {
 
@@ -34,6 +36,17 @@ class FavoritesFragment : Fragment() {
         }
         return root
     }
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+
+        if (childFragmentManager.findFragmentById(R.id.listingFragment) == null) {
+            childFragmentManager.beginTransaction()
+                .replace(R.id.listingFragment, ListingFragment())
+                .commit()
+        }
+    }
+
 
     override fun onDestroyView() {
         super.onDestroyView()

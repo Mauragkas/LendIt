@@ -1,15 +1,11 @@
 package com.example.lendit
 
 import android.os.Bundle
-import android.widget.Toast
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.fragment.NavHostFragment // Import NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.example.lendit.databinding.ActivityMainBinding
-
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.button.MaterialButton
 import kotlin.jvm.java
 import android.content.Intent
