@@ -22,17 +22,5 @@ class ListingActivity : AppCompatActivity() {
         listingAdapter = ListingAdapter(mutableListOf())
         recyclerView.adapter = listingAdapter
 
-        // Load or observe your data and update the adapter
-        // For example:
-        // val sampleListings = getSampleData()
-        // listingAdapter.update(sampleListings)
     }
-
-    // Example function to get sample data (replace with your actual data source)
-    // private fun getSampleData(): List<ListingEntity> {
-    //     return listOf(
-    //         ListingEntity(1, "Item 1", "Desc 1", "Electronics", "Location A", ListingStatus.AVAILABLE, 100.0, "2023-01-01"),
-    //         ListingEntity(2, "Item 2", "Desc 2", "Books", "Location B", ListingStatus.SOLD, 25.0, "2023-01-05")
-    //     )
-    // }
 }

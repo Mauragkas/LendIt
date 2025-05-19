@@ -36,16 +36,7 @@ class FavoritesFragment : Fragment() {
         }
         return root
     }
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
 
-
-        if (childFragmentManager.findFragmentById(R.id.listingFragment) == null) {
-            childFragmentManager.beginTransaction()
-                .replace(R.id.listingFragment, ListingFragment())
-                .commit()
-        }
-    }
 
 
     override fun onDestroyView() {

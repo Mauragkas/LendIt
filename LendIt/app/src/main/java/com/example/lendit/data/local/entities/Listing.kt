@@ -1,9 +1,12 @@
+import android.os.Parcelable
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import java.time.LocalDateTime
 import androidx.room.TypeConverter
 import com.google.common.reflect.TypeToken
 import com.google.gson.Gson
+import kotlinx.parcelize.Parcelize
+import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 enum class ListingStatus {
@@ -11,21 +14,56 @@ enum class ListingStatus {
     UNAVAILABLE,
     INACTIVE
 }
+enum class ListingCategory {
+    MANUAL,
+    ELECTRIC
+}
+enum class Region {
+    ATTICA,
+    CENTRAL_MACEDONIA,
+    EASTERN_MACEDONIA_AND_THRACE,
+    EPIRUS,
+    THESSALY,
+    WESTERN_MACEDONIA,
+    WESTERN_GREECE,
+    CENTRAL_GREECE,
+    PELOPONNESE,
+    IONIAN_ISLANDS,
+    NORTH_AEGEAN,
+    SOUTH_AEGEAN,
+    CRETE
+}
+
+@Parcelize
+data class ListingFilters(
+    val title: String?            = null,
+    val description: String?      = null,
+    var category: ListingCategory? = null,
+    val location: Region?         = null,
+    val minPrice: Double?         = null,
+    val maxPrice: Double?         = null,
+    val availableFrom: Int?  = null,
+    val availableUntil: Int?  = null
+): Parcelable
+
+
+
 
 @Entity(tableName = "listing")
 data class ListingEntity(
     @PrimaryKey(autoGenerate = true) val listingId: Int = 0,
     var title: String,
     var description: String,
-    var category: String,
-    var location: String,
+    var category: ListingCategory,
+    var location: Region,
     var status: ListingStatus = ListingStatus.AVAILABLE,
     var price: Double,
     var photos: String,
-    val creationDate: String?,
+    val creationDate: Int?,
+    val availableFrom: Int?,
+    val availableUntil: Int?,
     var longTermDiscount: Double
 )
-
 
 class Converters {
     // Image conversion
@@ -41,14 +79,16 @@ class Converters {
     }
 
     // Date conversion
-    private val formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME
+    private val dateFormatter = DateTimeFormatter.ofPattern("yyyyMMdd")
     @TypeConverter
-    fun fromLocalDateTime(date: LocalDateTime?): String? {
-        return date?.format(formatter)
+    fun fromLocalDate(date: LocalDate?): Int? {
+        return date?.format(dateFormatter)?.toInt()
     }
 
     @TypeConverter
-    fun toLocalDateTime(dateString: String?): LocalDateTime? {
-        return dateString?.let { LocalDateTime.parse(it, formatter) }
+    fun toLocalDate(dateInt: Int?): LocalDate? {
+        return dateInt?.toString()?.let {
+            LocalDate.parse(it, dateFormatter)
+        }
     }
 }

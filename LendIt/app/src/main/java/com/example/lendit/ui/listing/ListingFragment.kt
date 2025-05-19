@@ -1,6 +1,7 @@
 package com.example.lendit.ui.listing
 
 import ListingEntity
+import ListingFilters
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -22,6 +23,7 @@ class ListingFragment : Fragment(R.layout.fragment_listings) {
     private var _binding: FragmentListingsBinding? = null
     private val binding get() = _binding!!
 
+
     // one adapter instance – start with an empty list
     private val adapter = ListingAdapter(mutableListOf())
 
@@ -36,6 +38,8 @@ class ListingFragment : Fragment(R.layout.fragment_listings) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        val filters = arguments?.getParcelable("filters", ListingFilters::class.java)               //get filters
+
         // RecyclerView setup once
         binding.listingRecyclerView.apply {
             layoutManager = LinearLayoutManager(requireContext())
@@ -46,7 +50,7 @@ class ListingFragment : Fragment(R.layout.fragment_listings) {
         viewLifecycleOwner.lifecycleScope.launch {
             try {
                 val listings: List<ListingEntity> = withContext(Dispatchers.IO) {
-                    AppDatabase.getListings(requireContext())        // <<- only context
+                    AppDatabase.getListings(requireContext(), filters)        // <<- only context
                 }
 
                 if (listings.isNotEmpty()) {

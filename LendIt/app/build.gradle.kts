@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     id("org.jetbrains.kotlin.kapt")
+    id ("kotlin-parcelize")
 }
 
 android {
@@ -10,7 +11,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.lendit"
-        minSdk = 26
+        minSdk = 33
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
