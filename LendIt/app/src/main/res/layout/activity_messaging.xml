@@ -19,7 +19,7 @@
             android:layout_height="59dp">
 
             <ImageButton
-                android:id="@+id/backButtonSignup"
+                android:id="@+id/backButtonMessaging"
                 android:layout_width="64dp"
                 android:layout_height="64dp"
                 android:backgroundTint="#ffffff"
@@ -29,19 +29,19 @@
                 app:srcCompat="@drawable/ic_backbutton_24dp" />
 
             <TextView
-                android:id="@+id/newListing"
+                android:id="@+id/MessagesTitle"
                 android:layout_width="125dp"
                 android:layout_height="37dp"
-                android:text="Νέα Αγγελία"
+                android:text="Μηνύματα"
                 android:textAlignment="viewStart"
                 android:textSize="16sp"
                 android:textStyle="bold"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.431"
-                app:layout_constraintStart_toEndOf="@+id/backButtonSignup"
+                app:layout_constraintHorizontal_bias="0.415"
+                app:layout_constraintStart_toEndOf="@+id/backButtonMessaging"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="1.0" />
+                app:layout_constraintVertical_bias="0.727" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -106,11 +106,18 @@
                             android:text="16:32" />
 
                         <TextView
-                            android:id="@+id/newMessagesMessaging"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="10dp"
-                            android:text="5" />
+                            android:layout_marginTop="5dp"
+                            android:layout_marginLeft="5dp"
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:background="@drawable/ic_notification5_24dp"
+                            android:text="5"
+                            android:textColor="@android:color/white"
+                            android:gravity="center"
+                            android:textStyle="bold"
+                            android:textSize="16sp"/>
+
+
                     </LinearLayout>
 
                 </LinearLayout>

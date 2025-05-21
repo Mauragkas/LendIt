@@ -6,6 +6,31 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/searchInputLayoutMain"
+        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginVertical="24dp"
+        android:hint="Εισάγετε περιγραφή εργαλείου"
+        app:endIconMode="clear_text"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:startIconDrawable="@drawable/ic_search">
+
+            <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/searchEditTextMain"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:focusable="false"
+            android:clickable="true"
+            android:inputType="none"
+            android:layout_marginHorizontal="5dp"/>
+
+
+    </com.google.android.material.textfield.TextInputLayout>
+
 <!--    Bottom navigation bar-->
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/navView"
@@ -35,7 +60,7 @@
 
     <!-- Search Button -->
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/search_button"
+        android:id="@+id/new_listing_button"
         android:layout_width="50dp"
         android:layout_height="60dp"
         android:layout_margin="20dp"

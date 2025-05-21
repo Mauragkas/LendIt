@@ -17,12 +17,24 @@ import com.google.android.material.datepicker.CalendarConstraints
 import com.google.android.material.datepicker.DateValidatorPointForward
 import com.google.android.material.datepicker.MaterialDatePicker
 
+import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
+import android.widget.TextView
+import android.widget.EditText
+
+
+
+
+
+
 import androidx.core.view.isVisible
 import java.text.SimpleDateFormat
 import java.time.Instant
 import java.time.ZoneId
 import java.util.Date
 import java.util.Locale
+
+
 
 
 class SearchActivity : AppCompatActivity() {
@@ -36,8 +48,9 @@ class SearchActivity : AppCompatActivity() {
         binding = ActivitySearchBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+
         val dateButton = findViewById<MaterialButton>(R.id.date_button)
-        val perform_search_button = findViewById<MaterialButton>(R.id.perform_search_button)
+        val perform_search_button = findViewById<MaterialButton>(R.id.searchInputLayoutMain)
         val filterButton = findViewById<MaterialButton>(R.id.toggleFiltersButton)
         val filtersContainer = findViewById<View>(R.id.filtersContainer)
         val regionSelectorButton = findViewById<Button>(R.id.regionSelectorButton);
@@ -47,6 +60,21 @@ class SearchActivity : AppCompatActivity() {
         var selectedRegion: Region? = null
 
         var radioGroup = findViewById<RadioGroup>(R.id.toolTypeGroup)
+        // Handle Enter key in searchEditText
+        binding.searchEditText.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                // Hide keyboard
+                val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
+                imm.hideSoftInputFromWindow(binding.searchEditText.windowToken, 0)
+
+                // Trigger search button
+                perform_search_button.performClick()
+                true
+            } else {
+                false
+            }
+        }
+
 
         dateButton.setOnClickListener {
             val constraintsBuilder = CalendarConstraints.Builder()
@@ -109,7 +137,6 @@ class SearchActivity : AppCompatActivity() {
         }
 
         perform_search_button.setOnClickListener {
-            filterButton.visibility = View.VISIBLE              // Make filter button visible
             filtersContainer.visibility = View.GONE
             var category: ListingCategory? = null
 
@@ -119,7 +146,7 @@ class SearchActivity : AppCompatActivity() {
                 category = ListingCategory.ELECTRIC
 
             val query = ListingFilters(
-                title = binding.searchEditText.text.toString(),
+                title = binding.searchEditText .text.toString(),
                 minPrice = binding.priceFromEditText.text.toString().toDoubleOrNull(),
                 maxPrice = binding.priceToEditText.text.toString().toDoubleOrNull(),
                 location = selectedRegion,
