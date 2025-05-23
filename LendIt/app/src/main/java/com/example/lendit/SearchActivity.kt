@@ -12,21 +12,10 @@ import android.widget.RadioGroup
 import androidx.appcompat.app.AppCompatActivity
 import com.example.lendit.databinding.ActivitySearchBinding
 import com.example.lendit.ui.listing.ListingFragment
-import com.google.android.material.button.MaterialButton
 import com.google.android.material.datepicker.CalendarConstraints
 import com.google.android.material.datepicker.DateValidatorPointForward
 import com.google.android.material.datepicker.MaterialDatePicker
-
 import android.view.inputmethod.EditorInfo
-import android.view.inputmethod.InputMethodManager
-import android.widget.TextView
-import android.widget.EditText
-
-
-
-
-
-
 import androidx.core.view.isVisible
 import java.text.SimpleDateFormat
 import java.time.Instant
@@ -35,46 +24,39 @@ import java.util.Date
 import java.util.Locale
 
 
-
-
 class SearchActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivitySearchBinding
 
+    private var formattedStart: Int? = null
+    private var formattedEnd: Int? = null
+    private var selectedRegion: Region? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Inflate and set the layout
         binding = ActivitySearchBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        // Now safe to access binding:
+        val dateButton = binding.dateButton
+        val filterButton = binding.toggleFiltersButton
+        val filtersContainer = binding.filtersContainer
+        val regionSelectorButton = binding.regionSelectorButton
+        val radioGroup = binding.toolTypeGroup
+        val applyFiltersButton = binding.applyFiltersButton
+        val clearFiltersButton = binding.clearFiltersButton
+        // Use these local variables or just use binding.* directly
 
-        val dateButton = findViewById<MaterialButton>(R.id.date_button)
-        val perform_search_button = findViewById<MaterialButton>(R.id.searchInputLayoutMain)
-        val filterButton = findViewById<MaterialButton>(R.id.toggleFiltersButton)
-        val filtersContainer = findViewById<View>(R.id.filtersContainer)
-        val regionSelectorButton = findViewById<Button>(R.id.regionSelectorButton);
-
-        var formattedStart: Int? = null
-        var formattedEnd: Int? = null
-        var selectedRegion: Region? = null
-
-        var radioGroup = findViewById<RadioGroup>(R.id.toolTypeGroup)
         // Handle Enter key in searchEditText
         binding.searchEditText.setOnEditorActionListener { _, actionId, _ ->
-            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-                // Hide keyboard
-                val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
-                imm.hideSoftInputFromWindow(binding.searchEditText.windowToken, 0)
-
-                // Trigger search button
-                perform_search_button.performClick()
+            if (actionId == EditorInfo.IME_ACTION_GO) {
+                performSearch()
                 true
             } else {
                 false
             }
         }
-
 
         dateButton.setOnClickListener {
             val constraintsBuilder = CalendarConstraints.Builder()
@@ -121,10 +103,10 @@ class SearchActivity : AppCompatActivity() {
             // Replace underscores with spaces for better UI
 
             AlertDialog.Builder(this)
-                .setTitle("Select Region")
+                .setTitle("Επιλέξτε Περιοχή")
                 .setItems(regionsArray) { _, which ->
                     selectedRegion = Region.values()[which]
-                    regionSelectorButton.text = selectedRegion.name.replace('_', ' ')
+                    regionSelectorButton.text = selectedRegion?.name?.replace('_', ' ') ?: "Επιλέξτε Περιοχή"
                 }
                 .show()
         }
@@ -136,34 +118,60 @@ class SearchActivity : AppCompatActivity() {
                 filtersContainer.visibility = View.VISIBLE
         }
 
-        perform_search_button.setOnClickListener {
+        applyFiltersButton.setOnClickListener {
+            performSearch()
             filtersContainer.visibility = View.GONE
-            var category: ListingCategory? = null
-
-            if(radioGroup.checkedRadioButtonId == R.id.radioManual)
-                category = ListingCategory.MANUAL
-            else if(radioGroup.checkedRadioButtonId == R.id.radioElectric)
-                category = ListingCategory.ELECTRIC
-
-            val query = ListingFilters(
-                title = binding.searchEditText .text.toString(),
-                minPrice = binding.priceFromEditText.text.toString().toDoubleOrNull(),
-                maxPrice = binding.priceToEditText.text.toString().toDoubleOrNull(),
-                location = selectedRegion,
-                category = category,
-                availableFrom = formattedStart,
-                availableUntil = formattedEnd
-            )
-
-            val fragment = ListingFragment().apply {
-                arguments = Bundle().apply {
-                    putParcelable("filters", query)
-                }
-            }
-            supportFragmentManager.beginTransaction()
-                .replace(R.id.listingFragment, fragment)
-                .commit()
-            //finish()
         }
+
+        clearFiltersButton.setOnClickListener {
+            // Clear text inputs
+            binding.searchEditText.text?.clear()
+            binding.priceFromEditText.text?.clear()
+            binding.priceToEditText.text?.clear()
+
+            // Clear radio selection
+            binding.toolTypeGroup.clearCheck()
+
+            // Reset region
+            selectedRegion = null
+            binding.regionSelectorButton.text = "Επιλέξτε Περιοχή"
+
+            // Reset date range
+            formattedStart = null
+            formattedEnd = null
+            binding.dateButton.text = "Επιλογή ημερομηνιών"
+        }
+    }
+
+    private fun performSearch() {
+        // you can access binding directly here since performSearch()
+        // is called after onCreate(), so binding is initialized
+        binding.filterButtonContainer.visibility = View.VISIBLE
+
+        var category: ListingCategory? = null
+
+        if (binding.toolTypeGroup.checkedRadioButtonId == R.id.radioManual)
+            category = ListingCategory.MANUAL
+        else if (binding.toolTypeGroup.checkedRadioButtonId == R.id.radioElectric)
+            category = ListingCategory.ELECTRIC
+
+        val query = ListingFilters(
+            title = binding.searchEditText.text.toString(),
+            minPrice = binding.priceFromEditText.text.toString().toDoubleOrNull(),
+            maxPrice = binding.priceToEditText.text.toString().toDoubleOrNull(),
+            location = selectedRegion,
+            category = category,
+            availableFrom = formattedStart,
+            availableUntil = formattedEnd
+        )
+
+        val fragment = ListingFragment().apply {
+            arguments = Bundle().apply {
+                putParcelable("filters", query)
+            }
+        }
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.listingFragment, fragment)
+            .commit()
     }
 }

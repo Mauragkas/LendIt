@@ -1,13 +1,16 @@
 package com.example.lendit
 
+import com.example.lendit.R
 import android.content.Intent
 import android.os.Bundle
-import android.widget.EditText
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.example.lendit.databinding.ActivityMainBinding
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.android.material.textfield.TextInputEditText
+
 
 class MainActivity : AppCompatActivity() {
 
@@ -28,13 +31,14 @@ class MainActivity : AppCompatActivity() {
         navView.setupWithNavController(navController)
 
         // ✅ Set listener on the search bar
-        val searchEditTextMain = findViewById<EditText>(R.id.searchEditTextMain)
+        val searchEditText = findViewById<TextInputEditText?>(R.id.searchEditTextMain)
 
-
-        searchEditTextMain.setOnClickListener {
-            val intent = Intent(this, SearchActivity::class.java)
+        searchEditText.setOnClickListener(View.OnClickListener { v: View? ->
+            val intent = Intent(
+                this@MainActivity,
+                SearchActivity::class.java
+            ) // Replace SearchActivity with your target activity
             startActivity(intent)
-            finish()
-        }
+        })
     }
 }
