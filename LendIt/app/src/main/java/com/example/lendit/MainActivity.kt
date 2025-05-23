@@ -29,15 +29,5 @@ class MainActivity : AppCompatActivity() {
         val navController = navHostFragment.navController
 
         navView.setupWithNavController(navController)
-
-        val searchEditText = findViewById<TextInputEditText?>(R.id.searchEditTextMain)
-
-        searchEditText.setOnClickListener(View.OnClickListener { v: View? ->
-            val intent = Intent(
-                this@MainActivity,
-                SearchActivity::class.java
-            ) // Replace SearchActivity with your target activity
-            startActivity(intent)
-        })
     }
 }

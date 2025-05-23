@@ -5,13 +5,13 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import ListingEntity
+import EquipmentListing
 import android.util.Log
 
-// Make sure ListingEntity is accessible. If it's in the same package, no explicit import is needed.
-// If ListingEntity is in a different package, you would import it here.
+// Make sure EquipmentListing is accessible. If it's in the same package, no explicit import is needed.
+// If EquipmentListing is in a different package, you would import it here.
 
-class ListingAdapter(private val items: MutableList<ListingEntity>) :
+class ListingAdapter(private val items: MutableList<EquipmentListing>) :
     RecyclerView.Adapter<ListingAdapter.MyViewHolder>() {
 
     class MyViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -51,7 +51,7 @@ class ListingAdapter(private val items: MutableList<ListingEntity>) :
 
     override fun getItemCount() = items.size
 
-    fun update(newItems: List<ListingEntity>) {
+    fun update(newItems: List<EquipmentListing>) {
         items.clear()
         items.addAll(newItems)
         notifyDataSetChanged()

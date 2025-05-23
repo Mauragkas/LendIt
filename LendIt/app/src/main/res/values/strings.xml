@@ -7,4 +7,6 @@
     <string name="title_cart">Cart</string>
     <string name="title_search">Search</string>
     <string name="SearchButton">SearchButton</string>
+    <string name="title_archive">Archive</string>
+    <string name="title_create_listing">New Listing\n</string>
 </resources>

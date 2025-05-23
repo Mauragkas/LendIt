@@ -7,11 +7,9 @@ import Region
 import android.app.AlertDialog
 import android.os.Bundle
 import android.view.View
-import android.widget.Button
-import android.widget.RadioGroup
 import androidx.appcompat.app.AppCompatActivity
 import com.example.lendit.databinding.ActivitySearchBinding
-import com.example.lendit.ui.listing.ListingFragment
+import com.example.lendit.ui.show_listings.ShowListingsFragment
 import com.google.android.material.datepicker.CalendarConstraints
 import com.google.android.material.datepicker.DateValidatorPointForward
 import com.google.android.material.datepicker.MaterialDatePicker
@@ -47,6 +45,13 @@ class SearchActivity : AppCompatActivity() {
         val applyFiltersButton = binding.applyFiltersButton
         val clearFiltersButton = binding.clearFiltersButton
         // Use these local variables or just use binding.* directly
+
+
+        binding.searchEditText.requestFocus()
+        binding.searchEditText.post {
+            val imm = getSystemService(INPUT_METHOD_SERVICE) as android.view.inputmethod.InputMethodManager
+            imm.showSoftInput(binding.searchEditText, android.view.inputmethod.InputMethodManager.SHOW_IMPLICIT)
+        }
 
         // Handle Enter key in searchEditText
         binding.searchEditText.setOnEditorActionListener { _, actionId, _ ->
@@ -165,7 +170,7 @@ class SearchActivity : AppCompatActivity() {
             availableUntil = formattedEnd
         )
 
-        val fragment = ListingFragment().apply {
+        val fragment = ShowListingsFragment().apply {
             arguments = Bundle().apply {
                 putParcelable("filters", query)
             }

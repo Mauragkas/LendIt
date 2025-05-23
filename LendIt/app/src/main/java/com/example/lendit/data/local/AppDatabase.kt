@@ -7,7 +7,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 
-@Database(entities = [UserEntity::class, ListingEntity::class], version = 5)
+@Database(entities = [UserEntity::class, EquipmentListing::class], version = 5)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun userDao(): UserDao
     abstract fun listingDao(): ListingDao
@@ -16,7 +16,7 @@ abstract class AppDatabase : RoomDatabase() {
         @Volatile
         private var INSTANCE: AppDatabase? = null
 
-        suspend fun getListings(context: Context, filters: ListingFilters?): List<ListingEntity> {
+        suspend fun getListings(context: Context, filters: ListingFilters?): List<EquipmentListing> {
             val database = INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
@@ -111,7 +111,7 @@ abstract class AppDatabase : RoomDatabase() {
             )
             val photos = Converters().fromList(photoUriStrings)
 
-            val listing1 = ListingEntity(
+            val listing1 = EquipmentListing(
                 listingId = 0,
                 title = "Listing 1",
                 description = "Description of listing 1",
@@ -126,7 +126,7 @@ abstract class AppDatabase : RoomDatabase() {
                 longTermDiscount = 0.0
             )
 
-            val listing2 = ListingEntity(
+            val listing2 = EquipmentListing(
                 listingId = 0,
                 title = "Listing 2",
                 description = "Description of listing 2",
@@ -141,7 +141,7 @@ abstract class AppDatabase : RoomDatabase() {
                 longTermDiscount = 5.0
             )
 
-            val listing3 = ListingEntity(
+            val listing3 = EquipmentListing(
                 listingId = 0,
                 title = "Listing 3",
                 description = "Description of listing 3",
@@ -156,7 +156,7 @@ abstract class AppDatabase : RoomDatabase() {
                 longTermDiscount = 10.0
             )
 
-            val listing4 = ListingEntity(
+            val listing4 = EquipmentListing(
                 listingId = 0,
                 title = "Listing 4",
                 description = "Description of listing 4",
@@ -171,7 +171,7 @@ abstract class AppDatabase : RoomDatabase() {
                 longTermDiscount = 15.0
             )
 
-            val listings = listOf<ListingEntity>(listing1, listing2, listing3, listing4)
+            val listings = listOf<EquipmentListing>(listing1, listing2, listing3, listing4)
             listingDao.insertAll(listings)
 
         }

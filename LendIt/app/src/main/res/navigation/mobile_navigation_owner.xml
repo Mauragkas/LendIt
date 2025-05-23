@@ -24,15 +24,15 @@
         tools:layout="@layout/fragment_notifications" />
 
     <fragment
-        android:id="@+id/navigation_favorites"
-        android:name="com.example.lendit.ui.favorites.FavoritesFragment"
+        android:id="@+id/navigation_archive"
+        android:name="com.example.lendit.ui.archive.ArchiveFragment"
         android:label="@string/title_favorites"
         tools:layout="@layout/fragment_favorites" />
 
     <fragment
-        android:id="@+id/navigation_cart"
-        android:name="com.example.lendit.ui.cart.CartFragment"
+        android:id="@+id/navigation_new_listing"
+        android:name="com.example.lendit.ui.show_listings.ListingActivity"
         android:label="@string/title_cart"
-        tools:layout="@layout/fragment_cart" />
+        tools:layout="@layout/activity_listing_creation" />
 
 </navigation>

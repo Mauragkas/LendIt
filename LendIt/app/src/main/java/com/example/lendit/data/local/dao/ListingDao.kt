@@ -2,6 +2,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.RawQuery
+import androidx.room.util.query
 import androidx.sqlite.db.SimpleSQLiteQuery
 import androidx.sqlite.db.SupportSQLiteQuery
 
@@ -9,19 +10,19 @@ import androidx.sqlite.db.SupportSQLiteQuery
 interface ListingDao {
 
     @Insert
-    suspend fun insert(listingEntity: ListingEntity)
+    suspend fun insert(equipmentListing: EquipmentListing)
 
     @Insert
-    suspend fun insertAll(listings: List<ListingEntity>)
+    suspend fun insertAll(listings: List<EquipmentListing>)
 
     @Query("SELECT * FROM listing")
-    suspend fun getAllListings(): List<ListingEntity>
+    suspend fun getAllListings(): List<EquipmentListing>
 
     @Query("DELETE FROM listing")
     suspend fun deleteAllListings()
 
     @RawQuery
-    suspend fun getListings(query: SupportSQLiteQuery): List<ListingEntity>
+    suspend fun getListings(query: SupportSQLiteQuery): List<EquipmentListing>
 
 }
 fun buildQuery(f: ListingFilters): SupportSQLiteQuery {

@@ -1,6 +1,6 @@
-package com.example.lendit.ui.listing
+package com.example.lendit.ui.new_listing
 
-import ListingEntity
+import EquipmentListing
 import ListingFilters
 import android.os.Bundle
 import android.util.Log
@@ -18,7 +18,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class ListingFragment : Fragment(R.layout.fragment_listings) {
+class NewListingFragment : Fragment(R.layout.fragment_listings) {
 
     private var _binding: FragmentListingsBinding? = null
     private val binding get() = _binding!!
@@ -43,13 +43,13 @@ class ListingFragment : Fragment(R.layout.fragment_listings) {
         // RecyclerView setup once
         binding.listingRecyclerView.apply {
             layoutManager = LinearLayoutManager(requireContext())
-            adapter = this@ListingFragment.adapter
+            adapter = this@NewListingFragment.adapter
         }
 
         // Load the demo listings
         viewLifecycleOwner.lifecycleScope.launch {
             try {
-                val listings: List<ListingEntity> = withContext(Dispatchers.IO) {
+                val listings: List<EquipmentListing> = withContext(Dispatchers.IO) {
                     AppDatabase.getListings(requireContext(), filters)        // <<- only context
                 }
 

@@ -47,10 +47,8 @@ data class ListingFilters(
 ): Parcelable
 
 
-
-
 @Entity(tableName = "listing")
-data class ListingEntity(
+data class EquipmentListing(
     @PrimaryKey(autoGenerate = true) val listingId: Int = 0,
     var title: String,
     var description: String,

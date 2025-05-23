@@ -1,13 +1,13 @@
 package com.example.lendit.ui.home
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import com.example.lendit.R
+import com.example.lendit.SearchActivity
 import com.example.lendit.databinding.FragmentHomeBinding
-import com.example.lendit.ui.listing.ListingFragment
 
 class HomeFragment : Fragment() {
 
@@ -26,7 +26,14 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        val searchEditText = binding.searchEditTextMain
+
+        searchEditText.setOnClickListener {
+            val intent = Intent(requireContext(), SearchActivity::class.java)
+            startActivity(intent)
+        }
     }
+
 
 
 
