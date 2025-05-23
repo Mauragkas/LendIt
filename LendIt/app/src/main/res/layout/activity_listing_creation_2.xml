@@ -1,212 +1,158 @@
-<?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8" ?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/ListingView"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
-    android:padding="16dp">
+    android:padding="16dp"
+>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="vertical"
+    >
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="59dp">
+            android:layout_height="59dp"
+        >
 
             <ImageButton
-                android:id="@+id/backButtonSignup"
+                android:id="@+id/backButtonListingStep2"
                 android:layout_width="64dp"
                 android:layout_height="64dp"
                 android:backgroundTint="#ffffff"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@drawable/ic_backbutton_24dp" />
+                app:srcCompat="@drawable/ic_backbutton_24dp"
+            />
 
             <TextView
-                android:id="@+id/newListing"
-                android:layout_width="125dp"
-                android:layout_height="37dp"
-                android:text="Νέα Αγγελία"
+                android:id="@+id/listingStep2Title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Νέα Αγγελία - Βήμα 2"
                 android:textAlignment="viewStart"
                 android:textSize="16sp"
                 android:textStyle="bold"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.431"
-                app:layout_constraintStart_toEndOf="@+id/backButtonSignup"
+                app:layout_constraintStart_toEndOf="@+id/backButtonListingStep2"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="1.0" />
-
+            />
         </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <!-- Image Upload Section -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Φωτογραφίες Εργαλείου"
+            android:textSize="16sp"
+            android:textStyle="bold"
+        />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="Προσθέστε έως 5 φωτογραφίες του εργαλείου σας"
+            android:textSize="14sp"
+        />
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical">
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:orientation="horizontal"
+        >
 
-            <TextView
-                android:layout_marginTop="5dp"
-                android:id="@+id/textView19"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:fontFamily="sans-serif-medium"
-                android:text="Δωρεάν Καταχώρηση Αγγελίας"
-                android:textSize="24sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/textView20"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Υποχρεωτικά πεδία * προς συμπλήρωση"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/toolNameListing"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:text="Όνομα Εργαλείου *"
-                android:textSize="16sp"
-                android:textStyle="bold" />
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:layout_width="match_parent"
-                    android:layout_height="61dp"
-                    android:hint="Όνομα κάρτας" />
-
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <TextView
-                android:id="@+id/toolCategoryListing"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:text="Κατηγορία *"
-                android:textSize="16sp"
-                android:textStyle="bold" />
-
-            <AutoCompleteTextView
-                android:id="@+id/dropdownCategoryListing"
-                android:layout_width="match_parent"
-                android:layout_height="62dp"
-                android:backgroundTint="#CCCCCC"
-                android:clickable="true"
-                android:dropDownHeight="wrap_content"
-                android:focusable="false"
-                android:hint="Επιλέξτε κατηγορία"
-                android:inputType="none" />
-
-            <TextView
-                android:id="@+id/textView18"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:text="Τοποθεσία *"
-                android:textSize="16sp"
-                android:textStyle="bold" />
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="Εισάγετε διεύθυνση" />
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="99dp"
-                android:orientation="horizontal">
+            <androidx.cardview.widget.CardView
+                android:id="@+id/addPhotoCard"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_margin="4dp"
+                app:cardCornerRadius="8dp"
+                app:cardElevation="2dp"
+            >
 
                 <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:id="@+id/textView21"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Κόστος ενοικίασης"
-                        android:textStyle="bold" />
-
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:layout_width="180dp"
-                        android:layout_height="match_parent">
-
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:hint="Δηλώστε τιμή" />
-                    </com.google.android.material.textfield.TextInputLayout>
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:id="@+id/textView22"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Ενοικίαση Ανά"
-                        android:textStyle="bold" />
-
-                    <AutoCompleteTextView
-                        android:id="@+id/dropdownPeriodOfListing"
-                        android:layout_width="match_parent"
-                        android:layout_height="62dp"
-                        android:backgroundTint="#CCCCCC"
-                        android:clickable="true"
-                        android:dropDownHeight="wrap_content"
-                        android:focusable="false"
-                        android:hint="Μήνα"
-                        android:inputType="none" />
-                </LinearLayout>
-            </LinearLayout>
-
-            <TextView
-                android:id="@+id/toolDescriptionListing"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Περιγραφή"
-                android:textSize="16sp"
-                android:textStyle="bold" />
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="113dp">
-
-                <com.google.android.material.textfield.TextInputEditText
                     android:layout_width="match_parent"
-                    android:layout_height="103dp"
-                    android:hint="Πρόσθεστε μία περιγραφή για την αγγελία σας"
-                    android:maxLines="4" />
-            </com.google.android.material.textfield.TextInputLayout>
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                >
 
-            <Button
-                android:layout_marginTop="5dp"
-                android:id="@+id/buttonPostListing"
+                    <ImageView
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:src="@drawable/ic_plussign"
+                    />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Προσθήκη"
+                    />
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- Image preview placeholders -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/photosRecyclerView"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Δημοσίευση Αγγελίας" />
-
-
+                android:layout_height="100dp"
+                android:orientation="horizontal"
+            />
         </LinearLayout>
 
+        <!-- Usage Instructions Section -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="Οδηγίες Χρήσης"
+            android:textSize="16sp"
+            android:textStyle="bold"
+        />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+        >
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/usageInstructionsInput"
+                android:layout_width="match_parent"
+                android:layout_height="120dp"
+                android:gravity="top"
+                android:hint="Προσθέστε οδηγίες χρήσης για το εργαλείο"
+                android:inputType="textMultiLine"
+            />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Terms and Conditions Checkbox -->
+        <CheckBox
+            android:id="@+id/termsCheckBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Αποδέχομαι τους όρους και προϋποθέσεις της πλατφόρμας"
+        />
+
+        <!-- Publish Button -->
+        <Button
+            android:id="@+id/publishListingButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="16dp"
+            android:text="Δημοσίευση Αγγελίας"
+        />
     </LinearLayout>
 </ScrollView>
