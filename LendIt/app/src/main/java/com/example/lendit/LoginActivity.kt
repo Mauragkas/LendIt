@@ -16,91 +16,109 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var emailField: EditText
     private lateinit var passwordField: EditText
     private lateinit var loginBtn: Button
-
     private lateinit var signupBtn: Button
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
 
+        // Initialize database and DAO
         val db = AppDatabase.getLogin(applicationContext, lifecycleScope)
         val userDao = db.userDao()
 
+        // Check if user is already logged in
         val sharedPref = getSharedPreferences("MyAppPrefs", MODE_PRIVATE)
         val isLoggedIn = sharedPref.getBoolean("isLoggedIn", false)
+        val savedUserType = sharedPref.getString("userType", "renter")
 
+        if (isLoggedIn) {
+            // Redirect based on saved user type
+            val destination = when (savedUserType?.lowercase()) {
+                "owner" -> MainOwnerActivity::class.java
+//                "admin" -> AdminActivity::class.java
+                else -> MainActivity::class.java
+            }
+            startActivity(Intent(this, destination))
+            finish()
+            return
+        }
+
+        // Initialize UI components
+        loginBtn = findViewById(R.id.button)
+        emailField = findViewById(R.id.editTextTextEmailAddress)
+        passwordField = findViewById(R.id.editTextTextPassword)
+        signupBtn = findViewById(R.id.signUpButtonLogin)
+
+        // Set up text watcher for login button state
         val loginTextWatcher = object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-
             override fun afterTextChanged(s: Editable?) {
-                val email = emailField.text.toString()
-                val password = passwordField.text.toString()
-
-                // Your condition: email AND password is not blank
-                val conditionMet = email.isNotBlank() && password.isNotBlank()
-
-                // Enable or disable the button based on the condition
-                loginBtn.isEnabled = conditionMet
+                loginBtn.isEnabled = emailField.text.toString().isNotBlank() &&
+                        passwordField.text.toString().isNotBlank()
             }
         }
-
-        if (isLoggedIn) {
-            // User is logged in, proceed to main app screen directly
-            startActivity(Intent(this, MainActivity::class.java))
-            finish() // close login screen
-        } else {
-            // Show login screen or stay on current activity
-        }
-
-
-       loginBtn = findViewById<Button>(R.id.button)
-       emailField = findViewById<EditText>(R.id.editTextTextEmailAddress)
-       passwordField = findViewById<EditText>(R.id.editTextTextPassword)
-
-        loginBtn.isEnabled = false
 
         emailField.addTextChangedListener(loginTextWatcher)
         passwordField.addTextChangedListener(loginTextWatcher)
+        loginBtn.isEnabled = false
 
+        // Login button click handler
         loginBtn.setOnClickListener {
-            val email = emailField.text.toString()
-            val password = passwordField.text.toString()
+            val email = emailField.text.toString().trim()
+            val password = passwordField.text.toString().trim()
 
-            lifecycleScope.launch {
-                val user = userDao.getUserByEmailAndPassword(
-                    email = email,
-                    password = password
-                )
-
-                if (user != null) {
-                    val sharedPref = getSharedPreferences("MyAppPrefs", MODE_PRIVATE)
-                    with(sharedPref.edit()) {
-                        putBoolean("isLoggedIn", true)
-                        putString("email", email)  //store email
-                        apply()
-                    }
-
-                    startActivity(Intent(this@LoginActivity, MainActivity::class.java))
-                    finish() // close login screen
-                    // ✅ Login success, go to next activity
-                    // startActivity(Intent(this@LoginActivity, DashboardActivity::class.java))
-                }
-                else {
-                    Toast.makeText(this@LoginActivity, "Invalid Credentials!", Toast.LENGTH_SHORT).show()
-                }
+            if (email.isEmpty() || password.isEmpty()) {
+                Toast.makeText(this, "Please enter both email and password", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
             }
 
+            lifecycleScope.launch {
+                try {
+                    val user = userDao.getUserByEmailAndPassword(email, password)
+
+                    if (user != null) {
+                        // Save login state and user info
+                        with(sharedPref.edit()) {
+                            putBoolean("isLoggedIn", true)
+                            putString("email", email)
+                            putString("userType", user.userType)
+                            apply()
+                        }
+
+                        // Redirect based on user type
+                        val destination = when (user.userType?.lowercase()) {
+                            "owner" -> MainOwnerActivity::class.java
+//                            "admin" -> AdminActivity::class.java
+                            else -> MainActivity::class.java
+                        }
+
+                        startActivity(Intent(this@LoginActivity, destination))
+                        finish()
+                    } else {
+                        runOnUiThread {
+                            Toast.makeText(
+                                this@LoginActivity,
+                                "Invalid email or password",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    }
+                } catch (e: Exception) {
+                    runOnUiThread {
+                        Toast.makeText(
+                            this@LoginActivity,
+                            "Login failed: ${e.message}",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+            }
         }
 
-        signupBtn = findViewById<Button>(R.id.signUpButtonLogin)
-
+        // Signup button click handler
         signupBtn.setOnClickListener {
-            val intent = Intent(this, SignupActivity::class.java)
-            startActivity(intent)
-            finish()
+            startActivity(Intent(this, SignupActivity::class.java))
         }
-
     }
 }

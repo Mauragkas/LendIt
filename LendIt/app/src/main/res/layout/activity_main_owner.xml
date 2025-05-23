@@ -56,4 +56,24 @@
         app:menu="@menu/bottom_nav_menu">
     </com.google.android.material.bottomnavigation.BottomNavigationView>
 
+
+
+
+    <!-- Search Button -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/new_listing_button_main"
+        android:layout_width="50dp"
+        android:layout_height="60dp"
+        android:layout_margin="20dp"
+        app:layout_constraintBottom_toTopOf="@+id/navView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:icon="@drawable/ic_plussign"
+        style="@style/Widget.MaterialComponents.Button.Icon"
+        android:contentDescription="@string/SearchButton"
+        app:iconGravity="end"
+        app:shapeAppearance="@style/ShapeAppearance.Material3.Corner.ExtraLarge"
+        />
+
+
+
 </androidx.constraintlayout.widget.ConstraintLayout>
