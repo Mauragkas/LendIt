@@ -1,9 +1,11 @@
-<?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8" ?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/container"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+>
 
     <!--    Show Fragment-->
     <androidx.fragment.app.FragmentContainerView
@@ -18,7 +20,7 @@
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        />
+    />
 
 <!--    Bottom navigation bar-->
     <com.google.android.material.bottomnavigation.BottomNavigationView
@@ -29,27 +31,8 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:menu="@menu/bottom_nav_menu_owner">
+        app:menu="@menu/bottom_nav_menu_owner"
+    >
     </com.google.android.material.bottomnavigation.BottomNavigationView>
-
-
-
-
-    <!-- Search Button -->
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/new_listing_button_main"
-        android:layout_width="50dp"
-        android:layout_height="60dp"
-        android:layout_margin="20dp"
-        app:layout_constraintBottom_toTopOf="@+id/navView"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:icon="@drawable/ic_plussign"
-        style="@style/Widget.MaterialComponents.Button.Icon"
-        android:contentDescription="@string/SearchButton"
-        app:iconGravity="end"
-        app:shapeAppearance="@style/ShapeAppearance.Material3.Corner.ExtraLarge"
-        />
-
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>
