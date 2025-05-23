@@ -30,7 +30,6 @@ class MainActivity : AppCompatActivity() {
 
         navView.setupWithNavController(navController)
 
-        // ✅ Set listener on the search bar
         val searchEditText = findViewById<TextInputEditText?>(R.id.searchEditTextMain)
 
         searchEditText.setOnClickListener(View.OnClickListener { v: View? ->
