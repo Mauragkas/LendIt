@@ -10,7 +10,7 @@ import androidx.sqlite.db.SupportSQLiteQuery
 interface ListingDao {
 
     @Insert
-    suspend fun insert(equipmentListing: EquipmentListing)
+    suspend fun insert(equipmentListing: EquipmentListing): Long
 
     @Insert
     suspend fun insertAll(listings: List<EquipmentListing>)
@@ -20,6 +20,9 @@ interface ListingDao {
 
     @Query("DELETE FROM listing")
     suspend fun deleteAllListings()
+
+    @Query("SELECT COUNT(*) FROM listing")
+    suspend fun getCount(): Int
 
     @RawQuery
     suspend fun getListings(query: SupportSQLiteQuery): List<EquipmentListing>
@@ -62,5 +65,4 @@ fun buildQuery(f: ListingFilters): SupportSQLiteQuery {
 
     return SimpleSQLiteQuery(queryBuilder.toString(), args.toTypedArray())
 }
-
 
