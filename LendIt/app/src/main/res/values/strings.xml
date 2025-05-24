@@ -9,4 +9,6 @@
     <string name="SearchButton">SearchButton</string>
     <string name="title_archive">Archive</string>
     <string name="title_create_listing">New Listing\n</string>
+    <string name="listing_image">image\n</string>
+    <string name="title_premium">premium\n</string>
 </resources>

@@ -31,7 +31,7 @@
 
     <fragment
         android:id="@+id/navigation_new_listing"
-        android:name="com.example.lendit.ui.show_listings.ListingActivity"
+        android:name="com.example.lendit.ui.show_listings.ShowListingsFragment"
         android:label="@string/title_cart"
         tools:layout="@layout/activity_listing_creation" />
 
