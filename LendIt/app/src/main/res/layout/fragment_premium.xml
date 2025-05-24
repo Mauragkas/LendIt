@@ -141,10 +141,10 @@
                     />
                 </LinearLayout>
             </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
+            </com.google.android.material.card.MaterialCardView>
 
-        <!-- Subscription Plans Section -->
-        <TextView
+            <!-- Subscription Plans Section -->
+            <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Επιλέξτε Διάρκεια Συνδρομής"
@@ -153,18 +153,19 @@
             android:layout_marginBottom="8dp"
         />
 
-        <LinearLayout
+            <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:layout_marginBottom="24dp"
+            android:baselineAligned="false"
         >
 
-            <!-- Monthly Plan -->
-            <com.google.android.material.card.MaterialCardView
+                <!-- Monthly Plan -->
+                <com.google.android.material.card.MaterialCardView
                 android:id="@+id/monthlyPlanCard"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
                 app:cardCornerRadius="8dp"
                 app:cardElevation="2dp"
@@ -173,35 +174,43 @@
                 app:strokeColor="@color/teal_700"
             >
 
-                <LinearLayout
+                    <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:orientation="vertical"
                     android:gravity="center"
                     android:padding="16dp"
                 >
 
-                    <TextView
+                        <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Μηνιαίο"
                         android:textStyle="bold"
                     />
 
-                    <TextView
+                        <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="€9.99/μήνα"
                         android:textSize="16sp"
                     />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
 
-            <!-- Quarterly Plan -->
-            <com.google.android.material.card.MaterialCardView
+                        <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text=""
+                        android:textSize="12sp"
+                        android:visibility="invisible"
+                    />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Quarterly Plan -->
+                <com.google.android.material.card.MaterialCardView
                 android:id="@+id/quarterlyPlanCard"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
                 app:cardCornerRadius="8dp"
                 app:cardElevation="2dp"
@@ -210,42 +219,42 @@
                 app:strokeColor="@color/teal_700"
             >
 
-                <LinearLayout
+                    <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:orientation="vertical"
                     android:gravity="center"
                     android:padding="16dp"
                 >
 
-                    <TextView
+                        <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="3μηνο"
                         android:textStyle="bold"
                     />
 
-                    <TextView
+                        <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="€24.99"
                         android:textSize="16sp"
                     />
 
-                    <TextView
+                        <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="(€8.33/μήνα)"
                         android:textSize="12sp"
                     />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
 
-            <!-- Yearly Plan -->
-            <com.google.android.material.card.MaterialCardView
+                <!-- Yearly Plan -->
+                <com.google.android.material.card.MaterialCardView
                 android:id="@+id/yearlyPlanCard"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
                 app:cardCornerRadius="8dp"
                 app:cardElevation="2dp"
@@ -254,37 +263,37 @@
                 app:strokeColor="@color/teal_700"
             >
 
-                <LinearLayout
+                    <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:orientation="vertical"
                     android:gravity="center"
                     android:padding="16dp"
                 >
 
-                    <TextView
+                        <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Ετήσιο"
                         android:textStyle="bold"
                     />
 
-                    <TextView
+                        <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="€89.99"
                         android:textSize="16sp"
                     />
 
-                    <TextView
+                        <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="(€7.50/μήνα)"
                         android:textSize="12sp"
                     />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-        </LinearLayout>
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+            </LinearLayout>
 
         <!-- Action Buttons -->
         <Button
