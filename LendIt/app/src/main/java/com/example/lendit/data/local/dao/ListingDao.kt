@@ -1,3 +1,4 @@
+import android.util.Log
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
@@ -62,7 +63,11 @@ fun buildQuery(f: ListingFilters): SupportSQLiteQuery {
         args.add(f.availableUntil)  // filter end date
     }
 
-
+    when (f.sortBy ?: SortBy.SUGGESTED) {
+        SortBy.ASC -> queryBuilder.append(" ORDER BY price ASC")
+        SortBy.DESC -> queryBuilder.append(" ORDER BY price DESC")
+        SortBy.SUGGESTED -> queryBuilder.append(" ORDER BY creationDate DESC")
+    }
+    Log.d("SQL_QUERY", "Query: ${queryBuilder} | Args: ${args.joinToString()}")
     return SimpleSQLiteQuery(queryBuilder.toString(), args.toTypedArray())
 }
-

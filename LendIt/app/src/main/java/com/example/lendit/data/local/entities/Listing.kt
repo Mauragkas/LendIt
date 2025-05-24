@@ -14,9 +14,16 @@ enum class ListingStatus {
     UNAVAILABLE,
     INACTIVE
 }
+
 enum class ListingCategory {
     MANUAL,
     ELECTRIC
+}
+
+enum class SortBy {
+    ASC,
+    DESC,
+    SUGGESTED
 }
 enum class Region {
     ATTICA,
@@ -43,7 +50,8 @@ data class ListingFilters(
     val minPrice: Double?         = null,
     val maxPrice: Double?         = null,
     val availableFrom: Int?  = null,
-    val availableUntil: Int?  = null
+    val availableUntil: Int?  = null,
+    val sortBy: SortBy? = SortBy.SUGGESTED
 ): Parcelable
 
 

@@ -4,6 +4,7 @@ import Converters
 import ListingCategory
 import ListingFilters
 import Region
+import SortBy
 import android.app.AlertDialog
 import android.os.Bundle
 import android.view.View
@@ -41,7 +42,6 @@ class SearchActivity : AppCompatActivity() {
         val filterButton = binding.toggleFiltersButton
         val filtersContainer = binding.filtersContainer
         val regionSelectorButton = binding.regionSelectorButton
-        val radioGroup = binding.toolTypeGroup
         val applyFiltersButton = binding.applyFiltersButton
         val clearFiltersButton = binding.clearFiltersButton
         // Use these local variables or just use binding.* directly
@@ -154,11 +154,19 @@ class SearchActivity : AppCompatActivity() {
         binding.filterButtonContainer.visibility = View.VISIBLE
 
         var category: ListingCategory? = null
+        var sortBy: SortBy? = null
 
         if (binding.toolTypeGroup.checkedRadioButtonId == R.id.radioManual)
             category = ListingCategory.MANUAL
         else if (binding.toolTypeGroup.checkedRadioButtonId == R.id.radioElectric)
             category = ListingCategory.ELECTRIC
+
+        if (binding.priceSortGroup.checkedRadioButtonId == R.id.radioAscending)
+            sortBy = SortBy.ASC
+        else if (binding.priceSortGroup.checkedRadioButtonId == R.id.radioDescending)
+            sortBy = SortBy.DESC
+        else if (binding.priceSortGroup.checkedRadioButtonId == R.id.radioSuggested)
+            sortBy = SortBy.SUGGESTED
 
         val query = ListingFilters(
             title = binding.searchEditText.text.toString(),
@@ -167,7 +175,8 @@ class SearchActivity : AppCompatActivity() {
             location = selectedRegion,
             category = category,
             availableFrom = formattedStart,
-            availableUntil = formattedEnd
+            availableUntil = formattedEnd,
+            sortBy = sortBy
         )
 
         val fragment = ShowListingsFragment().apply {
