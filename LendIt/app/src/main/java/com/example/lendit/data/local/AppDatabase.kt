@@ -6,11 +6,13 @@ import java.time.LocalDate
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import com.example.lendit.data.local.entities.Report
 
-@Database(entities = [UserEntity::class, EquipmentListing::class], version = 6)
+@Database(entities = [UserEntity::class, EquipmentListing::class, Report::class], version = 7)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun userDao(): UserDao
     abstract fun listingDao(): ListingDao
+    abstract fun reportDao(): ReportDao
 
     companion object {
         @Volatile private var INSTANCE: AppDatabase? = null
