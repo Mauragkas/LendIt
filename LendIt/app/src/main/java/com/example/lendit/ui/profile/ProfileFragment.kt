@@ -8,7 +8,9 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
 import com.example.lendit.LoginActivity
+import com.example.lendit.R
 import com.example.lendit.databinding.FragmentProfileBinding
 
 class ProfileFragment : Fragment() {
@@ -49,6 +51,10 @@ class ProfileFragment : Fragment() {
             val intent = Intent(requireContext(), LoginActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             startActivity(intent)
+        }
+
+        binding.premiumButton.setOnClickListener {
+            findNavController().navigate(R.id.navigation_premium)
         }
     }
 
