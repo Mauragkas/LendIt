@@ -7,9 +7,11 @@ import android.view.ViewGroup
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.example.lendit.R
 import com.example.lendit.databinding.FragmentPremiumBinding
+import kotlinx.coroutines.launch
 
 class PremiumFragment : Fragment() {
 
@@ -96,14 +98,10 @@ class PremiumFragment : Fragment() {
     }
 
     private fun proceedToPayment() {
-        // In a real app, this would navigate to a payment screen
-        // For this demo, we'll simulate a successful payment
-
         AlertDialog.Builder(requireContext())
             .setTitle("Επιβεβαίωση αγοράς")
             .setMessage("Είστε βέβαιοι ότι θέλετε να αποκτήσετε το πλάνο ${viewModel.selectedPlan} για €${viewModel.planPrice}?")
             .setPositiveButton("Συνέχεια") { _, _ ->
-                // Simulate payment success
                 simulateSuccessfulPayment()
             }
             .setNegativeButton("Άκυρο", null)
@@ -111,23 +109,53 @@ class PremiumFragment : Fragment() {
     }
 
     private fun simulateSuccessfulPayment() {
-        // Update shared preferences
         val sharedPref = requireActivity().getSharedPreferences("MyAppPrefs", 0)
-        with(sharedPref.edit()) {
-            putBoolean("isPremium", true)
-            putString("premiumPlan", viewModel.selectedPlan)
-            apply()
-        }
+        val userEmail = sharedPref.getString("email", "") ?: ""
 
-        // Show success message
-        AlertDialog.Builder(requireContext())
-            .setTitle("Επιτυχής αναβάθμιση!")
-            .setMessage("Συγχαρητήρια! Έχετε αναβαθμιστεί σε Premium χρήστη.")
-            .setPositiveButton("OK") { _, _ ->
-                // Navigate back to profile
-                findNavController().navigateUp()
+        if (userEmail.isNotEmpty()) {
+            // Update database
+            lifecycleScope.launch {
+                try {
+                    val db = AppDatabase.getLogin(requireContext(), lifecycleScope)
+                    val userDao = db.userDao()
+
+                    // Update premium status in database
+                    userDao.updatePremiumStatus(userEmail, true, viewModel.selectedPlan)
+
+                    // Update shared preferences
+                    with(sharedPref.edit()) {
+                        putBoolean("isPremium", true)
+                        putString("premiumPlan", viewModel.selectedPlan)
+                        apply()
+                    }
+
+                    // Show success message on main thread
+                    requireActivity().runOnUiThread {
+                        AlertDialog.Builder(requireContext())
+                            .setTitle("Επιτυχής αναβάθμιση!")
+                            .setMessage("Συγχαρητήρια! Έχετε αναβαθμιστεί σε Premium χρήστη.")
+                            .setPositiveButton("OK") { _, _ ->
+                                findNavController().navigateUp()
+                            }
+                            .show()
+                    }
+                } catch (e: Exception) {
+                    requireActivity().runOnUiThread {
+                        android.widget.Toast.makeText(
+                            requireContext(),
+                            "Σφάλμα κατά την ενημέρωση: ${e.message}",
+                            android.widget.Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
             }
-            .show()
+        } else {
+            android.widget.Toast.makeText(
+                requireContext(),
+                "Σφάλμα: Δεν βρέθηκε χρήστης",
+                android.widget.Toast.LENGTH_SHORT
+            ).show()
+        }
     }
 
     private fun showCancellationDialog() {
@@ -142,25 +170,50 @@ class PremiumFragment : Fragment() {
     }
 
     private fun cancelSubscription() {
-        // Update shared preferences
         val sharedPref = requireActivity().getSharedPreferences("MyAppPrefs", 0)
-        with(sharedPref.edit()) {
-            putBoolean("isPremium", false)
-            remove("premiumPlan")
-            apply()
-        }
+        val userEmail = sharedPref.getString("email", "") ?: ""
 
-        // Update UI
-        updateUI(false)
+        if (userEmail.isNotEmpty()) {
+            // Update database
+            lifecycleScope.launch {
+                try {
+                    val db = AppDatabase.getLogin(requireContext(), lifecycleScope)
+                    val userDao = db.userDao()
 
-        // Show confirmation
-        AlertDialog.Builder(requireContext())
-            .setTitle("Η συνδρομή σας ακυρώθηκε")
-            .setMessage("Η συνδρομή σας έχει ακυρωθεί. Θα διατηρήσετε τα προνόμια Premium μέχρι το τέλος της τρέχουσας περιόδου χρέωσης.")
-            .setPositiveButton("OK") { _, _ ->
-                findNavController().navigateUp()
+                    // Update premium status in database
+                    userDao.updatePremiumStatus(userEmail, false, null)
+
+                    // Update shared preferences
+                    with(sharedPref.edit()) {
+                        putBoolean("isPremium", false)
+                        remove("premiumPlan")
+                        apply()
+                    }
+
+                    // Update UI on main thread
+                    requireActivity().runOnUiThread {
+                        updateUI(false)
+
+                        // Show confirmation
+                        AlertDialog.Builder(requireContext())
+                            .setTitle("Η συνδρομή σας ακυρώθηκε")
+                            .setMessage("Η συνδρομή σας έχει ακυρωθεί. Θα διατηρήσετε τα προνόμια Premium μέχρι το τέλος της τρέχουσας περιόδου χρέωσης.")
+                            .setPositiveButton("OK") { _, _ ->
+                                findNavController().navigateUp()
+                            }
+                            .show()
+                    }
+                } catch (e: Exception) {
+                    requireActivity().runOnUiThread {
+                        android.widget.Toast.makeText(
+                            requireContext(),
+                            "Σφάλμα κατά την ακύρωση: ${e.message}",
+                            android.widget.Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
             }
-            .show()
+        }
     }
 
     override fun onDestroyView() {

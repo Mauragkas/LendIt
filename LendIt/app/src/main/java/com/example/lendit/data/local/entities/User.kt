@@ -15,6 +15,7 @@ data class UserEntity(
 
     // Owner fields
     var premiumStatus: Boolean? = null,
+    var premiumPlan: String? = null,
     var ratings: Float? = null,
 
     // Coordinator field

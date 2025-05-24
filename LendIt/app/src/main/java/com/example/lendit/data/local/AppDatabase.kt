@@ -7,7 +7,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-@Database(entities = [UserEntity::class, EquipmentListing::class], version = 5)
+@Database(entities = [UserEntity::class, EquipmentListing::class], version = 6)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun userDao(): UserDao
     abstract fun listingDao(): ListingDao
@@ -42,6 +42,7 @@ abstract class AppDatabase : RoomDatabase() {
                                 AppDatabase::class.java,
                                 "lendit-db"
                             )
+                                .fallbackToDestructiveMigration(true)
                                 .build()
                         INSTANCE = instance
                         instance
@@ -111,7 +112,8 @@ abstract class AppDatabase : RoomDatabase() {
                     phoneNumber = "1112223333",
                     location = "CityA",
                     userType = "Owner",
-                    premiumStatus = true,
+                    premiumStatus = false,
+                    premiumPlan = null,
                     ratings = 4.5f
                 )
 
