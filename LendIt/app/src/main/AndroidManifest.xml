@@ -45,6 +45,8 @@
 
         <activity android:name=".MainOwnerActivity" android:exported="true" />
 
+        <activity android:name=".ListingDetailsActivity" android:exported="true" />
+
     </application>
 
 </manifest>

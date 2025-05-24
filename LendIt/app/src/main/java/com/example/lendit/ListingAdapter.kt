@@ -7,8 +7,10 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import EquipmentListing
+import android.content.Intent
 import android.util.Log
 import android.widget.ImageView
+import androidx.core.content.ContextCompat.startActivity
 import com.bumptech.glide.Glide
 
 // Make sure EquipmentListing is accessible. If it's in the same package, no explicit import is needed.
@@ -53,7 +55,10 @@ class ListingAdapter(private val items: MutableList<EquipmentListing>) :
         holder.categoryTextView.text = "Category: ${currentItem.category}"
         holder.locationTextView.text = "Location: ${currentItem.location}"
         holder.statusTextView.text = "Status: ${currentItem.status.name}"
-        holder.priceTextView.text = String.format("$%.2f", currentItem.price)
+        holder.priceTextView.text = buildString {
+            append(currentItem.price)
+            append("€")
+        }
 
         holder.creationDateTextView.text = if (currentItem.creationDate != null) {
             "Listed on: ${currentItem.creationDate}"
@@ -63,6 +68,12 @@ class ListingAdapter(private val items: MutableList<EquipmentListing>) :
         holder.itemView.setOnClickListener {
             Log.d("PRESSED", "pressed for position $position") // <-- ADD LOG
 
+            val context = holder.itemView.context
+            val intent = Intent(context, ListingDetailsActivity::class.java)
+
+            intent.putExtra("listing_id", currentItem.listingId) // Pass ID to fetch data in activity
+
+            context.startActivity(intent)
         }
     }
 

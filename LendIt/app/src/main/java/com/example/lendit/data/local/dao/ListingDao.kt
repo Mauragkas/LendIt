@@ -22,6 +22,9 @@ interface ListingDao {
     @Query("DELETE FROM listing")
     suspend fun deleteAllListings()
 
+    @Query("SELECT * FROM listing WHERE listingId = :id LIMIT 1")
+    suspend fun getListingById(id: Int): EquipmentListing?
+
     @Query("SELECT COUNT(*) FROM listing")
     suspend fun getCount(): Int
 
