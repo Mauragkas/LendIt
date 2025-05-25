@@ -83,8 +83,7 @@ class LoginActivity : AppCompatActivity() {
                             putBoolean("isLoggedIn", true)
                             putString("email", email)
                             putString("userType", user.userType)
-                            putString("userName", user.name) // <-- Add this line
-                            // Also save premium status from database to SharedPreferences
+                            putString("userName", user.name)
                             putBoolean("isPremium", user.premiumStatus ?: false)
                             putString("premiumPlan", user.premiumPlan)
                             apply()
@@ -93,7 +92,7 @@ class LoginActivity : AppCompatActivity() {
                         // Redirect based on user type
                         val destination = when (user.userType?.lowercase()) {
                             "owner" -> MainOwnerActivity::class.java
-//                            "admin" -> AdminActivity::class.java
+                            "admin" -> AdminActivity::class.java
                             else -> MainActivity::class.java
                         }
 

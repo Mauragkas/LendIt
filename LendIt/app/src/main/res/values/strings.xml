@@ -11,4 +11,5 @@
     <string name="title_create_listing">New Listing\n</string>
     <string name="listing_image">image\n</string>
     <string name="title_premium">premium\n</string>
+    <string name="title_reports">Reports</string>
 </resources>
