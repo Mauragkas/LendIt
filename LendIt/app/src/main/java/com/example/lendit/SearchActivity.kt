@@ -56,7 +56,7 @@ class SearchActivity : AppCompatActivity() {
         // Handle Enter key in searchEditText
         binding.searchEditText.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_GO) {
-                performSearch()
+                startSearch()
                 true
             } else {
                 false
@@ -124,7 +124,7 @@ class SearchActivity : AppCompatActivity() {
         }
 
         applyFiltersButton.setOnClickListener {
-            performSearch()
+            startSearch()
             filtersContainer.visibility = View.GONE
         }
 
@@ -148,8 +148,8 @@ class SearchActivity : AppCompatActivity() {
         }
     }
 
-    private fun performSearch() {
-        // you can access binding directly here since performSearch()
+    private fun startSearch() {
+        // you can access binding directly here since startSearch()
         // is called after onCreate(), so binding is initialized
         binding.filterButtonContainer.visibility = View.VISIBLE
 

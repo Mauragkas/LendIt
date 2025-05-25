@@ -14,6 +14,10 @@ class HomeFragment : Fragment() {
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
 
+    fun displaySearch() {
+        val intent = Intent(requireContext(), SearchActivity::class.java)
+        startActivity(intent)
+    }
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -29,8 +33,7 @@ class HomeFragment : Fragment() {
         val searchEditText = binding.searchEditTextMain
 
         searchEditText.setOnClickListener {
-            val intent = Intent(requireContext(), SearchActivity::class.java)
-            startActivity(intent)
+            displaySearch()
         }
     }
 
