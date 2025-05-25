@@ -6,6 +6,7 @@ import androidx.room.RawQuery
 import androidx.room.util.query
 import androidx.sqlite.db.SimpleSQLiteQuery
 import androidx.sqlite.db.SupportSQLiteQuery
+import androidx.room.Update
 
 @Dao
 interface ListingDao {
@@ -28,6 +29,12 @@ interface ListingDao {
     @Query("SELECT COUNT(*) FROM listing")
     suspend fun getCount(): Int
 
+    @Query("SELECT * FROM listing WHERE ownerName = :ownerName")
+    suspend fun getListingsByOwner(ownerName: String): List<EquipmentListing>
+
+    @Update
+    suspend fun updateListing(listing: EquipmentListing)
+
     @RawQuery
     suspend fun getListings(query: SupportSQLiteQuery): List<EquipmentListing>
 
@@ -36,6 +43,10 @@ interface ListingDao {
 fun buildQuery(f: ListingFilters): SupportSQLiteQuery {
     val queryBuilder = StringBuilder("SELECT * FROM listing INNER JOIN user ON user.name = listing.ownerName WHERE 1=1")
     val args = mutableListOf<Any>()
+
+    // Exclude inactive listings
+    queryBuilder.append(" AND status != ?")
+    args.add(ListingStatus.INACTIVE.name)
 
     f.title?.let {
         queryBuilder.append(" AND (title LIKE ? OR description LIKE ?)")

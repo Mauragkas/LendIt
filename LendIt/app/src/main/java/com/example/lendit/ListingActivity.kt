@@ -41,6 +41,10 @@ class ListingActivity : AppCompatActivity() {
     // Temporary storage for listing data between steps
     private var listingData = HashMap<String, Any>()
 
+    // For edit mode
+    private var editingListingId: Int = -1
+    private var isEditMode = false
+
     // Image picker result
     private val getContent =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -73,11 +77,64 @@ class ListingActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        showStep1()
 
-        //get the user Name to properly save it
+        // Check if we're editing an existing listing
+        editingListingId = intent.getIntExtra("edit_listing_id", -1)
+        isEditMode = editingListingId != -1
+
+        // Get the user Name to properly save it
         val sharedPref: SharedPreferences = getSharedPreferences("MyAppPrefs", MODE_PRIVATE)
         userName = sharedPref.getString("userName", "unknown").toString()
+
+        if (isEditMode) {
+            // Load the existing listing data
+            loadExistingListing(editingListingId)
+        } else {
+            // Normal flow for new listing
+            showStep1()
+        }
+    }
+
+    private fun loadExistingListing(listingId: Int) {
+        lifecycleScope.launch {
+            try {
+                val db = AppDatabase.getInstance(this@ListingActivity)
+                val listing = db.listingDao().getListingById(listingId)
+
+                if (listing != null) {
+                    // Pre-populate the form with existing data
+                    showStep1WithData(listing)
+                } else {
+                    Toast.makeText(this@ListingActivity, "Η αγγελία δεν βρέθηκε", Toast.LENGTH_SHORT).show()
+                    finish()
+                }
+            } catch (e: Exception) {
+                Toast.makeText(this@ListingActivity, "Σφάλμα: ${e.message}", Toast.LENGTH_SHORT).show()
+                finish()
+            }
+        }
+    }
+
+    private fun showStep1WithData(listing: EquipmentListing) {
+        showStep1()
+
+        // Populate the form fields with the existing data
+        bindingStep1.toolNameField.setText(listing.title)
+        bindingStep1.descriptionField.setText(listing.description)
+        bindingStep1.locationField.setText(listing.location.name.replace("_", " "))
+        bindingStep1.priceField.setText(listing.price.toString())
+
+        // Set category dropdown
+        when (listing.category) {
+            ListingCategory.ELECTRIC -> bindingStep1.dropdownCategoryListing.setText("Ηλεκτρικό")
+            ListingCategory.MANUAL -> bindingStep1.dropdownCategoryListing.setText("Χειροκίνητο")
+        }
+
+        // Set rental period dropdown if possible (if you store it)
+        // If you want to prefill rental period, you can add logic here
+
+        // Update button text
+        bindingStep1.buttonPostListing.text = "Ενημέρωση"
     }
 
     private fun showStep1() {
@@ -114,8 +171,8 @@ class ListingActivity : AppCompatActivity() {
         // Set up back button
         bindingStep1.backButtonSignup.setOnClickListener { finish() }
 
-        // Set up next button
-        bindingStep1.buttonPostListing.text = "Επόμενο"
+        // Set up next/update button
+        bindingStep1.buttonPostListing.text = if (isEditMode) "Ενημέρωση" else "Επόμενο"
         bindingStep1.buttonPostListing.setOnClickListener {
             // Validate and collect data from step 1
             if (validateStep1()) {
@@ -184,6 +241,21 @@ class ListingActivity : AppCompatActivity() {
         bindingStep2 = ActivityListingCreation2Binding.inflate(layoutInflater)
         setContentView(bindingStep2.root)
 
+        // If in edit mode and first time, prepopulate usage instructions and photos
+        if (isEditMode && listingData.isNotEmpty()) {
+            // Usage instructions
+            val usageInstructions = listingData["usageInstructions"] as? String
+            if (usageInstructions != null) {
+                bindingStep2.usageInstructionsInput.setText(usageInstructions)
+            }
+            // Photos
+            val photoUris = listingData["photoUris"] as? List<String>
+            if (photoUris != null) {
+                selectedImageUris.clear()
+                selectedImageUris.addAll(photoUris.map { Uri.parse(it) })
+            }
+        }
+
         // Initialize the RecyclerView and adapter
         setupPhotosRecyclerView()
 
@@ -193,7 +265,8 @@ class ListingActivity : AppCompatActivity() {
         // Set up add photo button
         bindingStep2.addPhotoCard.setOnClickListener { checkPermissionAndOpenPicker() }
 
-        // Set up publish button
+        // Set up publish/update button
+        bindingStep2.publishListingButton.text = if (isEditMode) "Ενημέρωση" else "Δημοσίευση"
         bindingStep2.publishListingButton.setOnClickListener {
             if (validateStep2()) {
                 collectDataFromStep2()
@@ -245,57 +318,46 @@ class ListingActivity : AppCompatActivity() {
         listingData["photoUris"] = selectedImageUris.map { it.toString() }
     }
 
-
     private fun publishListing() {
         lifecycleScope.launch {
             try {
-                // Create an EquipmentListing entity from the collected data
-                val listing =
-                    EquipmentListing(
-                        listingId = 0, // Auto-generated
-                        title = listingData["title"] as String,
-                        description = listingData["description"] as String,
-                        ownerName = userName.toString(),
-                        category = listingData["category"] as ListingCategory,
-                        location = parseLocation(listingData["location"] as String),
-                        status = ListingStatus.AVAILABLE,
-                        price = listingData["price"] as Double,
-                        photos =
-                            Converters()
-                                .fromList(
-                                    listingData["photoUris"] as? List<String>
-                                        ?: emptyList()
-                                ),
-                        creationDate = Converters().fromLocalDate(LocalDate.now()),
-                        availableFrom = Converters().fromLocalDate(LocalDate.now()),
-                        availableUntil =
-                            Converters().fromLocalDate(LocalDate.now().plusMonths(3)),
-                        longTermDiscount = 0.0
-                    )
-
-                android.util.Log.d(
-                    "ListingActivity",
-                    "Creating listing: ${listing.title}, Region: ${listing.location}"
+                // Create or update EquipmentListing entity
+                val listing = EquipmentListing(
+                    listingId = if (isEditMode) editingListingId else 0,
+                    title = listingData["title"] as String,
+                    description = listingData["description"] as String,
+                    ownerName = userName.toString(),
+                    category = listingData["category"] as ListingCategory,
+                    location = parseLocation(listingData["location"] as String),
+                    status = ListingStatus.AVAILABLE, // Always set to available when publishing
+                    price = listingData["price"] as Double,
+                    photos = Converters().fromList(listingData["photoUris"] as? List<String> ?: emptyList()),
+                    creationDate = if (isEditMode) null else Converters().fromLocalDate(LocalDate.now()),
+                    availableFrom = Converters().fromLocalDate(LocalDate.now()),
+                    availableUntil = Converters().fromLocalDate(LocalDate.now().plusMonths(3)),
+                    longTermDiscount = 0.0
                 )
 
-                // Save to database
                 withContext(Dispatchers.IO) {
-                    val db = AppDatabase.getLogin(this@ListingActivity, lifecycleScope)
-                    val id = db.listingDao().insert(listing)
-                    android.util.Log.d("ListingActivity", "Listing created with ID: $id")
+                    val db = AppDatabase.getInstance(this@ListingActivity)
+
+                    if (isEditMode) {
+                        // Update existing listing
+                        db.listingDao().updateListing(listing)
+                        android.util.Log.d("ListingActivity", "Listing updated with ID: ${listing.listingId}")
+                    } else {
+                        // Insert new listing
+                        val id = db.listingDao().insert(listing)
+                        android.util.Log.d("ListingActivity", "Listing created with ID: $id")
+                    }
                 }
 
-                Toast.makeText(
-                    this@ListingActivity,
-                    "Η αγγελία δημοσιεύτηκε με επιτυχία!",
-                    Toast.LENGTH_LONG
-                )
-                    .show()
+                val message = if (isEditMode) "Η αγγελία ενημερώθηκε με επιτυχία!" else "Η αγγελία δημοσιεύτηκε με επιτυχία!"
+                Toast.makeText(this@ListingActivity, message, Toast.LENGTH_LONG).show()
                 finish()
             } catch (e: Exception) {
-                android.util.Log.e("ListingActivity", "Error creating listing", e)
-                Toast.makeText(this@ListingActivity, "Σφάλμα: ${e.message}", Toast.LENGTH_LONG)
-                    .show()
+                android.util.Log.e("ListingActivity", "Error creating/updating listing", e)
+                Toast.makeText(this@ListingActivity, "Σφάλμα: ${e.message}", Toast.LENGTH_LONG).show()
             }
         }
     }

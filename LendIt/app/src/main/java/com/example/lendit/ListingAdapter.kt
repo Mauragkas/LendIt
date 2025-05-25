@@ -12,6 +12,14 @@ import android.util.Log
 import android.widget.ImageView
 import androidx.core.content.ContextCompat.startActivity
 import com.bumptech.glide.Glide
+import androidx.appcompat.app.AlertDialog
+import android.widget.PopupMenu
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
+import com.example.lendit.data.local.ListingManager
+import com.example.lendit.ui.archive.ArchiveFragment
+import kotlinx.coroutines.launch
 
 // Make sure EquipmentListing is accessible. If it's in the same package, no explicit import is needed.
 // If EquipmentListing is in a different package, you would import it here.
@@ -67,15 +75,93 @@ class ListingAdapter(private val items: MutableList<EquipmentListing>) :
         } else {
             "Date not available"
         }
-        holder.itemView.setOnClickListener {
-            Log.d("PRESSED", "pressed for position $position") // <-- ADD LOG
 
+        // Update the click behavior
+        holder.itemView.setOnClickListener {
             val context = holder.itemView.context
             val intent = Intent(context, ListingDetailsActivity::class.java)
-
-            intent.putExtra("listing_id", currentItem.listingId) // Pass ID to fetch data in activity
-
+            intent.putExtra("listing_id", currentItem.listingId)
             context.startActivity(intent)
+        }
+
+        // Add long click listener for context menu
+        holder.itemView.setOnLongClickListener { view ->
+            val context = view.context
+            val popup = PopupMenu(context, view)
+
+            val inflater = popup.menuInflater
+
+            when (currentItem.status) {
+                ListingStatus.AVAILABLE -> {
+                    inflater.inflate(R.menu.available_listing_menu, popup.menu)
+                }
+                ListingStatus.UNAVAILABLE -> {
+                    inflater.inflate(R.menu.unavailable_listing_menu, popup.menu)
+                }
+                ListingStatus.INACTIVE -> {
+                    inflater.inflate(R.menu.inactive_listing_menu, popup.menu)
+                }
+            }
+
+            popup.setOnMenuItemClickListener { menuItem ->
+                when (menuItem.itemId) {
+                    R.id.action_edit -> {
+                        val intent = Intent(context, ListingActivity::class.java)
+                        intent.putExtra("edit_listing_id", currentItem.listingId)
+                        context.startActivity(intent)
+                        true
+                    }
+                    R.id.action_deactivate -> {
+                        // Show confirmation dialog
+                        AlertDialog.Builder(context)
+                            .setTitle("Απενεργοποίηση Αγγελίας")
+                            .setMessage("Είστε βέβαιοι ότι θέλετε να απενεργοποιήσετε αυτήν την αγγελία;")
+                            .setPositiveButton("Ναι") { _, _ ->
+                                (context as? AppCompatActivity)?.lifecycleScope?.launch {
+                                    if (ListingManager.updateListingStatus(context, currentItem.listingId, ListingStatus.INACTIVE)) {
+                                        Toast.makeText(context, "Η αγγελία απενεργοποιήθηκε", Toast.LENGTH_SHORT).show()
+                                        (context.supportFragmentManager.findFragmentById(R.id.nav_host_fragment_activity_main)
+                                            ?.childFragmentManager?.fragments?.firstOrNull() as? ArchiveFragment)
+                                            ?.refreshListings()
+                                    }
+                                }
+                            }
+                            .setNegativeButton("Όχι", null)
+                            .show()
+                        true
+                    }
+                    R.id.action_activate -> {
+                        // Show confirmation dialog
+                        AlertDialog.Builder(context)
+                            .setTitle("Ενεργοποίηση Αγγελίας")
+                            .setMessage("Είστε βέβαιοι ότι θέλετε να ενεργοποιήσετε αυτήν την αγγελία;")
+                            .setPositiveButton("Ναι") { _, _ ->
+                                (context as? AppCompatActivity)?.lifecycleScope?.launch {
+                                    if (ListingManager.updateListingStatus(context, currentItem.listingId, ListingStatus.AVAILABLE)) {
+                                        Toast.makeText(context, "Η αγγελία ενεργοποιήθηκε", Toast.LENGTH_SHORT).show()
+                                        (context.supportFragmentManager.findFragmentById(R.id.nav_host_fragment_activity_main)
+                                            ?.childFragmentManager?.fragments?.firstOrNull() as? ArchiveFragment)
+                                            ?.refreshListings()
+                                    }
+                                }
+                            }
+                            .setNegativeButton("Όχι", null)
+                            .show()
+                        true
+                    }
+                    else -> false
+                }
+            }
+
+            popup.show()
+            true
+        }
+
+        // Visual indication for inactive listings
+        if (currentItem.status == ListingStatus.INACTIVE) {
+            holder.itemView.alpha = 0.7f
+        } else {
+            holder.itemView.alpha = 1.0f
         }
     }
 
