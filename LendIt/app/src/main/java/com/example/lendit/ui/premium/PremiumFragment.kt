@@ -36,8 +36,30 @@ class PremiumFragment : Fragment() {
         val sharedPref = requireActivity().getSharedPreferences("MyAppPrefs", 0)
         val isPremium = sharedPref.getBoolean("isPremium", false)
 
+        // Initially hide plan selection and duration selection
+        binding.planDetailsContainer.visibility = View.GONE
+        binding.planDurationContainer.visibility = View.GONE
+
         // Update UI based on premium status
         updateUI(isPremium)
+
+        // Setup learn more button
+        binding.learnMoreButton.setOnClickListener {
+            // Show plan details
+            binding.planDetailsContainer.visibility = View.VISIBLE
+        }
+
+        // Setup get premium button
+        binding.getPremiumButton.setOnClickListener {
+            // Show duration selection
+            binding.planDurationContainer.visibility = View.VISIBLE
+            binding.subscribeButton.isEnabled = false
+        }
+
+        // Setup view benefits button for premium users
+        binding.viewBenefitsButton.setOnClickListener {
+            binding.planDetailsContainer.visibility = View.VISIBLE
+        }
 
         // Set up subscription buttons
         binding.monthlyPlanCard.setOnClickListener { selectPlan("monthly") }
@@ -57,11 +79,15 @@ class PremiumFragment : Fragment() {
 
     private fun updateUI(isPremium: Boolean) {
         if (isPremium) {
+            binding.premiumStatusContainer.visibility = View.VISIBLE
+            binding.nonPremiumContainer.visibility = View.GONE
             binding.subscribeButton.visibility = View.GONE
             binding.cancelSubscriptionButton.visibility = View.VISIBLE
             binding.subscriptionStatusText.text = "Είστε συνδρομητής Premium"
             binding.subscriptionStatusText.setTextColor(resources.getColor(R.color.teal_700, null))
         } else {
+            binding.premiumStatusContainer.visibility = View.GONE
+            binding.nonPremiumContainer.visibility = View.VISIBLE
             binding.subscribeButton.visibility = View.VISIBLE
             binding.cancelSubscriptionButton.visibility = View.GONE
             binding.subscriptionStatusText.text = "Δεν έχετε ακόμη συνδρομή Premium"
@@ -101,7 +127,9 @@ class PremiumFragment : Fragment() {
         AlertDialog.Builder(requireContext())
             .setTitle("Επιβεβαίωση αγοράς")
             .setMessage("Είστε βέβαιοι ότι θέλετε να αποκτήσετε το πλάνο ${viewModel.selectedPlan} για €${viewModel.planPrice}?")
-            .setPositiveButton("Συνέχεια") { _, _ ->
+            .setPositiveButton("Συνέχεια στην πληρωμή") { _, _ ->
+                // Here you would navigate to payment screen
+                // For demo, we'll simulate successful payment
                 simulateSuccessfulPayment()
             }
             .setNegativeButton("Άκυρο", null)
