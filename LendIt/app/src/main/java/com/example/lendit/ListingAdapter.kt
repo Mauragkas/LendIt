@@ -7,8 +7,10 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import EquipmentListing
+import android.content.Context
 import android.content.Intent
 import android.util.Log
+import android.widget.ImageButton
 import android.widget.ImageView
 import androidx.core.content.ContextCompat.startActivity
 import com.bumptech.glide.Glide
@@ -20,6 +22,10 @@ import androidx.lifecycle.lifecycleScope
 import com.example.lendit.data.local.ListingManager
 import com.example.lendit.ui.archive.ArchiveFragment
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import com.example.lendit.data.local.entities.Favorite
+
 
 // Make sure EquipmentListing is accessible. If it's in the same package, no explicit import is needed.
 // If EquipmentListing is in a different package, you would import it here.
@@ -37,6 +43,7 @@ class ListingAdapter(private val items: MutableList<EquipmentListing>) :
         val creationDateTextView: TextView = itemView.findViewById(R.id.listingCreationDate)
         val imageView: ImageView = itemView.findViewById(R.id.listingImage)
         val creator: TextView = itemView.findViewById(R.id.listingCreator)
+        val favoriteButton : ImageButton = itemView.findViewById(R.id.imageFavoriteButtonListings)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyViewHolder {
@@ -47,6 +54,52 @@ class ListingAdapter(private val items: MutableList<EquipmentListing>) :
 
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
         val currentItem = items[position]
+        val context = holder.itemView.context
+
+        // Load other item data
+        holder.titleTextView.text = currentItem.title
+        // ... other view bindings ...
+
+        val db = AppDatabase.getDatabase(context)
+        val favoriteDao = db.FavoriteDao()
+        val sharedPref = context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+        val userId = sharedPref.getInt("user_id", -1)
+
+        if (userId == -1) {
+            Log.e("ListingAdapter", "User ID not found in SharedPreferences")
+            return
+        }
+
+        // Check initial favorite status
+        (context as AppCompatActivity).lifecycleScope.launch(Dispatchers.IO) {
+            val isFavorite = favoriteDao.isFavorite(userId, currentItem.listingId)
+            withContext(Dispatchers.Main) {
+                holder.favoriteButton.setImageResource(
+                    if (isFavorite) R.drawable.ic_favorite_filled
+                    else R.drawable.ic_favorite_border
+                )
+            }
+        }
+
+        // Set click listener
+        holder.favoriteButton.setOnClickListener {
+            (context as AppCompatActivity).lifecycleScope.launch(Dispatchers.IO) {
+                val isFavorite = favoriteDao.isFavorite(userId, currentItem.listingId)
+                if (isFavorite) {
+                    favoriteDao.removeFromFavorites(userId, currentItem.listingId)
+                    withContext(Dispatchers.Main) {
+                        holder.favoriteButton.setImageResource(R.drawable.ic_favorite_border)
+                        Toast.makeText(context, "Removed from favorites", Toast.LENGTH_SHORT).show()
+                    }
+                } else {
+                    favoriteDao.addToFavorites(Favorite(userId = userId, listingId = currentItem.listingId))
+                    withContext(Dispatchers.Main) {
+                        holder.favoriteButton.setImageResource(R.drawable.ic_favorite_filled)
+                        Toast.makeText(context, "Added to favorites", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+        }
 
         Log.d("ListingAdapter", "onBindViewHolder for position $position, title: ${currentItem.title}") // <-- ADD LOG
 

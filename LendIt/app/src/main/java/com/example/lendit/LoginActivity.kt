@@ -10,6 +10,8 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
+import android.content.Context
+
 
 class LoginActivity : AppCompatActivity() {
 
@@ -97,8 +99,12 @@ class LoginActivity : AppCompatActivity() {
                             else -> MainActivity::class.java
                         }
 
+                        val sharedPref = getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+                        sharedPref.edit().putInt("user_id", user.userId).apply()
+
                         startActivity(Intent(this@LoginActivity, destination))
                         finish()
+
                     } else {
                         runOnUiThread {
                             Toast.makeText(

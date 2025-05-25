@@ -2,6 +2,8 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import com.example.lendit.data.local.dao.FavoriteDao
+import com.example.lendit.data.local.entities.Favorite
 import java.time.LocalDate
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -9,12 +11,13 @@ import kotlinx.coroutines.launch
 import com.example.lendit.data.local.entities.Report
 import com.example.lendit.data.local.entities.UserCart
 
-@Database(entities = [UserEntity::class, EquipmentListing::class, Report::class, UserCart::class], version = 11)
+@Database(entities = [UserEntity::class, EquipmentListing::class, Report::class, UserCart::class, Favorite::class], version = 11)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun userDao(): UserDao
     abstract fun listingDao(): ListingDao
     abstract fun reportDao(): ReportDao
     abstract fun cartDao(): CartDao
+    abstract fun FavoriteDao(): FavoriteDao
 
     companion object {
         @Volatile private var INSTANCE: AppDatabase? = null
@@ -28,6 +31,18 @@ abstract class AppDatabase : RoomDatabase() {
                 )
                     .build()
 
+                INSTANCE = instance
+                instance
+            }
+        }
+
+        fun getDatabase(context: Context): AppDatabase {
+            return INSTANCE ?: synchronized(this) {
+                val instance = Room.databaseBuilder(
+                    context.applicationContext,
+                    AppDatabase::class.java,
+                    "lendit_database"
+                ).build()
                 INSTANCE = instance
                 instance
             }
