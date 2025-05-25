@@ -3,6 +3,7 @@ package com.example.lendit
 import android.Manifest
 import android.app.Activity
 import android.content.Intent
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
@@ -14,15 +15,19 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
+import com.example.lendit.ListingActivity
 import com.example.lendit.data.local.entities.Report
+import com.example.lendit.data.local.entities.UserCart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.properties.Delegates
 
 class ListingDetailsActivity : AppCompatActivity() {
 
     private val selectedFiles = mutableListOf<Uri>()
     private var attachmentStatusTextRef: TextView? = null
+    private var userId by Delegates.notNull<Int>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,6 +39,13 @@ class ListingDetailsActivity : AppCompatActivity() {
         // Set up report button click listener
         findViewById<Button>(R.id.reportButton).setOnClickListener {
             showReportDialog()
+        }
+
+        // Set up report button click listener
+        findViewById<Button>(R.id.lendNowButton).setOnClickListener {
+            lifecycleScope.launch {
+                addToCart(listingId)
+            }
         }
 
         lifecycleScope.launch {
@@ -76,6 +88,9 @@ class ListingDetailsActivity : AppCompatActivity() {
             }
         }
     }
+
+
+
 
     private fun showReportDialog() {
         val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_report_listing, null)
@@ -258,6 +273,44 @@ class ListingDetailsActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    private suspend fun addToCart(listingId: Int) {
+        try {
+            // Get the user ID from SharedPreferences
+            val sharedPref: SharedPreferences = getSharedPreferences("MyAppPrefs", MODE_PRIVATE)
+            val userId = sharedPref.getInt("userId", -1)
+
+            if (userId == -1) {
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(this@ListingDetailsActivity, "User not logged in", Toast.LENGTH_SHORT).show()
+                }
+                return
+            }
+
+            // Create UserCart object
+            val userCart = UserCart(
+                userId = userId,
+                listingId = listingId
+            )
+
+            // Save to database
+            withContext(Dispatchers.IO) {
+                val db = AppDatabase.getInstance(applicationContext)
+                db.cartDao().insert(userCart)
+            }
+
+            // Show success toast on main thread
+            withContext(Dispatchers.Main) {
+                Toast.makeText(this@ListingDetailsActivity, "Added to cart successfully", Toast.LENGTH_SHORT).show()
+            }
+        } catch (e: Exception) {
+            // Show error toast on main thread
+            withContext(Dispatchers.Main) {
+                Toast.makeText(this@ListingDetailsActivity, "Error adding to cart: ${e.message}", Toast.LENGTH_LONG).show()
+            }
+        }
+        finish()
     }
 
     companion object {

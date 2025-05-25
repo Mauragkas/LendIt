@@ -1,13 +1,26 @@
 package com.example.lendit.ui.cart
 
+import EquipmentListing
+import android.content.Context.MODE_PRIVATE
+import android.content.SharedPreferences
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.lendit.ListingAdapter
 import com.example.lendit.databinding.FragmentCartBinding
+import com.example.lendit.ui.show_listings.ShowListingsFragment
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlin.properties.Delegates
 
 class CartFragment : Fragment() {
 
@@ -16,26 +29,49 @@ class CartFragment : Fragment() {
     // This property is only valid between onCreateView and
     // onDestroyView.
     private val binding get() = _binding!!
+    lateinit var listings: List<EquipmentListing>
+    var userId by Delegates.notNull<Int>()
+    private val adapter = ListingAdapter(mutableListOf())
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val cartViewModel =
-            ViewModelProvider(this).get(CartViewModel::class.java)
+        //get the user Name to properly save it
+        val sharedPref = requireContext().getSharedPreferences("MyAppPrefs", MODE_PRIVATE)
+        userId = sharedPref.getInt("userId", -1)
 
         _binding = FragmentCartBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
-        val textView: TextView = binding.textCart
-        cartViewModel.text.observe(viewLifecycleOwner) {
-            textView.text = it
-        }
         return root
     }
 
-    override fun onDestroyView() {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        // Load the listings
+        binding.cartRecyclerView.layoutManager = LinearLayoutManager(requireContext())
+        binding.cartRecyclerView.adapter = adapter
+
+        viewLifecycleOwner.lifecycleScope.launch {
+
+            try {
+                listings = withContext(Dispatchers.IO) {
+                    AppDatabase.showCart(requireContext(), userId)        // <<- only context
+                }
+
+                if (listings.isNotEmpty()) {
+                    adapter.update(listings)                         // refresh rows
+                } else {
+                    Toast.makeText(context, "No listings available.", Toast.LENGTH_SHORT).show()
+                }
+
+            } catch (e: Exception) {
+                Log.e("ListingFragment", "Error fetching listings", e)
+            }
+        }
+    }
+        override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
     }

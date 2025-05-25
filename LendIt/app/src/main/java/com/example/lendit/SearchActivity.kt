@@ -56,7 +56,7 @@ class SearchActivity : AppCompatActivity() {
         // Handle Enter key in searchEditText
         binding.searchEditText.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_GO) {
-                startSearch()
+                startSearch(insertFilters())
                 true
             } else {
                 false

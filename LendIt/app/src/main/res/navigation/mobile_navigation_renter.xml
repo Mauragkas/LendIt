@@ -18,10 +18,10 @@
         tools:layout="@layout/fragment_profile" />
 
     <fragment
-        android:id="@+id/navigation_notifications"
-        android:name="com.example.lendit.ui.notifications.NotificationsFragment"
-        android:label="@string/title_notifications"
-        tools:layout="@layout/fragment_notifications" />
+        android:id="@+id/navigation_compare"
+        android:name="com.example.lendit.ui.compare.CompareFragment"
+        android:label="@string/title_compare"
+        tools:layout="@layout/fragment_compare" />
 
     <fragment
         android:id="@+id/navigation_favorites"
@@ -31,7 +31,7 @@
 
     <fragment
         android:id="@+id/navigation_cart"
-        android:name="com.example.lendit.ui.archive.ArchiveFragment"
+        android:name="com.example.lendit.ui.cart.CartFragment"
         android:label="@string/title_cart"
         tools:layout="@layout/fragment_cart" />
 

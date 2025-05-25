@@ -28,10 +28,10 @@ class LoginActivity : AppCompatActivity() {
 
         // Check if user is already logged in
         val sharedPref = getSharedPreferences("MyAppPrefs", MODE_PRIVATE)
-        val isLoggedIn = sharedPref.getBoolean("isLoggedIn", false)
+        val isLoggedIn = sharedPref.getInt("userId", -1)
         val savedUserType = sharedPref.getString("userType", "renter")
 
-        if (isLoggedIn) {
+        if (isLoggedIn != -1) {
             // Redirect based on saved user type
             val destination = when (savedUserType?.lowercase()) {
                 "owner" -> MainOwnerActivity::class.java
@@ -80,10 +80,15 @@ class LoginActivity : AppCompatActivity() {
                     if (user != null) {
                         // Save login state and user info
                         with(sharedPref.edit()) {
-                            putBoolean("isLoggedIn", true)
                             putString("email", email)
                             putString("userType", user.userType)
+<<<<<<< Updated upstream
                             putString("userName", user.name)
+=======
+                            putInt("userId", user.userId)
+                            putString("userName", user.name)
+                            // Also save premium status from database to SharedPreferences
+>>>>>>> Stashed changes
                             putBoolean("isPremium", user.premiumStatus ?: false)
                             putString("premiumPlan", user.premiumPlan)
                             apply()

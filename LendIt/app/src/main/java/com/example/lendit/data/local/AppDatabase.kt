@@ -7,12 +7,14 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import com.example.lendit.data.local.entities.Report
+import com.example.lendit.data.local.entities.UserCart
 
-@Database(entities = [UserEntity::class, EquipmentListing::class, Report::class], version = 10)
+@Database(entities = [UserEntity::class, EquipmentListing::class, Report::class, UserCart::class], version = 11)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun userDao(): UserDao
     abstract fun listingDao(): ListingDao
     abstract fun reportDao(): ReportDao
+    abstract fun cartDao(): CartDao
 
     companion object {
         @Volatile private var INSTANCE: AppDatabase? = null
@@ -214,5 +216,19 @@ abstract class AppDatabase : RoomDatabase() {
             val listings = listOf<EquipmentListing>(listing1, listing2, listing3, listing4)
             listingDao.insertAll(listings)
         }
+
+        suspend fun showCart(
+            context: Context,
+            userId: Int
+        ): List<EquipmentListing> {
+
+            val db = getInstance(context)          // see helper below
+
+            if (db.cartDao().getCartCount(userId) == 0) {
+                // TODO: HANDLE NOTHING IN CART
+            }
+
+            return db.cartDao().getCartById(userId)
+            }
     }
 }

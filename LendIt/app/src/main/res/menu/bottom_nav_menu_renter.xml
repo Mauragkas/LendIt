@@ -18,9 +18,9 @@
         android:title="@string/title_cart" />
 
     <item
-        android:id="@+id/navigation_notifications"
-        android:icon="@drawable/ic_notifications_black_24dp"
-        android:title="@string/title_notifications" />
+        android:id="@+id/navigation_compare"
+        android:icon="@drawable/ic_compare_24dp"
+        android:title="@string/title_compare" />
 
     <item
         android:id="@+id/navigation_profile"

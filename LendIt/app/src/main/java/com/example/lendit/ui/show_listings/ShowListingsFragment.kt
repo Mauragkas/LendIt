@@ -78,7 +78,7 @@ class ShowListingsFragment : Fragment(R.layout.fragment_listings) {
             }
         }
 
-        // Load the demo listings
+        // Load the listings
         viewLifecycleOwner.lifecycleScope.launch {
             try {
                 listings = withContext(Dispatchers.IO) {

@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+<<<<<<< Updated upstream
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.lendit.ListingAdapter
@@ -15,10 +16,21 @@ import ListingStatus
 import AppDatabase
 import com.example.lendit.R
 import kotlinx.coroutines.launch
+=======
+import androidx.lifecycle.ViewModelProvider
+import com.example.lendit.databinding.FragmentArchiveBinding
+import com.example.lendit.databinding.FragmentCartBinding
+>>>>>>> Stashed changes
 
 class ArchiveFragment : Fragment() {
 
     private var _binding: FragmentArchiveBinding? = null
+<<<<<<< Updated upstream
+=======
+
+    // This property is only valid between onCreateView and
+    // onDestroyView.
+>>>>>>> Stashed changes
     private val binding get() = _binding!!
 
     private val availableAdapter = ListingAdapter(mutableListOf())
@@ -34,8 +46,13 @@ class ArchiveFragment : Fragment() {
         return binding.root
     }
 
+<<<<<<< Updated upstream
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+=======
+        _binding = FragmentArchiveBinding.inflate(inflater, container, false)
+        val root: View = binding.root
+>>>>>>> Stashed changes
 
         // Get owner name from shared preferences
         val sharedPref = requireActivity().getSharedPreferences("MyAppPrefs", 0)

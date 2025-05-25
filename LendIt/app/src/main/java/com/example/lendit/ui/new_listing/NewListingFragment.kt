@@ -10,7 +10,6 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.lendit.ListingAdapter
 import com.example.lendit.R
 import com.example.lendit.databinding.FragmentListingsBinding
@@ -39,12 +38,6 @@ class NewListingFragment : Fragment(R.layout.fragment_listings) {
         super.onViewCreated(view, savedInstanceState)
 
         val filters = arguments?.getParcelable("filters", ListingFilters::class.java)               //get filters
-
-        // RecyclerView setup once
-        binding.listingRecyclerView.apply {
-            layoutManager = LinearLayoutManager(requireContext())
-            adapter = this@NewListingFragment.adapter
-        }
 
         // Load the demo listings
         viewLifecycleOwner.lifecycleScope.launch {
