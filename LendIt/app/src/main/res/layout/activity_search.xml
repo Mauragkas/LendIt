@@ -40,13 +40,20 @@
         </com.google.android.material.textfield.TextInputLayout>
 
         <!-- Filter container (initially hidden) -->
-        <LinearLayout
-            android:id="@+id/filterButtonContainer"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:visibility="gone"
-            app:layout_constraintTop_toBottomOf="@+id/searchInputLayout">
+    <ScrollView
+        android:id="@+id/filterButtonContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fillViewport="true"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/searchInputLayout"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
 
             <!-- Filters toggle button -->
             <com.google.android.material.button.MaterialButton
@@ -250,9 +257,9 @@
                     android:layout_weight="1"
                     android:text="Εκκαθάριση"/>
             </LinearLayout>
-
             </LinearLayout>
-        </LinearLayout>
+    </LinearLayout>
+    </ScrollView>
 
         <androidx.fragment.app.FragmentContainerView
             android:id="@+id/listingFragment"

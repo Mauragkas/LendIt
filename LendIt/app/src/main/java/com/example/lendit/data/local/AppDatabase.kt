@@ -8,7 +8,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import com.example.lendit.data.local.entities.Report
 
-@Database(entities = [UserEntity::class, EquipmentListing::class, Report::class], version = 7)
+@Database(entities = [UserEntity::class, EquipmentListing::class, Report::class], version = 10)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun userDao(): UserDao
     abstract fun listingDao(): ListingDao
@@ -95,7 +95,7 @@ abstract class AppDatabase : RoomDatabase() {
             // insert dummy data here, e.g.:
             val renter =
                 UserEntity(
-                    userId = "paflou",
+                    userId = 1,
                     name = "paflou Renter",
                     email = "paflou@renter.com",
                     password = "123",
@@ -107,7 +107,7 @@ abstract class AppDatabase : RoomDatabase() {
 
             val owner =
                 UserEntity(
-                    userId = "mavragkas",
+                    userId = 2,
                     name = "mavragas owner",
                     email = "mavragas@owner.com",
                     password = "123",
@@ -121,7 +121,7 @@ abstract class AppDatabase : RoomDatabase() {
 
             val admin =
                 UserEntity(
-                    userId = "natalia",
+                    userId = 3,
                     name = "natalia admin",
                     email = "natalia@admin.com",
                     password = "123",
@@ -148,6 +148,7 @@ abstract class AppDatabase : RoomDatabase() {
                     listingId = 0,
                     title = "Listing 1",
                     description = "Description of listing 1",
+                    ownerName = "mavragas owner",
                     category = ListingCategory.ELECTRIC,
                     location = Region.CENTRAL_MACEDONIA,
                     status = ListingStatus.AVAILABLE,
@@ -164,6 +165,7 @@ abstract class AppDatabase : RoomDatabase() {
                     listingId = 0,
                     title = "Listing 2",
                     description = "Description of listing 2",
+                    ownerName = "mavragas owner",
                     category = ListingCategory.ELECTRIC,
                     location = Region.CRETE,
                     status = ListingStatus.INACTIVE,
@@ -180,6 +182,7 @@ abstract class AppDatabase : RoomDatabase() {
                     listingId = 0,
                     title = "Listing 3",
                     description = "Description of listing 3",
+                    ownerName = "mavragas owner",
                     category = ListingCategory.MANUAL,
                     location = Region.ATTICA,
                     status = ListingStatus.AVAILABLE,
@@ -196,6 +199,7 @@ abstract class AppDatabase : RoomDatabase() {
                     listingId = 0,
                     title = "Listing 4",
                     description = "Description of listing 4",
+                    ownerName = "mavragas owner",
                     category = ListingCategory.MANUAL,
                     location = Region.PELOPONNESE,
                     status = ListingStatus.UNAVAILABLE,

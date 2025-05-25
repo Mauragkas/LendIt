@@ -8,6 +8,7 @@ import Region
 import android.Manifest
 import android.app.Activity
 import android.content.Intent
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
@@ -35,6 +36,7 @@ class ListingActivity : AppCompatActivity() {
     private var currentStep = 1
     private val selectedImageUris = mutableListOf<Uri>()
     private lateinit var photoAdapter: PhotoAdapter
+    private lateinit var userName: String
 
     // Temporary storage for listing data between steps
     private var listingData = HashMap<String, Any>()
@@ -72,6 +74,10 @@ class ListingActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         showStep1()
+
+        //get the user Name to properly save it
+        val sharedPref: SharedPreferences = getSharedPreferences("MyAppPrefs", MODE_PRIVATE)
+        userName = sharedPref.getString("userName", "unknown").toString()
     }
 
     private fun showStep1() {
@@ -239,6 +245,7 @@ class ListingActivity : AppCompatActivity() {
         listingData["photoUris"] = selectedImageUris.map { it.toString() }
     }
 
+
     private fun publishListing() {
         lifecycleScope.launch {
             try {
@@ -248,6 +255,7 @@ class ListingActivity : AppCompatActivity() {
                         listingId = 0, // Auto-generated
                         title = listingData["title"] as String,
                         description = listingData["description"] as String,
+                        ownerName = userName.toString(),
                         category = listingData["category"] as ListingCategory,
                         location = parseLocation(listingData["location"] as String),
                         status = ListingStatus.AVAILABLE,

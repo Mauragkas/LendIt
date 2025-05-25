@@ -63,6 +63,7 @@ class SearchActivity : AppCompatActivity() {
             }
         }
 
+        // Get dates
         dateButton.setOnClickListener {
             val constraintsBuilder = CalendarConstraints.Builder()
                 .setValidator(DateValidatorPointForward.now())      // Disable past dates
@@ -102,7 +103,7 @@ class SearchActivity : AppCompatActivity() {
 
         }
 
-
+        // Get region
         regionSelectorButton.setOnClickListener {
             val regionsArray = Region.entries.map { it.name.replace('_', ' ') }.toTypedArray()
             // Replace underscores with spaces for better UI
@@ -116,6 +117,7 @@ class SearchActivity : AppCompatActivity() {
                 .show()
         }
 
+        // Toggle filters visibility
         filterButton.setOnClickListener {
             if (filtersContainer.isVisible)
                 filtersContainer.visibility = View.GONE
@@ -123,11 +125,13 @@ class SearchActivity : AppCompatActivity() {
                 filtersContainer.visibility = View.VISIBLE
         }
 
+        // Apply filters
         applyFiltersButton.setOnClickListener {
-            startSearch()
+            startSearch(insertFilters())
             filtersContainer.visibility = View.GONE
         }
 
+        // Clear Filters
         clearFiltersButton.setOnClickListener {
             // Clear text inputs
             binding.searchEditText.text?.clear()
@@ -148,11 +152,7 @@ class SearchActivity : AppCompatActivity() {
         }
     }
 
-    private fun startSearch() {
-        // you can access binding directly here since startSearch()
-        // is called after onCreate(), so binding is initialized
-        binding.filterButtonContainer.visibility = View.VISIBLE
-
+    private fun insertFilters(): ListingFilters {
         var category: ListingCategory? = null
         var sortBy: SortBy? = null
 
@@ -168,7 +168,7 @@ class SearchActivity : AppCompatActivity() {
         else if (binding.priceSortGroup.checkedRadioButtonId == R.id.radioSuggested)
             sortBy = SortBy.SUGGESTED
 
-        val query = ListingFilters(
+        return ListingFilters(
             title = binding.searchEditText.text.toString(),
             minPrice = binding.priceFromEditText.text.toString().toDoubleOrNull(),
             maxPrice = binding.priceToEditText.text.toString().toDoubleOrNull(),
@@ -178,14 +178,22 @@ class SearchActivity : AppCompatActivity() {
             availableUntil = formattedEnd,
             sortBy = sortBy
         )
+    }
+
+
+
+    private fun startSearch(filters: ListingFilters = ListingFilters()) {
+        binding.filterButtonContainer.visibility = View.VISIBLE
 
         val fragment = ShowListingsFragment().apply {
             arguments = Bundle().apply {
-                putParcelable("filters", query)
+                putParcelable("filters", filters)
             }
         }
+
         supportFragmentManager.beginTransaction()
             .replace(R.id.listingFragment, fragment)
             .commit()
     }
+
 }

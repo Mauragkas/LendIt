@@ -60,6 +60,7 @@ data class EquipmentListing(
     @PrimaryKey(autoGenerate = true) val listingId: Int = 0,
     var title: String,
     var description: String,
+    var ownerName: String,
     var category: ListingCategory,
     var location: Region,
     var status: ListingStatus = ListingStatus.AVAILABLE,

@@ -83,6 +83,7 @@ class LoginActivity : AppCompatActivity() {
                             putBoolean("isLoggedIn", true)
                             putString("email", email)
                             putString("userType", user.userType)
+                            putString("userName", user.name) // <-- Add this line
                             // Also save premium status from database to SharedPreferences
                             putBoolean("isPremium", user.premiumStatus ?: false)
                             putString("premiumPlan", user.premiumPlan)

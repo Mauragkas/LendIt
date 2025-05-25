@@ -32,8 +32,9 @@ interface ListingDao {
     suspend fun getListings(query: SupportSQLiteQuery): List<EquipmentListing>
 
 }
+
 fun buildQuery(f: ListingFilters): SupportSQLiteQuery {
-    val queryBuilder = StringBuilder("SELECT * FROM listing WHERE 1=1")
+    val queryBuilder = StringBuilder("SELECT * FROM listing INNER JOIN user ON user.name = listing.ownerName WHERE 1=1")
     val args = mutableListOf<Any>()
 
     f.title?.let {
@@ -66,10 +67,11 @@ fun buildQuery(f: ListingFilters): SupportSQLiteQuery {
         args.add(f.availableUntil)  // filter end date
     }
 
+    queryBuilder.append(" ORDER BY user.premiumStatus DESC")
     when (f.sortBy ?: SortBy.SUGGESTED) {
-        SortBy.ASC -> queryBuilder.append(" ORDER BY price ASC")
-        SortBy.DESC -> queryBuilder.append(" ORDER BY price DESC")
-        SortBy.SUGGESTED -> queryBuilder.append(" ORDER BY creationDate DESC")
+        SortBy.ASC -> queryBuilder.append(", price ASC")
+        SortBy.DESC -> queryBuilder.append(", price DESC")
+        SortBy.SUGGESTED -> queryBuilder.append(", creationDate DESC")
     }
     Log.d("SQL_QUERY", "Query: ${queryBuilder} | Args: ${args.joinToString()}")
     return SimpleSQLiteQuery(queryBuilder.toString(), args.toTypedArray())

@@ -28,6 +28,7 @@ class ListingAdapter(private val items: MutableList<EquipmentListing>) :
         val priceTextView: TextView = itemView.findViewById(R.id.listingPrice)
         val creationDateTextView: TextView = itemView.findViewById(R.id.listingCreationDate)
         val imageView: ImageView = itemView.findViewById(R.id.listingImage)
+        val creator: TextView = itemView.findViewById(R.id.listingCreator)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyViewHolder {
@@ -52,6 +53,7 @@ class ListingAdapter(private val items: MutableList<EquipmentListing>) :
 
         holder.titleTextView.text = currentItem.title
         holder.descriptionTextView.text = currentItem.description
+        holder.creator.text = "Creator: ${currentItem.ownerName}"
         holder.categoryTextView.text = "Category: ${currentItem.category}"
         holder.locationTextView.text = "Location: ${currentItem.location}"
         holder.statusTextView.text = "Status: ${currentItem.status.name}"

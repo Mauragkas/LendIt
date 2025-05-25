@@ -64,7 +64,11 @@ class ListingDetailsActivity : AppCompatActivity() {
                     append("€")
                 }
 
-                findViewById<TextView>(R.id.listingCreationDate).text = listing.creationDate.toString()
+                findViewById<TextView>(R.id.listingCreationDate).text = "Creation date: ${listing.creationDate}"
+
+                findViewById<TextView>(R.id.listingCreator).text = "Owner: ${listing.ownerName}"
+
+
             } else {
                 // Listing not found
                 Toast.makeText(this@ListingDetailsActivity, "Listing not found", Toast.LENGTH_SHORT).show()
