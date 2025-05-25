@@ -82,13 +82,9 @@ class LoginActivity : AppCompatActivity() {
                         with(sharedPref.edit()) {
                             putString("email", email)
                             putString("userType", user.userType)
-<<<<<<< Updated upstream
-                            putString("userName", user.name)
-=======
                             putInt("userId", user.userId)
                             putString("userName", user.name)
                             // Also save premium status from database to SharedPreferences
->>>>>>> Stashed changes
                             putBoolean("isPremium", user.premiumStatus ?: false)
                             putString("premiumPlan", user.premiumPlan)
                             apply()

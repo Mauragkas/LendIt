@@ -1,19 +1,13 @@
-<<<<<<< Updated upstream
 <?xml version="1.0" encoding="utf-8" ?>
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-=======
-<?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
->>>>>>> Stashed changes
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-<<<<<<< Updated upstream
     android:padding="16dp"
     tools:context=".ui.archive.ArchiveFragment"
->
+    >
 
     <TextView
         android:id="@+id/archiveTitle"
@@ -25,7 +19,7 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-    />
+        />
 
     <LinearLayout
         android:id="@+id/tabsContainer"
@@ -36,7 +30,7 @@
         app:layout_constraintTop_toBottomOf="@id/archiveTitle"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-    >
+        >
 
         <Button
             android:id="@+id/availableTab"
@@ -46,7 +40,7 @@
             android:layout_weight="1"
             android:text="Διαθέσιμες"
             android:layout_marginEnd="4dp"
-        />
+            />
 
         <TextView
             android:id="@+id/availableCount"
@@ -58,7 +52,7 @@
             android:text="0"
             android:layout_gravity="center_vertical"
             android:layout_marginEnd="8dp"
-        />
+            />
 
         <Button
             android:id="@+id/unavailableTab"
@@ -68,7 +62,7 @@
             android:layout_weight="1"
             android:text="Μη Διαθέσιμες"
             android:layout_marginEnd="4dp"
-        />
+            />
 
         <TextView
             android:id="@+id/unavailableCount"
@@ -80,7 +74,7 @@
             android:text="0"
             android:layout_gravity="center_vertical"
             android:layout_marginEnd="8dp"
-        />
+            />
 
         <Button
             android:id="@+id/inactiveTab"
@@ -90,7 +84,7 @@
             android:layout_weight="1"
             android:text="Ανενεργές"
             android:layout_marginEnd="4dp"
-        />
+            />
 
         <TextView
             android:id="@+id/inactiveCount"
@@ -101,7 +95,7 @@
             android:padding="4dp"
             android:text="0"
             android:layout_gravity="center_vertical"
-        />
+            />
     </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView
@@ -115,7 +109,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         tools:listitem="@layout/item_layout"
         android:visibility="visible"
-    />
+        />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/unavailableRecyclerView"
@@ -128,7 +122,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         tools:listitem="@layout/item_layout"
         android:visibility="gone"
-    />
+        />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/inactiveRecyclerView"
@@ -141,7 +135,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         tools:listitem="@layout/item_layout"
         android:visibility="gone"
-    />
+        />
 
     <!-- Empty state -->
     <androidx.constraintlayout.widget.Group
@@ -150,7 +144,7 @@
         android:layout_height="wrap_content"
         android:visibility="gone"
         app:constraint_referenced_ids="emptyStateImage,emptyStateText,emptyStateButton"
-    />
+        />
 
     <ImageView
         android:id="@+id/emptyStateImage"
@@ -162,7 +156,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintVertical_bias="0.4"
-    />
+        />
 
     <TextView
         android:id="@+id/emptyStateText"
@@ -174,7 +168,7 @@
         app:layout_constraintTop_toBottomOf="@id/emptyStateImage"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-    />
+        />
 
     <Button
         android:id="@+id/emptyStateButton"
@@ -185,26 +179,6 @@
         app:layout_constraintTop_toBottomOf="@id/emptyStateText"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-    />
+        />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
-=======
-    tools:context=".ui.archive.ArchiveFragment">
-
-
-    <TextView
-        android:id="@+id/text_cart"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:textAlignment="center"
-        android:textSize="20sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-</androidx.constraintlayout.widget.ConstraintLayout>
->>>>>>> Stashed changes
