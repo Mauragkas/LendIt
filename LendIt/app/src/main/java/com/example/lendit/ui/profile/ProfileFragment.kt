@@ -40,9 +40,18 @@ class ProfileFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.logoutButtonProfile.setOnClickListener {
-            val sharedPref = requireActivity().getSharedPreferences("MyAppPrefs", android.content.Context.MODE_PRIVATE)
+        // Get user type from SharedPreferences
+        val sharedPref = requireActivity().getSharedPreferences("MyAppPrefs", android.content.Context.MODE_PRIVATE)
+        val userType = sharedPref.getString("userType", "")?.lowercase() ?: ""
 
+        // Show Premium button only for owners
+        if (userType == "owner") {
+            binding.premiumButton.visibility = View.VISIBLE
+        } else {
+            binding.premiumButton.visibility = View.GONE
+        }
+
+        binding.logoutButtonProfile.setOnClickListener {
             with(sharedPref.edit()) {
                 clear()
                 apply()
