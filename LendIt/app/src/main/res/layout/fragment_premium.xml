@@ -35,274 +35,353 @@
             android:layout_marginBottom="24dp"
         />
 
-        <!-- Premium Features Section -->
-        <TextView
+        <!-- Non-Premium User View -->
+        <LinearLayout
+            android:id="@+id/nonPremiumContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Προνόμια Premium"
-            android:textStyle="bold"
-            android:textSize="18sp"
-            android:layout_marginBottom="8dp"
-        />
-
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:cardCornerRadius="8dp"
-            app:cardElevation="4dp"
-            android:layout_marginBottom="16dp"
+            android:orientation="vertical"
         >
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Αποκτήστε πρόσβαση σε premium χαρακτηριστικά"
+                android:textSize="16sp"
+                android:textAlignment="center"
+                android:layout_marginBottom="16dp"
+            />
+
+            <Button
+                android:id="@+id/learnMoreButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Μάθετε περισσότερα"
+                android:layout_marginBottom="8dp"
+            />
+
+            <Button
+                android:id="@+id/getPremiumButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Απόκτηση Premium"
+                android:layout_marginBottom="16dp"
+            />
+        </LinearLayout>
+
+        <!-- Premium User View -->
+        <LinearLayout
+            android:id="@+id/premiumStatusContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone"
+        >
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Απολαμβάνετε όλα τα premium προνόμια"
+                android:textSize="16sp"
+                android:textAlignment="center"
+                android:layout_marginBottom="16dp"
+            />
+
+            <Button
+                android:id="@+id/viewBenefitsButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Δείτε τα προνόμιά σας"
+                android:layout_marginBottom="16dp"
+            />
+        </LinearLayout>
+
+        <!-- Premium Features Section - Initially hidden -->
+        <LinearLayout
+            android:id="@+id/planDetailsContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone"
+        >
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Προνόμια Premium"
+                android:textStyle="bold"
+                android:textSize="18sp"
+                android:layout_marginBottom="8dp"
+            />
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="8dp"
+                app:cardElevation="4dp"
+                android:layout_marginBottom="16dp"
+            >
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp"
+                >
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="12dp"
+                    >
+
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:src="@drawable/ic_plussign"
+                            android:layout_marginEnd="8dp"
+                        />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Προτεραιότητα στις καταχωρήσεις (Listing Boost)"
+                        />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="12dp"
+                    >
+
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:src="@drawable/ic_plussign"
+                            android:layout_marginEnd="8dp"
+                        />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Δυνατότητα προσθήκης περισσότερων εικόνων (έως 10)"
+                        />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="12dp"
+                    >
+
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:src="@drawable/ic_plussign"
+                            android:layout_marginEnd="8dp"
+                        />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Πρόσβαση σε analytics (προβολές, ενοικιάσεις, engagement)"
+                        />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                    >
+
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:src="@drawable/ic_plussign"
+                            android:layout_marginEnd="8dp"
+                        />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Αυτόματη ανανέωση των αγγελιών"
+                        />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+        </LinearLayout>
+
+        <!-- Subscription Plans Section - Initially hidden -->
+        <LinearLayout
+            android:id="@+id/planDurationContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone"
+        >
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Επιλέξτε Διάρκεια Συνδρομής"
+                android:textStyle="bold"
+                android:textSize="18sp"
+                android:layout_marginBottom="8dp"
+            />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp"
+                android:orientation="horizontal"
+                android:layout_marginBottom="24dp"
+                android:baselineAligned="false"
             >
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:layout_marginBottom="12dp"
-                >
-
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:src="@drawable/ic_plussign"
-                        android:layout_marginEnd="8dp"
-                    />
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Προτεραιότητα στις καταχωρήσεις (Listing Boost)"
-                    />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:layout_marginBottom="12dp"
-                >
-
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:src="@drawable/ic_plussign"
-                        android:layout_marginEnd="8dp"
-                    />
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Δυνατότητα προσθήκης περισσότερων εικόνων (έως 10)"
-                    />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:layout_marginBottom="12dp"
-                >
-
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:src="@drawable/ic_plussign"
-                        android:layout_marginEnd="8dp"
-                    />
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Πρόσβαση σε analytics (προβολές, ενοικιάσεις, engagement)"
-                    />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                >
-
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:src="@drawable/ic_plussign"
-                        android:layout_marginEnd="8dp"
-                    />
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Αυτόματη ανανέωση των αγγελιών"
-                    />
-                </LinearLayout>
-            </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- Subscription Plans Section -->
-            <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Επιλέξτε Διάρκεια Συνδρομής"
-            android:textStyle="bold"
-            android:textSize="18sp"
-            android:layout_marginBottom="8dp"
-        />
-
-            <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginBottom="24dp"
-            android:baselineAligned="false"
-        >
 
                 <!-- Monthly Plan -->
                 <com.google.android.material.card.MaterialCardView
-                android:id="@+id/monthlyPlanCard"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                app:cardCornerRadius="8dp"
-                app:cardElevation="2dp"
-                android:layout_margin="4dp"
-                app:strokeWidth="0dp"
-                app:strokeColor="@color/teal_700"
-            >
-
-                    <LinearLayout
-                    android:layout_width="match_parent"
+                    android:id="@+id/monthlyPlanCard"
+                    android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:orientation="vertical"
-                    android:gravity="center"
-                    android:padding="16dp"
+                    android:layout_weight="1"
+                    app:cardCornerRadius="8dp"
+                    app:cardElevation="2dp"
+                    android:layout_margin="4dp"
+                    app:strokeWidth="0dp"
+                    app:strokeColor="@color/teal_700"
                 >
 
-                        <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Μηνιαίο"
-                        android:textStyle="bold"
-                    />
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical"
+                        android:gravity="center"
+                        android:padding="16dp"
+                    >
 
                         <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="€9.99/μήνα"
-                        android:textSize="16sp"
-                    />
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Μηνιαίο"
+                            android:textStyle="bold"
+                        />
 
                         <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text=""
-                        android:textSize="12sp"
-                        android:visibility="invisible"
-                    />
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="€9.99/μήνα"
+                            android:textSize="16sp"
+                        />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text=""
+                            android:textSize="12sp"
+                            android:visibility="invisible"
+                        />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
                 <!-- Quarterly Plan -->
                 <com.google.android.material.card.MaterialCardView
-                android:id="@+id/quarterlyPlanCard"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                app:cardCornerRadius="8dp"
-                app:cardElevation="2dp"
-                android:layout_margin="4dp"
-                app:strokeWidth="0dp"
-                app:strokeColor="@color/teal_700"
-            >
-
-                    <LinearLayout
-                    android:layout_width="match_parent"
+                    android:id="@+id/quarterlyPlanCard"
+                    android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:orientation="vertical"
-                    android:gravity="center"
-                    android:padding="16dp"
+                    android:layout_weight="1"
+                    app:cardCornerRadius="8dp"
+                    app:cardElevation="2dp"
+                    android:layout_margin="4dp"
+                    app:strokeWidth="0dp"
+                    app:strokeColor="@color/teal_700"
                 >
 
-                        <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="3μηνο"
-                        android:textStyle="bold"
-                    />
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical"
+                        android:gravity="center"
+                        android:padding="16dp"
+                    >
 
                         <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="€24.99"
-                        android:textSize="16sp"
-                    />
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="3μηνο"
+                            android:textStyle="bold"
+                        />
 
                         <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="(€8.33/μήνα)"
-                        android:textSize="12sp"
-                    />
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="€24.99"
+                            android:textSize="16sp"
+                        />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="(€8.33/μήνα)"
+                            android:textSize="12sp"
+                        />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
                 <!-- Yearly Plan -->
                 <com.google.android.material.card.MaterialCardView
-                android:id="@+id/yearlyPlanCard"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                app:cardCornerRadius="8dp"
-                app:cardElevation="2dp"
-                android:layout_margin="4dp"
-                app:strokeWidth="0dp"
-                app:strokeColor="@color/teal_700"
-            >
-
-                    <LinearLayout
-                    android:layout_width="match_parent"
+                    android:id="@+id/yearlyPlanCard"
+                    android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:orientation="vertical"
-                    android:gravity="center"
-                    android:padding="16dp"
+                    android:layout_weight="1"
+                    app:cardCornerRadius="8dp"
+                    app:cardElevation="2dp"
+                    android:layout_margin="4dp"
+                    app:strokeWidth="0dp"
+                    app:strokeColor="@color/teal_700"
                 >
 
-                        <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Ετήσιο"
-                        android:textStyle="bold"
-                    />
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical"
+                        android:gravity="center"
+                        android:padding="16dp"
+                    >
 
                         <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="€89.99"
-                        android:textSize="16sp"
-                    />
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Ετήσιο"
+                            android:textStyle="bold"
+                        />
 
                         <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="(€7.50/μήνα)"
-                        android:textSize="12sp"
-                    />
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="€89.99"
+                            android:textSize="16sp"
+                        />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="(€7.50/μήνα)"
+                            android:textSize="12sp"
+                        />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
             </LinearLayout>
+        </LinearLayout>
 
         <!-- Action Buttons -->
         <Button
             android:id="@+id/subscribeButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Απόκτηση Premium"
+            android:text="Συνέχεια στην πληρωμή"
             android:enabled="false"
             android:layout_marginBottom="8dp"
         />
