@@ -13,14 +13,14 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp"
+        android:padding="12dp"
     >
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginBottom="8dp"
+            android:layout_marginBottom="4dp"
         >
 
             <TextView
@@ -45,14 +45,14 @@
             android:id="@+id/listingId"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
+            android:layout_marginBottom="4dp"
             android:text="Listing: 456"
         />
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Λόγος:"
+            android:text="Reason:"
             android:textStyle="bold"
         />
 
@@ -60,14 +60,16 @@
             android:id="@+id/reportReason"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:text="Παραπλανητική περιγραφή"
+            android:layout_marginBottom="4dp"
+            android:text="Misleading description"
+            android:maxLines="2"
+            android:ellipsize="end"
         />
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Σχόλια:"
+            android:text="Comments:"
             android:textStyle="bold"
         />
 
@@ -75,8 +77,10 @@
             android:id="@+id/reportComments"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:text="Το εργαλείο δεν αντιστοιχεί στην περιγραφή"
+            android:layout_marginBottom="4dp"
+            android:text="The tool doesn't match the description"
+            android:maxLines="2"
+            android:ellipsize="end"
         />
 
         <TextView
@@ -95,22 +99,25 @@
             android:layout_marginTop="8dp"
         >
 
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/viewDetailsButton"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:layout_marginEnd="4dp"
-                android:text="Προβολή Λεπτομερειών"
+                android:text="View Listing"
+                android:textSize="12sp"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             />
 
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/markReviewedButton"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:layout_marginStart="4dp"
-                android:text="Σήμανση ως Επιλυμένο"
+                android:text="Take Action"
+                android:textSize="12sp"
             />
         </LinearLayout>
     </LinearLayout>

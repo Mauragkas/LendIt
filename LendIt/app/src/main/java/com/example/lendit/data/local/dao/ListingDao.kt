@@ -6,6 +6,7 @@ import androidx.room.RawQuery
 import androidx.sqlite.db.SimpleSQLiteQuery
 import androidx.sqlite.db.SupportSQLiteQuery
 import androidx.room.Update
+import androidx.room.Delete
 
 @Dao
 interface ListingDao {
@@ -36,7 +37,9 @@ interface ListingDao {
 
     @RawQuery
     suspend fun getListings(query: SupportSQLiteQuery): List<EquipmentListing>
-
+    
+    @Delete
+    suspend fun deleteListing(listing: EquipmentListing)
 }
 
 fun buildQuery(f: ListingFilters): SupportSQLiteQuery {
