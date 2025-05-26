@@ -59,6 +59,11 @@
             android:exported="false"
         />
 
+        <activity
+            android:name=".CompareResultActivity"
+            android:exported="false"
+        />
+
     </application>
 
 </manifest>
