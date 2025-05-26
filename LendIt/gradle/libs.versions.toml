@@ -1,5 +1,5 @@
 [versions]
-agp = "8.9.2"
+agp = "8.10.0"
 glide = "4.16.0"
 kotlin = "2.1.0" # Used for kotlin-android AND kotlin-kapt
 room = "2.7.1"   # Single version for all Room artifacts (ensure this is the version you intend, 2.6.1 is latest stable)
