@@ -13,6 +13,7 @@ import com.example.lendit.databinding.FragmentArchiveBinding
 import EquipmentListing
 import ListingStatus
 import AppDatabase
+import com.example.lendit.OwnerAdapter
 import com.example.lendit.R
 import kotlinx.coroutines.launch
 
@@ -22,9 +23,9 @@ class ArchiveFragment : Fragment() {
     // This property is only valid between onCreateView and onDestroyView.
     private val binding get() = _binding!!
 
-    private val availableAdapter = ListingAdapter(mutableListOf())
-    private val unavailableAdapter = ListingAdapter(mutableListOf())
-    private val inactiveAdapter = ListingAdapter(mutableListOf())
+    private val availableAdapter = OwnerAdapter(mutableListOf())
+    private val unavailableAdapter = OwnerAdapter(mutableListOf())
+    private val inactiveAdapter = OwnerAdapter(mutableListOf())
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -103,7 +104,6 @@ class ArchiveFragment : Fragment() {
         binding.availableRecyclerView.visibility = View.GONE
         binding.unavailableRecyclerView.visibility = View.GONE
         binding.inactiveRecyclerView.visibility = View.GONE
-
         // Reset all tab styles
         binding.availableTab.isSelected = false
         binding.unavailableTab.isSelected = false

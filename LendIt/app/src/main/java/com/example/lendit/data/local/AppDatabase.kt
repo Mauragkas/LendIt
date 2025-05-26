@@ -11,7 +11,7 @@ import kotlinx.coroutines.launch
 import com.example.lendit.data.local.entities.Report
 import com.example.lendit.data.local.entities.UserCart
 
-@Database(entities = [UserEntity::class, EquipmentListing::class, Report::class, UserCart::class, Favorite::class], version = 11)
+@Database(entities = [UserEntity::class, EquipmentListing::class, Report::class, UserCart::class, Favorite::class], version = 12)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun userDao(): UserDao
     abstract fun listingDao(): ListingDao

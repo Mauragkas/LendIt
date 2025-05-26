@@ -28,9 +28,17 @@
             android:id="@+id/imageFavoriteButtonListings"
             android:layout_width="match_parent"
             android:layout_height="28dp"
-            android:layout_marginLeft="100dp"
+            android:layout_marginStart="100dp"
             android:background="@android:color/transparent"
             app:srcCompat="@drawable/ic_favorite_border" />
+
+        <ImageButton
+            android:id="@+id/removeFromCartButton"
+            android:layout_width="match_parent"
+            android:layout_height="28dp"
+            android:layout_marginStart="100dp"
+            android:background="@android:color/transparent"
+            app:srcCompat="@drawable/ic_trash_24dp" />
 
         <TextView
             android:id="@+id/listingTitle"

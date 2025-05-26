@@ -11,12 +11,10 @@ import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.lendit.ListingAdapter
+import com.example.lendit.CartAdapter
 import com.example.lendit.databinding.FragmentCartBinding
-import com.example.lendit.ui.show_listings.ShowListingsFragment
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -31,7 +29,7 @@ class CartFragment : Fragment() {
     private val binding get() = _binding!!
     lateinit var listings: List<EquipmentListing>
     var userId by Delegates.notNull<Int>()
-    private val adapter = ListingAdapter(mutableListOf())
+    private val adapter = CartAdapter(mutableListOf())
 
     override fun onCreateView(
         inflater: LayoutInflater,

@@ -12,7 +12,6 @@ import android.content.Intent
 import android.util.Log
 import android.widget.ImageButton
 import android.widget.ImageView
-import androidx.core.content.ContextCompat.startActivity
 import com.bumptech.glide.Glide
 import androidx.appcompat.app.AlertDialog
 import android.widget.PopupMenu
@@ -27,8 +26,8 @@ import kotlinx.coroutines.withContext
 import com.example.lendit.data.local.entities.Favorite
 
 
-class ListingAdapter(private val items: MutableList<EquipmentListing>) :
-    RecyclerView.Adapter<ListingAdapter.MyViewHolder>() {
+class OwnerAdapter(private val items: MutableList<EquipmentListing>) :
+    RecyclerView.Adapter<OwnerAdapter.MyViewHolder>() {
 
     class MyViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val titleTextView: TextView = itemView.findViewById(R.id.listingTitle)
@@ -38,16 +37,15 @@ class ListingAdapter(private val items: MutableList<EquipmentListing>) :
         val statusTextView: TextView = itemView.findViewById(R.id.listingStatus)
         val priceTextView: TextView = itemView.findViewById(R.id.listingPrice)
         val creationDateTextView: TextView = itemView.findViewById(R.id.listingCreationDate)
+        val cartButton : ImageButton = itemView.findViewById(R.id.removeFromCartButton)
         val imageView: ImageView = itemView.findViewById(R.id.listingImage)
         val creator: TextView = itemView.findViewById(R.id.listingCreator)
         val favoriteButton : ImageButton = itemView.findViewById(R.id.imageFavoriteButtonListings)
-        val cartButton : ImageButton = itemView.findViewById(R.id.removeFromCartButton)
-
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyViewHolder {
         val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.item_layout, parent, false)
+            .inflate(R.layout.item_layout, parent, false) // Use your actual layout file name
         return MyViewHolder(view)
     }
 
@@ -57,6 +55,7 @@ class ListingAdapter(private val items: MutableList<EquipmentListing>) :
 
         // Load other item data
         holder.titleTextView.text = currentItem.title
+        // ... other view bindings ...
 
         val db = AppDatabase.getDatabase(context)
         val favoriteDao = db.FavoriteDao()
@@ -66,37 +65,6 @@ class ListingAdapter(private val items: MutableList<EquipmentListing>) :
         if (userId == -1) {
             Log.e("ListingAdapter", "User ID not found in SharedPreferences")
             return
-        }
-
-        // Check initial favorite status
-        (context as AppCompatActivity).lifecycleScope.launch(Dispatchers.IO) {
-            val isFavorite = favoriteDao.isFavorite(userId, currentItem.listingId)
-            withContext(Dispatchers.Main) {
-                holder.favoriteButton.setImageResource(
-                    if (isFavorite) R.drawable.ic_favorite_filled
-                    else R.drawable.ic_favorite_border
-                )
-            }
-        }
-
-        // Set click listener
-        holder.favoriteButton.setOnClickListener {
-            (context as AppCompatActivity).lifecycleScope.launch(Dispatchers.IO) {
-                val isFavorite = favoriteDao.isFavorite(userId, currentItem.listingId)
-                if (isFavorite) {
-                    favoriteDao.removeFromFavorites(userId, currentItem.listingId)
-                    withContext(Dispatchers.Main) {
-                        holder.favoriteButton.setImageResource(R.drawable.ic_favorite_border)
-                        Toast.makeText(context, "Removed from favorites", Toast.LENGTH_SHORT).show()
-                    }
-                } else {
-                    favoriteDao.addToFavorites(Favorite(userId = userId, listingId = currentItem.listingId))
-                    withContext(Dispatchers.Main) {
-                        holder.favoriteButton.setImageResource(R.drawable.ic_favorite_filled)
-                        Toast.makeText(context, "Added to favorites", Toast.LENGTH_SHORT).show()
-                    }
-                }
-            }
         }
 
         Log.d("ListingAdapter", "onBindViewHolder for position $position, title: ${currentItem.title}") // <-- ADD LOG
@@ -120,23 +88,18 @@ class ListingAdapter(private val items: MutableList<EquipmentListing>) :
             append(currentItem.price)
             append("€")
         }
+        // Hide favorite button
+        holder.favoriteButton.visibility = View.GONE
         holder.cartButton.visibility = View.GONE
+
         holder.creationDateTextView.text = if (currentItem.creationDate != null) {
             "Listed on: ${currentItem.creationDate}"
         } else {
             "Date not available"
         }
 
-        // Update the click behavior
-        holder.itemView.setOnClickListener {
-            val context = holder.itemView.context
-            val intent = Intent(context, ListingDetailsActivity::class.java)
-            intent.putExtra("listing_id", currentItem.listingId)
-            context.startActivity(intent)
-        }
-
         // Add long click listener for context menu
-        holder.itemView.setOnLongClickListener { view ->
+        holder.itemView.setOnClickListener { view ->
             val context = view.context
             val popup = PopupMenu(context, view)
 
