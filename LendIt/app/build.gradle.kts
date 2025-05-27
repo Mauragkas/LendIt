@@ -42,6 +42,7 @@ android {
 
 dependencies {
     implementation(libs.gson)
+    androidTestImplementation("androidx.test.espresso:espresso-intents:3.5.1")
     implementation("androidx.room:room-runtime") // OR replace with androidx.room:room-runtime alias
     implementation(libs.androidx.room.ktx)
     implementation(libs.androidx.cardview)

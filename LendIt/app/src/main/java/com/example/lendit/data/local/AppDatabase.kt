@@ -2,8 +2,12 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import com.example.lendit.data.local.dao.CouponDao
 import com.example.lendit.data.local.dao.FavoriteDao
+import com.example.lendit.data.local.dao.OrderDao
+import com.example.lendit.data.local.entities.Coupon
 import com.example.lendit.data.local.entities.Favorite
+import com.example.lendit.data.local.entities.Order
 import java.time.LocalDate
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -11,13 +15,22 @@ import kotlinx.coroutines.launch
 import com.example.lendit.data.local.entities.Report
 import com.example.lendit.data.local.entities.UserCart
 
-@Database(entities = [UserEntity::class, EquipmentListing::class, Report::class, UserCart::class, Favorite::class], version = 12)
+@Database(entities = [
+    UserEntity::class,
+    EquipmentListing::class,
+    Report::class,
+    UserCart::class,
+    Favorite::class,
+    Order::class,
+    Coupon::class], version = 14)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun userDao(): UserDao
+    abstract fun couponDao(): CouponDao
     abstract fun listingDao(): ListingDao
     abstract fun reportDao(): ReportDao
     abstract fun cartDao(): CartDao
     abstract fun FavoriteDao(): FavoriteDao
+    abstract fun OrderDao(): OrderDao
 
     companion object {
         @Volatile private var INSTANCE: AppDatabase? = null
@@ -100,6 +113,12 @@ abstract class AppDatabase : RoomDatabase() {
                             database.userDao().deleteAllUsers()
 
                             populateDatabase(database.userDao())
+
+                            val existingCoupons = database.couponDao().getAllCoupons()
+
+                            if (existingCoupons.isEmpty()) {
+                                insertCoupons(database.couponDao())
+                            }
                         }
                     }
                     // --- END DEVELOPMENT ONLY ---
@@ -119,7 +138,6 @@ abstract class AppDatabase : RoomDatabase() {
                     phoneNumber = "1112223333",
                     location = "CityA",
                     userType = "Renter",
-                    favoritesJson = "[]"
                 )
 
             val owner =
@@ -230,6 +248,11 @@ abstract class AppDatabase : RoomDatabase() {
 
             val listings = listOf<EquipmentListing>(listing1, listing2, listing3, listing4)
             listingDao.insertAll(listings)
+        }
+
+        private suspend fun insertCoupons(couponDao: CouponDao) {
+            couponDao.insert(Coupon("save30",30))
+            couponDao.insert(Coupon("nikos15",15))
         }
 
         suspend fun showCart(

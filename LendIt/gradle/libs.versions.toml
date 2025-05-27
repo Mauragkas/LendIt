@@ -19,8 +19,10 @@ roomCommonJvm = "2.7.1"
 roomRuntimeAndroid ="2.7.1"
 engageCore = "1.5.8"
 cardview = "1.0.0"
+espresso = "3.5.1"
 
 [libraries]
+espresso-intents = { group = "androidx.test.espresso", name = "espresso-intents", version.ref = "espresso" }
 glide = { module = "com.github.bumptech.glide:glide", version.ref = "glide" }
 glideCompiler = { module = "com.github.bumptech.glide:compiler", version.ref = "glide" }
 gson = "com.google.code.gson:gson:2.10.1"

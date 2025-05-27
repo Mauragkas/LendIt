@@ -20,7 +20,4 @@ data class UserEntity(
 
     // Coordinator field
     val staffId: String? = null,
-
-    // Renter favorites stored as JSON string
-    var favoritesJson: String? = null
 )

@@ -99,6 +99,7 @@ class ListingAdapter(private val items: MutableList<EquipmentListing>) :
             }
         }
 
+
         Log.d("ListingAdapter", "onBindViewHolder for position $position, title: ${currentItem.title}") // <-- ADD LOG
 
         val photoList = Converters().fromString(currentItem.photos)
@@ -133,79 +134,6 @@ class ListingAdapter(private val items: MutableList<EquipmentListing>) :
             val intent = Intent(context, ListingDetailsActivity::class.java)
             intent.putExtra("listing_id", currentItem.listingId)
             context.startActivity(intent)
-        }
-
-        // Add long click listener for context menu
-        holder.itemView.setOnLongClickListener { view ->
-            val context = view.context
-            val popup = PopupMenu(context, view)
-
-            val inflater = popup.menuInflater
-
-            when (currentItem.status) {
-                ListingStatus.AVAILABLE -> {
-                    inflater.inflate(R.menu.available_listing_menu, popup.menu)
-                }
-                ListingStatus.UNAVAILABLE -> {
-                    inflater.inflate(R.menu.unavailable_listing_menu, popup.menu)
-                }
-                ListingStatus.INACTIVE -> {
-                    inflater.inflate(R.menu.inactive_listing_menu, popup.menu)
-                }
-            }
-
-            popup.setOnMenuItemClickListener { menuItem ->
-                when (menuItem.itemId) {
-                    R.id.action_edit -> {
-                        val intent = Intent(context, ListingActivity::class.java)
-                        intent.putExtra("edit_listing_id", currentItem.listingId)
-                        context.startActivity(intent)
-                        true
-                    }
-                    R.id.action_deactivate -> {
-                        // Show confirmation dialog
-                        AlertDialog.Builder(context)
-                            .setTitle("Απενεργοποίηση Αγγελίας")
-                            .setMessage("Είστε βέβαιοι ότι θέλετε να απενεργοποιήσετε αυτήν την αγγελία;")
-                            .setPositiveButton("Ναι") { _, _ ->
-                                (context as? AppCompatActivity)?.lifecycleScope?.launch {
-                                    if (ListingManager.updateListingStatus(context, currentItem.listingId, ListingStatus.INACTIVE)) {
-                                        Toast.makeText(context, "Η αγγελία απενεργοποιήθηκε", Toast.LENGTH_SHORT).show()
-                                        (context.supportFragmentManager.findFragmentById(R.id.nav_host_fragment_activity_main)
-                                            ?.childFragmentManager?.fragments?.firstOrNull() as? ArchiveFragment)
-                                            ?.refreshListings()
-                                    }
-                                }
-                            }
-                            .setNegativeButton("Όχι", null)
-                            .show()
-                        true
-                    }
-                    R.id.action_activate -> {
-                        // Show confirmation dialog
-                        AlertDialog.Builder(context)
-                            .setTitle("Ενεργοποίηση Αγγελίας")
-                            .setMessage("Είστε βέβαιοι ότι θέλετε να ενεργοποιήσετε αυτήν την αγγελία;")
-                            .setPositiveButton("Ναι") { _, _ ->
-                                (context as? AppCompatActivity)?.lifecycleScope?.launch {
-                                    if (ListingManager.updateListingStatus(context, currentItem.listingId, ListingStatus.AVAILABLE)) {
-                                        Toast.makeText(context, "Η αγγελία ενεργοποιήθηκε", Toast.LENGTH_SHORT).show()
-                                        (context.supportFragmentManager.findFragmentById(R.id.nav_host_fragment_activity_main)
-                                            ?.childFragmentManager?.fragments?.firstOrNull() as? ArchiveFragment)
-                                            ?.refreshListings()
-                                    }
-                                }
-                            }
-                            .setNegativeButton("Όχι", null)
-                            .show()
-                        true
-                    }
-                    else -> false
-                }
-            }
-
-            popup.show()
-            true
         }
 
         // Visual indication for inactive listings

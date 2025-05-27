@@ -12,6 +12,12 @@ interface CartDao {
     @Insert
     suspend fun insert(userCart: UserCart): Long
 
+    @Query("SELECT EXISTS(SELECT 1 FROM UserCart WHERE userId = :id AND listingId = :listingId)")
+    suspend fun checkCart(id: Int, listingId: Int): Boolean
+
+    @Query("DELETE FROM UserCart WHERE userId = :id AND listingId = :listingId")
+    suspend fun deleteFromCart(id: Int, listingId: Int)
+
     @Query("DELETE FROM UserCart WHERE userId = :id ")
     suspend fun deleteCart(id: Int)
 

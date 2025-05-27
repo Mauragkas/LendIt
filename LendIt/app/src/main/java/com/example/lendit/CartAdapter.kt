@@ -25,6 +25,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import com.example.lendit.data.local.entities.Favorite
+import com.example.lendit.data.local.entities.UserCart
 
 
 class CartAdapter(private val items: MutableList<EquipmentListing>) :
@@ -41,6 +42,7 @@ class CartAdapter(private val items: MutableList<EquipmentListing>) :
         val imageView: ImageView = itemView.findViewById(R.id.listingImage)
         val creator: TextView = itemView.findViewById(R.id.listingCreator)
         val favoriteButton : ImageButton = itemView.findViewById(R.id.imageFavoriteButtonListings)
+        val cartButton : ImageButton = itemView.findViewById(R.id.removeFromCartButton)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyViewHolder {
@@ -49,13 +51,20 @@ class CartAdapter(private val items: MutableList<EquipmentListing>) :
         return MyViewHolder(view)
     }
 
+    fun getTotalPrice(): Double {
+        return items.sumOf { it.price }
+    }
+
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
         val currentItem = items[position]
         val context = holder.itemView.context
 
+        val db = AppDatabase.getDatabase(context)
+        val cartDao = db.cartDao()
+
         // Load other item data
         holder.titleTextView.text = currentItem.title
-        // ... other view bindings ...
+
 
         val sharedPref = context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
         val userId = sharedPref.getInt("user_id", -1)
@@ -102,7 +111,28 @@ class CartAdapter(private val items: MutableList<EquipmentListing>) :
             context.startActivity(intent)
         }
 
-        // Visual indication for inactive listings
+        // Set click listener
+        holder.cartButton.setOnClickListener {
+            (context as AppCompatActivity).lifecycleScope.launch(Dispatchers.IO) {
+                val isInCart = cartDao.checkCart(userId, currentItem.listingId)
+                if (isInCart) {
+                    // Remove from cart in db
+                    cartDao.deleteFromCart(userId, currentItem.listingId)
+                    // Remove from cart in adapter
+                    items.removeAt(holder.adapterPosition)
+
+                    //show toast and refresh
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(context, "Removed from cart", Toast.LENGTH_SHORT).show()
+                        notifyDataSetChanged()
+                    }
+                } else {
+                    Toast.makeText(context, "Item not in cart!", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+
+
         if (currentItem.status == ListingStatus.INACTIVE) {
             holder.itemView.alpha = 0.7f
         } else {

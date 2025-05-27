@@ -47,6 +47,8 @@
 
         <activity android:name=".MainOwnerActivity" android:exported="true" />
 
+        <activity android:name=".ui.payment.PaymentActivity" android:exported="true" />
+
         <activity
             android:name=".ListingDetailsActivity"
             android:exported="true"
