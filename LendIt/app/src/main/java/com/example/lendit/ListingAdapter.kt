@@ -81,7 +81,7 @@ class ListingAdapter(private val items: MutableList<EquipmentListing>) :
 
         // Set click listener
         holder.favoriteButton.setOnClickListener {
-            (context as AppCompatActivity).lifecycleScope.launch(Dispatchers.IO) {
+            context.lifecycleScope.launch(Dispatchers.IO) {
                 val isFavorite = favoriteDao.isFavorite(userId, currentItem.listingId)
                 if (isFavorite) {
                     favoriteDao.removeFromFavorites(userId, currentItem.listingId)

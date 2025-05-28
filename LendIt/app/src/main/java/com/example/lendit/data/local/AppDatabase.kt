@@ -22,7 +22,7 @@ import com.example.lendit.data.local.entities.UserCart
     UserCart::class,
     Favorite::class,
     Order::class,
-    Coupon::class], version = 14)
+    Coupon::class], version = 15)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun userDao(): UserDao
     abstract fun couponDao(): CouponDao

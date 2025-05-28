@@ -5,6 +5,7 @@ import android.app.Activity
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
+import android.database.sqlite.SQLiteConstraintException
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -303,14 +304,24 @@ class ListingDetailsActivity : AppCompatActivity() {
             // Show success toast on main thread
             withContext(Dispatchers.Main) {
                 Toast.makeText(this@ListingDetailsActivity, "Added to cart successfully", Toast.LENGTH_SHORT).show()
+                finish()
             }
-        } catch (e: Exception) {
+        }  catch (e: SQLiteConstraintException) {
+            // Likely a UNIQUE constraint failed (duplicate entry)
+            withContext(Dispatchers.Main) {
+                Toast.makeText(
+                    this@ListingDetailsActivity,
+                    "Item is already in cart",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+            catch (e: Exception) {
             // Show error toast on main thread
             withContext(Dispatchers.Main) {
                 Toast.makeText(this@ListingDetailsActivity, "Error adding to cart: ${e.message}", Toast.LENGTH_LONG).show()
             }
         }
-        finish()
     }
 
     companion object {

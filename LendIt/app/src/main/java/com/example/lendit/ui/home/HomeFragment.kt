@@ -14,7 +14,7 @@ class HomeFragment : Fragment() {
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
 
-    fun displaySearch() {
+    private fun displaySearch() {
         val intent = Intent(requireContext(), SearchActivity::class.java)
         startActivity(intent)
     }

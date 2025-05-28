@@ -1,6 +1,7 @@
 package com.example.lendit
 
 import Converters
+import EquipmentListing
 import ListingCategory
 import ListingFilters
 import Region
@@ -10,72 +11,91 @@ import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.example.lendit.databinding.ActivitySearchBinding
-import com.example.lendit.ui.show_listings.ShowListingsFragment
 import com.google.android.material.datepicker.CalendarConstraints
 import com.google.android.material.datepicker.DateValidatorPointForward
 import com.google.android.material.datepicker.MaterialDatePicker
 import android.view.inputmethod.EditorInfo
+import android.widget.Toast
 import androidx.core.view.isVisible
+import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
 import java.text.SimpleDateFormat
 import java.time.Instant
 import java.time.ZoneId
 import java.util.Date
 import java.util.Locale
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 
 class SearchActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivitySearchBinding
 
+
     private var formattedStart: Int? = null
     private var formattedEnd: Int? = null
     private var selectedRegion: Region? = null
+    private lateinit var adapter: ListingAdapter
+    private var allListings: List<EquipmentListing> = emptyList() // Store all fetched listings
+    private var listings: List<EquipmentListing> = emptyList()
 
+    /**
+     * Initializes the activity. Sets up UI, event listeners for search, date,
+     * region, filters, and sort. Prepares RecyclerView for search results.
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         binding = ActivitySearchBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Now safe to access binding:
         val dateButton = binding.dateButton
         val filterButton = binding.toggleFiltersButton
         val filtersContainer = binding.filtersContainer
         val regionSelectorButton = binding.regionSelectorButton
         val applyFiltersButton = binding.applyFiltersButton
         val clearFiltersButton = binding.clearFiltersButton
-        // Use these local variables or just use binding.* directly
 
 
-        binding.searchEditText.requestFocus()
-        binding.searchEditText.post {
-            val imm = getSystemService(INPUT_METHOD_SERVICE) as android.view.inputmethod.InputMethodManager
-            imm.showSoftInput(binding.searchEditText, android.view.inputmethod.InputMethodManager.SHOW_IMPLICIT)
+
+        /** Initialize RecyclerView */
+        adapter = ListingAdapter(mutableListOf())
+        binding.listingRecyclerView.apply {
+            layoutManager = LinearLayoutManager(this@SearchActivity)
+            adapter = this@SearchActivity.adapter
         }
 
-        // Handle Enter key in searchEditText
+        /** Handle Enter key in searchEditText */
         binding.searchEditText.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_GO) {
-                startSearch(insertFilters())
+                startSearch()
                 true
             } else {
                 false
             }
         }
 
-        // Get dates
+        /** Price Sort Radio Group Listener*/
+        binding.priceSortGroup.setOnCheckedChangeListener { _, checkedId ->
+            when (checkedId) {
+                R.id.radioAscending, R.id.radioDescending, R.id.radioSuggested -> getFilters()
+            }
+        }
+
+        /** Date Picker Listener */
         dateButton.setOnClickListener {
             val constraintsBuilder = CalendarConstraints.Builder()
                 .setValidator(DateValidatorPointForward.now())      // Disable past dates
 
             val builder = MaterialDatePicker.Builder.dateRangePicker()
                 .setTitleText("Επιλέξτε εύρος ημερομηνιών")
-                .setCalendarConstraints(constraintsBuilder.build()) // Set constraints here
+                .setCalendarConstraints(constraintsBuilder.build()) // Set constraints
 
             val picker = builder.build()                            // Build Date picker
 
             picker.show(supportFragmentManager, "DATE_PICKER")
-
 
             picker.addOnPositiveButtonClickListener { selection ->
                 val startDate = selection.first  // Long timestamp in ms
@@ -93,17 +113,17 @@ class SearchActivity : AppCompatActivity() {
                 val startDisplay = formatter.format(Date(startDate))
                 val endDisplay = formatter.format(Date(endDate))
 
-                // Format LocalDateTime -> String using your formatter
+                // Format LocalDateTime -> String using formatter
                 formattedStart = Converters().fromLocalDate(startLocalDateTime)
                 formattedEnd = Converters().fromLocalDate(endLocalDateTime)
 
-                // Now you have ISO_LOCAL_DATE_TIME strings to use/store
+                // ISO_LOCAL_DATE_TIME strings to use
                 dateButton.text = "$startDisplay - $endDisplay"
             }
 
         }
 
-        // Get region
+        /** Region Selector Listener */
         regionSelectorButton.setOnClickListener {
             val regionsArray = Region.entries.map { it.name.replace('_', ' ') }.toTypedArray()
             // Replace underscores with spaces for better UI
@@ -117,7 +137,7 @@ class SearchActivity : AppCompatActivity() {
                 .show()
         }
 
-        // Toggle filters visibility
+        /** Filter Button Toggle Listener */
         filterButton.setOnClickListener {
             if (filtersContainer.isVisible)
                 filtersContainer.visibility = View.GONE
@@ -125,13 +145,13 @@ class SearchActivity : AppCompatActivity() {
                 filtersContainer.visibility = View.VISIBLE
         }
 
-        // Apply filters
+        /** Apply Filters Button Listener */
         applyFiltersButton.setOnClickListener {
-            startSearch(insertFilters())
+            insertFilters()
             filtersContainer.visibility = View.GONE
         }
 
-        // Clear Filters
+        /** Clear Filters Button Listener */
         clearFiltersButton.setOnClickListener {
             // Clear text inputs
             binding.searchEditText.text?.clear()
@@ -152,7 +172,34 @@ class SearchActivity : AppCompatActivity() {
         }
     }
 
-    private fun insertFilters(): ListingFilters {
+    private fun startSearch() {
+        val searchTerm = binding.searchEditText.text.toString()
+        if (searchTerm.isBlank()) {
+            Toast.makeText(this, "Please enter a search term.", Toast.LENGTH_SHORT).show()
+            allListings = emptyList()
+            listings = emptyList()
+            adapter.update(listings)
+            binding.filterButtonContainer.visibility = View.GONE
+            return
+        }
+
+        lifecycleScope.launch {
+            try {
+                // Only filter by title in the initial DB query
+                val initialFilters = ListingFilters(title = searchTerm)
+                allListings = withContext(Dispatchers.IO) {
+                    AppDatabase.getListings(applicationContext, initialFilters)
+                }
+                insertFilters() // Apply all other filters to the fetched list
+                binding.filterButtonContainer.visibility = View.VISIBLE
+            } catch (e: Exception) {
+                Toast.makeText(this@SearchActivity, "Failed to fetch listings.", Toast.LENGTH_SHORT).show()
+                e.printStackTrace()
+            }
+        }
+    }
+
+    private fun getFilters(): ListingFilters {
         var category: ListingCategory? = null
         var sortBy: SortBy? = null
 
@@ -180,20 +227,45 @@ class SearchActivity : AppCompatActivity() {
         )
     }
 
+    private fun insertFilters() {
+        val filters = getFilters()
 
+        // Start with all listings fetched based on the initial title search
+        var filteredList = allListings
 
-    private fun startSearch(filters: ListingFilters = ListingFilters()) {
-        binding.filterButtonContainer.visibility = View.VISIBLE
-
-        val fragment = ShowListingsFragment().apply {
-            arguments = Bundle().apply {
-                putParcelable("filters", filters)
-            }
+        // Filter by min price
+        filters.minPrice?.let { min ->
+            filteredList = filteredList.filter { it.price >= min }
         }
 
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.listingFragment, fragment)
-            .commit()
-    }
+        // Filter by max price
+        filters.maxPrice?.let { max ->
+            filteredList = filteredList.filter { it.price <= max }
+        }
 
+        // Filter by location
+        filters.location?.let { region ->
+            filteredList = filteredList.filter { it.location == region }
+        }
+
+        // Filter by category
+        filters.category?.let { category ->
+            filteredList = filteredList.filter { it.category == category }
+        }
+
+        // TODO: Implement date filtering from formattedStart and formattedEnd
+
+        // Sort the filtered list
+        filteredList = when (filters.sortBy) {
+            SortBy.ASC -> filteredList.sortedBy { it.price }
+            SortBy.DESC -> filteredList.sortedByDescending { it.price }
+            else -> filteredList // SortBy.SUGGESTED or null
+        }
+
+        listings = filteredList
+        adapter.update(listings)
+        if (listings.isEmpty()) {
+            Toast.makeText(this@SearchActivity, "No listings match your filters.", Toast.LENGTH_SHORT).show()
+        }
+    }
 }

@@ -26,6 +26,9 @@ interface ListingDao {
     @Query("SELECT * FROM listing WHERE listingId = :id LIMIT 1")
     suspend fun getListingById(id: Int): EquipmentListing?
 
+    @Query("SELECT * FROM listing WHERE category = :categoryId AND listingId != :currentId LIMIT 5")
+    suspend fun getRelatedListings(categoryId: Int, currentId: Int): List<EquipmentListing>
+
     @Query("SELECT COUNT(*) FROM listing")
     suspend fun getCount(): Int
 

@@ -52,7 +52,9 @@ class CartAdapter(private val items: MutableList<EquipmentListing>) :
     }
 
     fun getTotalPrice(): Double {
-        return items.sumOf { it.price }
+        return items.sumOf {
+            it.price
+        }
     }
 
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {

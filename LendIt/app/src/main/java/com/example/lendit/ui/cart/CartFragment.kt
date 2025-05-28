@@ -40,6 +40,7 @@ class CartFragment : Fragment() {
     lateinit var listings: List<EquipmentListing>
     var userId by Delegates.notNull<Int>()
     private val adapter = CartAdapter(mutableListOf())
+    private var total = 0.0
 
     private lateinit var couponDao: CouponDao
 
@@ -76,15 +77,24 @@ class CartFragment : Fragment() {
         return discount
     }
 
-    private suspend fun calculateCost(couponCode: String): Double {
-        val discount = validateCoupon(couponCode)
+    private fun calculateCost(discount: Int): Double {
         adapter.update(listings) // refresh rows
-        val total = adapter.getTotalPrice() * (1 - discount * 0.01)
+        total = adapter.getTotalPrice() * (1 - discount * 0.01)
         return total
     }
 
+    private fun displayPayment() {
+        val intent = Intent(requireContext(), PaymentActivity::class.java)
+        intent.putExtra("userId", userId)
+        intent.putExtra("price", total)
+        val listingIds = ArrayList(listings.map { it.listingId })
+        intent.putIntegerArrayListExtra("listingIds", listingIds)
+
+        startActivity(intent)
+    }
+
     private fun getProduct() {
-        startActivity(Intent(requireContext(), PaymentActivity::class.java))
+        displayPayment()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -99,7 +109,8 @@ class CartFragment : Fragment() {
             val couponCode = binding.couponEditText.text.toString()
             if (couponCode.isNotBlank()) {
                 viewLifecycleOwner.lifecycleScope.launch {
-                    val total = calculateCost(couponCode)
+                    val discount = validateCoupon(couponCode)
+                    val total = calculateCost(discount)
                     binding.totalPriceTextView.text = "Total: ${"%.2f€".format(total)}"
                 }
             }
@@ -121,15 +132,13 @@ class CartFragment : Fragment() {
 
         // Placeholder listener for Continue to Payment button
         binding.continueToPaymentButton.setOnClickListener {
-            // Placeholder action: show a Toast
             getProduct()
-            Toast.makeText(requireContext(), "Continue to Payment clicked", Toast.LENGTH_SHORT).show()
         }
 
         viewLifecycleOwner.lifecycleScope.launch {
             try {
                 listings = withContext(Dispatchers.IO) {
-                    AppDatabase.showCart(requireContext(), userId)        // <<- only context
+                    AppDatabase.showCart(requireContext(), userId)
                 }
 
                 if (listings.isNotEmpty()) {

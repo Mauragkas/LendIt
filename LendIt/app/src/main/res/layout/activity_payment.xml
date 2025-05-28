@@ -47,6 +47,30 @@
         </RadioGroup>
 
         <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/bank_details_form"
+            android:orientation="vertical"
+            android:visibility="gone"
+            android:layout_marginTop="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Στοιχεία Τράπεζας"
+                android:textSize="18sp"
+                android:layout_marginBottom="8dp" />
+
+            <EditText
+                android:id="@+id/edit_bank_number"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="iBan"
+                android:maxLength="128" />
+
+        </LinearLayout>
+
+        <LinearLayout
             android:id="@+id/card_details_form"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -89,13 +113,16 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:hint="Ημ. Λήξης (MM/YY)"
-                    android:inputType="text" />
+                    android:maxLength="5"
+                    android:inputType="number" />
+
 
                 <EditText
                     android:id="@+id/edit_cvv"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
+                    android:maxLength="3"
                     android:hint="CVV"
                     android:inputType="numberPassword"
                     android:layout_marginStart="8dp" />
