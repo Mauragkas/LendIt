@@ -2,6 +2,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
+import com.example.lendit.data.local.entities.ListingReportCount
 import com.example.lendit.data.local.entities.Report
 
 @Dao
@@ -17,13 +18,16 @@ interface ReportDao {
 
     @Query("SELECT * FROM report")
     suspend fun getAllReports(): List<Report>
-    
+
     @Query("SELECT * FROM report WHERE status = :status")
     suspend fun getReportsByStatus(status: String): List<Report>
 
     @Query("DELETE FROM report WHERE reportId = :reportId")
     suspend fun deleteReport(reportId: Int)
-    
+
     @Query("SELECT * FROM report WHERE reportId = :reportId LIMIT 1")
     suspend fun getReportById(reportId: Int): Report?
+
+    @Query("SELECT listingId, COUNT(*) as reportCount FROM report GROUP BY listingId")
+    suspend fun getListingReportCounts(): List<ListingReportCount>
 }

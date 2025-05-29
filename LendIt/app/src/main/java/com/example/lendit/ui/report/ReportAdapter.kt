@@ -14,6 +14,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.RecyclerView
 import com.example.lendit.ListingDetailsActivity
 import com.example.lendit.R
+import com.example.lendit.data.local.ListingManager
 import com.example.lendit.data.local.entities.Report
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -26,7 +27,8 @@ import kotlinx.coroutines.withContext
 class ReportAdapter(
         private val reports: MutableList<Report>,
         private val scope: CoroutineScope,
-        private val context: Context
+        private val context: Context,
+        private val reportCounts: MutableMap<Int, Int> = mutableMapOf()
 ) : RecyclerView.Adapter<ReportAdapter.ReportViewHolder>() {
 
     class ReportViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -48,8 +50,11 @@ class ReportAdapter(
     override fun onBindViewHolder(holder: ReportViewHolder, position: Int) {
         val report = reports[position]
 
+        // Get report count for this listing
+        val reportCount = reportCounts[report.listingId] ?: 1
+
         holder.reportIdTextView.text = "Report #${report.reportId}"
-        holder.listingIdTextView.text = "Listing: ${report.listingId}"
+        holder.listingIdTextView.text = "Listing: ${report.listingId} (${reportCount} reports)"
         holder.reasonTextView.text = report.reason
         holder.commentsTextView.text = report.comments
         holder.statusTextView.text = report.status
@@ -133,6 +138,10 @@ class ReportAdapter(
         }
     }
 
+    override fun getItemCount(): Int {
+        return reports.size
+    }
+
     private fun showActionDialog(report: Report) {
         val options =
                 arrayOf(
@@ -160,24 +169,20 @@ class ReportAdapter(
         scope.launch {
             try {
                 val db = AppDatabase.getInstance(context)
-
-                // Create a copy with the updated status
                 val updatedReport = report.copy(status = "REVIEWED")
                 db.reportDao().updateReport(updatedReport)
 
-                // Update the list item
-                val index = reports.indexOfFirst { it.reportId == report.reportId }
-                if (index >= 0) {
-                    reports[index] = updatedReport
-                }
-
                 withContext(Dispatchers.Main) {
                     Toast.makeText(context, "Report marked as reviewed", Toast.LENGTH_SHORT).show()
-                    notifyDataSetChanged()
+                    val position = reports.indexOf(report)
+                    if (position != -1) {
+                        reports[position] = updatedReport
+                        notifyItemChanged(position)
+                    }
                 }
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
-                    Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "Error updating report: ${e.message}", Toast.LENGTH_SHORT).show()
                 }
             }
         }
@@ -186,9 +191,7 @@ class ReportAdapter(
     private fun showRemoveListingConfirmation(report: Report) {
         AlertDialog.Builder(context)
                 .setTitle("Remove Listing")
-                .setMessage(
-                        "Are you sure you want to permanently remove this listing? This action cannot be undone."
-                )
+                .setMessage("Are you sure you want to permanently remove this listing? This action cannot be undone.")
                 .setPositiveButton("Remove") { _, _ -> removeListing(report) }
                 .setNegativeButton("Cancel", null)
                 .show()
@@ -198,34 +201,38 @@ class ReportAdapter(
         scope.launch {
             try {
                 val db = AppDatabase.getInstance(context)
-
-                // Delete the listing
                 val listing = db.listingDao().getListingById(report.listingId)
+
                 if (listing != null) {
                     db.listingDao().deleteListing(listing)
 
-                    // Update all reports for this listing
+                    // Update all related reports
                     val relatedReports = db.reportDao().getReportsForListing(report.listingId)
                     for (relatedReport in relatedReports) {
                         val updatedReport = relatedReport.copy(status = "CLOSED")
                         db.reportDao().updateReport(updatedReport)
-
-                        // Update the report in our list if it exists
-                        val index = reports.indexOfFirst { it.reportId == relatedReport.reportId }
-                        if (index >= 0) {
-                            reports[index] = updatedReport
-                        }
                     }
 
                     withContext(Dispatchers.Main) {
-                        Toast.makeText(context, "Listing removed successfully", Toast.LENGTH_SHORT)
-                                .show()
-                        notifyDataSetChanged()
+                        Toast.makeText(context, "Listing removed successfully", Toast.LENGTH_SHORT).show()
+                        // Refresh the adapter with updated data
+                        val reportsToUpdate = reports.filter { it.listingId == report.listingId }
+                        for (reportToUpdate in reportsToUpdate) {
+                            val position = reports.indexOf(reportToUpdate)
+                            if (position != -1) {
+                                reports[position] = reportToUpdate.copy(status = "CLOSED")
+                                notifyItemChanged(position)
+                            }
+                        }
+                    }
+                } else {
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(context, "Listing not found", Toast.LENGTH_SHORT).show()
                     }
                 }
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
-                    Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "Error removing listing: ${e.message}", Toast.LENGTH_SHORT).show()
                 }
             }
         }
@@ -234,27 +241,25 @@ class ReportAdapter(
     private fun deactivateListing(report: Report) {
         scope.launch {
             try {
-                val db = AppDatabase.getInstance(context)
+                val result = ListingManager.updateListingStatus(context, report.listingId, ListingStatus.INACTIVE)
 
-                // Deactivate the listing
-                val listing = db.listingDao().getListingById(report.listingId)
-                if (listing != null) {
-                    val updatedListing = listing.copy(status = ListingStatus.INACTIVE)
-                    db.listingDao().updateListing(updatedListing)
-
+                if (result) {
                     // Update report status
+                    val db = AppDatabase.getInstance(context)
                     val updatedReport = report.copy(status = "REVIEWED")
                     db.reportDao().updateReport(updatedReport)
 
-                    // Update the report in our list
-                    val index = reports.indexOfFirst { it.reportId == report.reportId }
-                    if (index >= 0) {
-                        reports[index] = updatedReport
-                    }
-
                     withContext(Dispatchers.Main) {
                         Toast.makeText(context, "Listing deactivated", Toast.LENGTH_SHORT).show()
-                        notifyDataSetChanged()
+                        val position = reports.indexOf(report)
+                        if (position != -1) {
+                            reports[position] = updatedReport
+                            notifyItemChanged(position)
+                        }
+                    }
+                } else {
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(context, "Failed to deactivate listing", Toast.LENGTH_SHORT).show()
                     }
                 }
             } catch (e: Exception) {
@@ -269,24 +274,20 @@ class ReportAdapter(
         scope.launch {
             try {
                 val db = AppDatabase.getInstance(context)
-
-                // Update report status to CLOSED
                 val updatedReport = report.copy(status = "CLOSED")
                 db.reportDao().updateReport(updatedReport)
 
-                // Update the report in our list
-                val index = reports.indexOfFirst { it.reportId == report.reportId }
-                if (index >= 0) {
-                    reports[index] = updatedReport
-                }
-
                 withContext(Dispatchers.Main) {
                     Toast.makeText(context, "Report dismissed", Toast.LENGTH_SHORT).show()
-                    notifyDataSetChanged()
+                    val position = reports.indexOf(report)
+                    if (position != -1) {
+                        reports[position] = updatedReport
+                        notifyItemChanged(position)
+                    }
                 }
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
-                    Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "Error dismissing report: ${e.message}", Toast.LENGTH_SHORT).show()
                 }
             }
         }
@@ -296,34 +297,33 @@ class ReportAdapter(
         scope.launch {
             try {
                 val db = AppDatabase.getInstance(context)
-
-                // Update report status
                 val updatedReport = report.copy(status = "CLOSED")
                 db.reportDao().updateReport(updatedReport)
 
-                // Update the report in our list
-                val index = reports.indexOfFirst { it.reportId == report.reportId }
-                if (index >= 0) {
-                    reports[index] = updatedReport
-                }
-
                 withContext(Dispatchers.Main) {
                     Toast.makeText(context, "Report closed", Toast.LENGTH_SHORT).show()
-                    notifyDataSetChanged()
+                    val position = reports.indexOf(report)
+                    if (position != -1) {
+                        reports[position] = updatedReport
+                        notifyItemChanged(position)
+                    }
                 }
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
-                    Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "Error closing report: ${e.message}", Toast.LENGTH_SHORT).show()
                 }
             }
         }
     }
 
-    override fun getItemCount() = reports.size
-
-    fun updateReports(newReports: List<Report>) {
+    // Update this method to accept the report counts
+    fun updateReports(newReports: List<Report>, newReportCounts: Map<Int, Int> = emptyMap()) {
         reports.clear()
         reports.addAll(newReports)
+
+        reportCounts.clear()
+        reportCounts.putAll(newReportCounts)
+
         notifyDataSetChanged()
     }
 }

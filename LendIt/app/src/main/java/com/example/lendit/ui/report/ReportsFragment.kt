@@ -17,8 +17,7 @@ import kotlinx.coroutines.launch
 class ReportsFragment : Fragment() {
 
     private var _binding: FragmentReportsBinding? = null
-    private val binding
-        get() = _binding!!
+    private val binding get() = _binding!!
     private lateinit var adapter: ReportAdapter
     private var currentFilter = "All"
 
@@ -74,18 +73,35 @@ class ReportsFragment : Fragment() {
         lifecycleScope.launch {
             try {
                 val db = AppDatabase.getInstance(requireContext())
-                val reports =
-                        when (currentFilter) {
-                            "Pending" -> db.reportDao().getReportsByStatus("PENDING")
-                            "Reviewed" -> db.reportDao().getReportsByStatus("REVIEWED")
-                            "Closed" -> db.reportDao().getReportsByStatus("CLOSED")
-                            else -> db.reportDao().getAllReports()
-                        }
 
-                if (reports.isNotEmpty()) {
-                    adapter.updateReports(reports)
+                // Get all reports
+                val allReports = db.reportDao().getAllReports()
+
+                // Group reports by listing ID and count them
+                val reportCountByListing = allReports.groupingBy { it.listingId }.eachCount()
+
+                // Filter reports based on selected filter
+                val filteredReports = when (currentFilter) {
+                    "Pending" -> allReports.filter { it.status == "PENDING" }
+                    "Reviewed" -> allReports.filter { it.status == "REVIEWED" }
+                    "Closed" -> allReports.filter { it.status == "CLOSED" }
+                    else -> allReports
+                }
+
+                if (filteredReports.isNotEmpty()) {
+                    // Group by listing ID and take the most recent report for each listing
+                    val uniqueReports = filteredReports
+                        .groupBy { it.listingId }
+                        .map { entry -> entry.value.maxByOrNull { it.reportDate }!! }
+
+                    // Sort by number of reports per listing (most reports first)
+                    val sortedReports = uniqueReports.sortedByDescending {
+                        reportCountByListing[it.listingId] ?: 0
+                    }
+
+                    adapter.updateReports(sortedReports, reportCountByListing)
                     binding.emptyStateLayout.visibility = View.GONE
-                    binding.reportCountText.text = "Reports found: ${reports.size}"
+                    binding.reportCountText.text = "Reports found: ${filteredReports.size} across ${reportCountByListing.size} listings"
                     binding.reportCountText.visibility = View.VISIBLE
                 } else {
                     binding.emptyStateLayout.visibility = View.VISIBLE
@@ -93,11 +109,10 @@ class ReportsFragment : Fragment() {
                 }
             } catch (e: Exception) {
                 Toast.makeText(
-                                requireContext(),
-                                "Error loading reports: ${e.message}",
-                                Toast.LENGTH_SHORT
-                        )
-                        .show()
+                    requireContext(),
+                    "Error loading reports: ${e.message}",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         }
     }
