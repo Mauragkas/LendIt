@@ -16,6 +16,7 @@ import com.example.lendit.R
 import com.example.lendit.data.local.ListingManager.Companion.updateListingStatus
 import com.example.lendit.data.local.entities.Order
 import com.example.lendit.data.local.entities.PaymentMethod
+import com.example.lendit.data.local.entities.Rental
 import kotlinx.coroutines.launch
 import kotlin.math.log
 
@@ -221,7 +222,17 @@ class PaymentActivity : AppCompatActivity() {
 
             listingIds?.forEach { listingId ->
                 lifecycleScope.launch {
-                    updateListingStatus(applicationContext,listingId,ListingStatus.UNAVAILABLE)
+                    // Update listing status
+                    updateListingStatus(applicationContext, listingId, ListingStatus.UNAVAILABLE)
+
+                    // Create rental record for review
+                    val rental = Rental(
+                        userId = userId,
+                        listingId = listingId,
+                        rentalDate = System.currentTimeMillis(),
+                        isReviewed = false
+                    )
+                    AppDatabase.getInstance(applicationContext).rentalDao().insert(rental)
                 }
             }
 
