@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<navigation
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mobile_navigation"
+    app:startDestination="@+id/navigation_home"
+>
+
+    <fragment
+        android:id="@+id/navigation_home"
+        android:name="com.example.lendit.ui.home.HomeFragment"
+        android:label="@string/title_home"
+        tools:layout="@layout/fragment_home"
+    />
+
+    <fragment
+        android:id="@+id/navigation_profile"
+        android:name="com.example.lendit.ui.profile.ProfileFragment"
+        android:label="@string/title_profile"
+        tools:layout="@layout/fragment_profile"
+    />
+
+    <fragment
+        android:id="@+id/navigation_compare"
+        android:name="com.example.lendit.ui.compare.CompareFragment"
+        android:label="@string/title_compare"
+        tools:layout="@layout/fragment_compare" />
+
+    <fragment
+        android:id="@+id/navigation_archive"
+        android:name="com.example.lendit.ui.archive.ArchiveFragment"
+        android:label="@string/title_archive"
+        tools:layout="@layout/fragment_archive"
+    />
+
+    <fragment
+        android:id="@+id/navigation_new_listing"
+        android:name="com.example.lendit.ui.show_listings.ShowListingsFragment"
+        android:label="@string/title_cart"
+        tools:layout="@layout/activity_listing_creation"
+    />
+
+    <fragment
+        android:id="@+id/navigation_premium"
+        android:name="com.example.lendit.ui.premium.PremiumFragment"
+        android:label="@string/title_premium"
+        tools:layout="@layout/fragment_premium"
+    />
+</navigation>

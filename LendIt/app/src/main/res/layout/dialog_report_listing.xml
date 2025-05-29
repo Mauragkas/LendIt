@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp"
+>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Αναφορά Αγγελίας"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="16dp"
+    />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Λόγος αναφοράς:"
+        android:textStyle="bold"
+    />
+
+    <Spinner
+        android:id="@+id/reportReasonSpinner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+    />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Σχόλια:"
+        android:textStyle="bold"
+    />
+
+    <EditText
+        android:id="@+id/reportComments"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="100dp"
+        android:gravity="top"
+        android:inputType="textMultiLine"
+        android:layout_marginBottom="16dp"
+    />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="16dp"
+    >
+
+        <Button
+            android:id="@+id/attachFilesButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Επισύναψη αρχείων"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+        />
+
+        <TextView
+            android:id="@+id/attachmentStatusText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginStart="8dp"
+            android:text="Δεν έχουν επιλεγεί αρχεία"
+        />
+    </LinearLayout>
+
+    <CheckBox
+        android:id="@+id/reportTermsCheckbox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Δηλώνω ότι η αναφορά μου είναι αληθής και δεν περιέχει προσβλητικό περιεχόμενο"
+    />
+
+</LinearLayout>

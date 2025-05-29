@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp"
+>
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+    >
+        <ImageButton
+            android:id="@+id/backButton"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:src="@drawable/ic_backbutton_24dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+        />
+
+        <TextView
+            android:id="@+id/reportIdText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Report #123"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            app:layout_constraintTop_toTopOf="@id/backButton"
+            app:layout_constraintBottom_toBottomOf="@id/backButton"
+            app:layout_constraintStart_toEndOf="@id/backButton"
+        />
+
+        <TextView
+            android:id="@+id/reportDetailsLabel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Report Details"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginTop="16dp"
+            app:layout_constraintTop_toBottomOf="@id/backButton"
+            app:layout_constraintStart_toStartOf="parent"
+        />
+
+        <TextView
+            android:id="@+id/reportReasonLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Reason:"
+            android:textStyle="bold"
+            android:layout_marginTop="8dp"
+            app:layout_constraintTop_toBottomOf="@id/reportDetailsLabel"
+            app:layout_constraintStart_toStartOf="parent"
+        />
+
+        <TextView
+            android:id="@+id/reportReasonText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Misleading Description"
+            android:layout_marginTop="4dp"
+            app:layout_constraintTop_toBottomOf="@id/reportReasonLabel"
+            app:layout_constraintStart_toStartOf="parent"
+        />
+
+        <TextView
+            android:id="@+id/reportCommentsLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Comments:"
+            android:textStyle="bold"
+            android:layout_marginTop="12dp"
+            app:layout_constraintTop_toBottomOf="@id/reportReasonText"
+            app:layout_constraintStart_toStartOf="parent"
+        />
+
+        <TextView
+            android:id="@+id/reportCommentsText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="This listing doesn't match the description. The tool is not electric as stated."
+            android:layout_marginTop="4dp"
+            app:layout_constraintTop_toBottomOf="@id/reportCommentsLabel"
+            app:layout_constraintStart_toStartOf="parent"
+        />
+
+        <TextView
+            android:id="@+id/reportStatusLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Status:"
+            android:textStyle="bold"
+            android:layout_marginTop="12dp"
+            app:layout_constraintTop_toBottomOf="@id/reportCommentsText"
+            app:layout_constraintStart_toStartOf="parent"
+        />
+
+        <TextView
+            android:id="@+id/reportStatusText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="PENDING"
+            android:layout_marginTop="4dp"
+            app:layout_constraintTop_toBottomOf="@id/reportStatusLabel"
+            app:layout_constraintStart_toStartOf="parent"
+        />
+
+        <androidx.constraintlayout.widget.Group
+            android:id="@+id/attachmentsGroup"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:constraint_referenced_ids="reportAttachmentsLabel,reportAttachmentsText"
+            android:visibility="gone"
+        />
+
+        <TextView
+            android:id="@+id/reportAttachmentsLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Attachments:"
+            android:textStyle="bold"
+            android:layout_marginTop="12dp"
+            app:layout_constraintTop_toBottomOf="@id/reportStatusText"
+            app:layout_constraintStart_toStartOf="parent"
+        />
+
+        <TextView
+            android:id="@+id/reportAttachmentsText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="2 attachments"
+            android:layout_marginTop="4dp"
+            app:layout_constraintTop_toBottomOf="@id/reportAttachmentsLabel"
+            app:layout_constraintStart_toStartOf="parent"
+        />
+
+        <View
+            android:id="@+id/divider"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@android:color/darker_gray"
+            android:layout_marginTop="16dp"
+            app:layout_constraintTop_toBottomOf="@id/reportAttachmentsText"
+            app:layout_constraintStart_toStartOf="parent"
+        />
+
+        <TextView
+            android:id="@+id/listingDetailsLabel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Listing Details"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginTop="16dp"
+            app:layout_constraintTop_toBottomOf="@id/divider"
+            app:layout_constraintStart_toStartOf="parent"
+        />
+
+        <TextView
+            android:id="@+id/listingTitleLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Title:"
+            android:textStyle="bold"
+            android:layout_marginTop="8dp"
+            app:layout_constraintTop_toBottomOf="@id/listingDetailsLabel"
+            app:layout_constraintStart_toStartOf="parent"
+        />
+
+        <TextView
+            android:id="@+id/listingTitleText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Electric Drill"
+            android:layout_marginTop="4dp"
+            app:layout_constraintTop_toBottomOf="@id/listingTitleLabel"
+            app:layout_constraintStart_toStartOf="parent"
+        />
+
+        <TextView
+            android:id="@+id/listingDescriptionLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Description:"
+            android:textStyle="bold"
+            android:layout_marginTop="12dp"
+            app:layout_constraintTop_toBottomOf="@id/listingTitleText"
+            app:layout_constraintStart_toStartOf="parent"
+        />
+
+        <TextView
+            android:id="@+id/listingDescriptionText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Powerful electric drill, perfect for home projects."
+            android:layout_marginTop="4dp"
+            app:layout_constraintTop_toBottomOf="@id/listingDescriptionLabel"
+            app:layout_constraintStart_toStartOf="parent"
+        />
+
+        <TextView
+            android:id="@+id/listingOwnerText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Owner: John Doe"
+            android:layout_marginTop="12dp"
+            app:layout_constraintTop_toBottomOf="@id/listingDescriptionText"
+            app:layout_constraintStart_toStartOf="parent"
+        />
+
+        <TextView
+            android:id="@+id/listingStatusText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Status: AVAILABLE"
+            android:layout_marginTop="4dp"
+            app:layout_constraintTop_toBottomOf="@id/listingOwnerText"
+            app:layout_constraintStart_toStartOf="parent"
+        />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="16dp"
+            app:layout_constraintTop_toBottomOf="@id/listingStatusText"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+        >
+
+            <Button
+                android:id="@+id/dismissButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Dismiss Report"
+                android:layout_marginEnd="4dp"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+            />
+
+            <Button
+                android:id="@+id/actionButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Take Action"
+                android:layout_marginStart="4dp"
+            />
+
+        </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>

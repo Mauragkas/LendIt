@@ -1,7 +1,103 @@
-<?xml version="1.0" encoding="utf-8"?>
-<TextView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/textViewItem"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="16dp"
-    android:textSize="18sp" />
+    android:orientation="horizontal"
+    android:clickable="true"
+    android:weightSum="2"
+    android:padding="16dp">
+
+    <ImageView
+        android:id="@+id/listingImage"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:scaleType="centerCrop"
+        android:contentDescription="@string/listing_image" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp">
+
+
+        <ImageButton
+            android:id="@+id/imageFavoriteButtonListings"
+            android:layout_width="match_parent"
+            android:layout_height="28dp"
+            android:layout_marginStart="100dp"
+            android:background="@android:color/transparent"
+            app:srcCompat="@drawable/ic_favorite_border" />
+
+        <ImageButton
+            android:id="@+id/removeFromCartButton"
+            android:layout_width="match_parent"
+            android:layout_height="28dp"
+            android:layout_marginStart="100dp"
+            android:background="@android:color/transparent"
+            app:srcCompat="@drawable/ic_trash_24dp" />
+
+        <TextView
+            android:id="@+id/listingTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="6dp" />
+
+        <TextView
+            android:id="@+id/listingDescription"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="6dp" />
+
+        <TextView
+            android:id="@+id/listingCategory"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="12sp"
+            android:textStyle="italic"
+            android:layout_marginBottom="6dp" />
+
+        <TextView
+            android:id="@+id/listingLocation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="6dp" />
+
+        <TextView
+            android:id="@+id/listingStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="6dp" />
+
+        <TextView
+            android:id="@+id/listingPrice"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="end"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="6dp" />
+
+        <TextView
+            android:id="@+id/listingCreationDate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="10sp"
+            android:layout_marginBottom="6dp"
+            android:gravity="end"/>
+
+        <TextView
+            android:id="@+id/listingCreator"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="10sp"
+            android:gravity="end" />
+
+    </LinearLayout>
+
+</LinearLayout>

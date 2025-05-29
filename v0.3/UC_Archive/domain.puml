@@ -1,0 +1,31 @@
+@startuml
+class Dashboard {
+    +viewHistory()
+    +displayListing()
+}
+
+class HistoryScreen {
+    +getListingUserId()
+    +filterResultsList()
+    +displayHistoryScreen()
+    +showEditingForm()
+    +submitForm()
+    +checkForm()
+    +temporarySave()
+    +showConfirmation()
+    +cliclConfirm()
+    +save()
+    +informUser()
+}
+
+class FormView {
+    +
+}
+
+class ListingDetailsScreen {}
+
+class Database {}
+
+class TempStorage {}
+
+@enduml
