@@ -1,4 +1,4 @@
-package com.example.lendit.ui.reports
+package com.example.lendit.ui.report
 
 import AppDatabase
 import android.os.Bundle

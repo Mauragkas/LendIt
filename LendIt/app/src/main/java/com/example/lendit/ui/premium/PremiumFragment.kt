@@ -1,10 +1,14 @@
 package com.example.lendit.ui.premium
 
+import android.app.Activity
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -20,12 +24,24 @@ class PremiumFragment : Fragment() {
     private var _binding: FragmentPremiumBinding? = null
     private val binding get() = _binding!!
     private lateinit var viewModel: PremiumViewModel
+    private lateinit var paymentLauncher: ActivityResultLauncher<Intent>
+    private lateinit var sharedPref: SharedPreferences
+    private lateinit var userEmail: String
+
+
+    fun showProfile() {
+        findNavController().navigate(R.id.navigation_profile)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+
+        sharedPref = requireActivity().getSharedPreferences("MyAppPrefs", 0)
+        userEmail = sharedPref.getString("email", "") ?: ""
+
         _binding = FragmentPremiumBinding.inflate(inflater, container, false)
         viewModel = ViewModelProvider(this).get(PremiumViewModel::class.java)
         return binding.root
@@ -45,17 +61,37 @@ class PremiumFragment : Fragment() {
         // Update UI based on premium status
         updateUI(isPremium)
 
+
+            paymentLauncher = registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult()
+        ) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                // Payment was successful
+                updateUserStatus(hasPremium = true)
+                showProfile()
+                android.widget.Toast.makeText(requireContext(), "Είστε πλέον Premium!", android.widget.Toast.LENGTH_SHORT).show()
+            } else {
+                // Payment was cancelled or failed
+                // notifyUser()
+                android.widget.Toast.makeText(requireContext(), "Η πληρωμή ακυρώθηκε ή απέτυχε.", android.widget.Toast.LENGTH_SHORT).show()
+            }
+        }
+
         // Setup learn more button
         binding.learnMoreButton.setOnClickListener {
             // Show plan details
             binding.planDetailsContainer.visibility = View.VISIBLE
         }
 
-        // Setup get premium button
-        binding.getPremiumButton.setOnClickListener {
+        fun showOptions(){
             // Show duration selection
             binding.planDurationContainer.visibility = View.VISIBLE
             binding.subscribeButton.isEnabled = false
+        }
+
+        // Setup get premium button
+        binding.getPremiumButton.setOnClickListener {
+            showOptions()
         }
 
         // Setup view benefits button for premium users
@@ -75,7 +111,7 @@ class PremiumFragment : Fragment() {
 
         // Set up cancel button
         binding.cancelSubscriptionButton.setOnClickListener {
-            showCancellationDialog()
+            cancelSubscription()
         }
     }
 
@@ -125,6 +161,21 @@ class PremiumFragment : Fragment() {
         binding.subscribeButton.isEnabled = true
     }
 
+    fun updateUserStatus(hasPremium: Boolean) {
+        val db = AppDatabase.getLogin(requireContext(), lifecycleScope)
+        val userDao = db.userDao()
+        lifecycleScope.launch {
+            // Update premium status in database
+            userDao.updateUserStatus(userEmail, hasPremium, null)
+
+            // Update shared preferences
+            with(sharedPref.edit()) {
+                putBoolean("isPremium", hasPremium)
+                apply()
+            }
+        }
+    }
+
     private fun proceedToPayment() {
         AlertDialog.Builder(requireContext())
             .setTitle("Επιβεβαίωση αγοράς")
@@ -134,95 +185,29 @@ class PremiumFragment : Fragment() {
                     putExtra("selectedPlan", viewModel.selectedPlan)
                     putExtra("planPrice", viewModel.planPrice)
                 }
-                startActivity(intent)
+                paymentLauncher.launch(intent)
             }
-
             .setNegativeButton("Άκυρο", null)
             .show()
     }
 
-    private fun simulateSuccessfulPayment() {
-        val sharedPref = requireActivity().getSharedPreferences("MyAppPrefs", 0)
-        val userEmail = sharedPref.getString("email", "") ?: ""
-
-        if (userEmail.isNotEmpty()) {
-            // Update database
-            lifecycleScope.launch {
-                try {
-                    val db = AppDatabase.getLogin(requireContext(), lifecycleScope)
-                    val userDao = db.userDao()
-
-                    // Update premium status in database
-                    userDao.updatePremiumStatus(userEmail, true, viewModel.selectedPlan)
-
-                    // Update shared preferences
-                    with(sharedPref.edit()) {
-                        putBoolean("isPremium", true)
-                        putString("premiumPlan", viewModel.selectedPlan)
-                        apply()
-                    }
-
-                    // Show success message on main thread
-                    requireActivity().runOnUiThread {
-                        AlertDialog.Builder(requireContext())
-                            .setTitle("Επιτυχής αναβάθμιση!")
-                            .setMessage("Συγχαρητήρια! Έχετε αναβαθμιστεί σε Premium χρήστη.")
-                            .setPositiveButton("OK") { _, _ ->
-                                findNavController().navigateUp()
-                            }
-                            .show()
-                    }
-                } catch (e: Exception) {
-                    requireActivity().runOnUiThread {
-                        android.widget.Toast.makeText(
-                            requireContext(),
-                            "Σφάλμα κατά την ενημέρωση: ${e.message}",
-                            android.widget.Toast.LENGTH_SHORT
-                        ).show()
-                    }
-                }
-            }
-        } else {
-            android.widget.Toast.makeText(
-                requireContext(),
-                "Σφάλμα: Δεν βρέθηκε χρήστης",
-                android.widget.Toast.LENGTH_SHORT
-            ).show()
-        }
-    }
-
-    private fun showCancellationDialog() {
+    private fun cancelSubscription() {
         AlertDialog.Builder(requireContext())
             .setTitle("Ακύρωση συνδρομής Premium")
             .setMessage("Είστε βέβαιοι ότι θέλετε να ακυρώσετε τη συνδρομή σας; Θα χάσετε όλα τα προνόμια Premium.")
             .setPositiveButton("Ακύρωση συνδρομής") { _, _ ->
-                cancelSubscription()
+                clickConfirm()
             }
             .setNegativeButton("Όχι, θέλω να παραμείνω Premium", null)
             .show()
     }
 
-    private fun cancelSubscription() {
-        val sharedPref = requireActivity().getSharedPreferences("MyAppPrefs", 0)
-        val userEmail = sharedPref.getString("email", "") ?: ""
-
+    private fun clickConfirm() {
         if (userEmail.isNotEmpty()) {
             // Update database
             lifecycleScope.launch {
                 try {
-                    val db = AppDatabase.getLogin(requireContext(), lifecycleScope)
-                    val userDao = db.userDao()
-
-                    // Update premium status in database
-                    userDao.updatePremiumStatus(userEmail, false, null)
-
-                    // Update shared preferences
-                    with(sharedPref.edit()) {
-                        putBoolean("isPremium", false)
-                        remove("premiumPlan")
-                        apply()
-                    }
-
+                    updateUserStatus(hasPremium = false)
                     // Update UI on main thread
                     requireActivity().runOnUiThread {
                         updateUI(false)
@@ -232,7 +217,7 @@ class PremiumFragment : Fragment() {
                             .setTitle("Η συνδρομή σας ακυρώθηκε")
                             .setMessage("Η συνδρομή σας έχει ακυρωθεί. Θα διατηρήσετε τα προνόμια Premium μέχρι το τέλος της τρέχουσας περιόδου χρέωσης.")
                             .setPositiveButton("OK") { _, _ ->
-                                findNavController().navigateUp()
+                                showProfile()
                             }
                             .show()
                     }

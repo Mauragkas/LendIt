@@ -44,7 +44,7 @@ getListingDetails() ginetai loadListings
 showResults feugei (sumperilamvanetai sto compareListings)
 
 
-cart
+payment
 -------------------------------------------
 
 cartFragment

@@ -1,5 +1,6 @@
 package com.example.lendit.ui.payment
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
@@ -21,13 +22,14 @@ class PaymentActivity : AppCompatActivity() {
     private lateinit var cardDetailsForm: View
     private lateinit var bankDetailsForm: View
     private lateinit var completePaymentButton: Button
+    private lateinit var expiryEditText: EditText
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_payment)
-        val expiryEditText = findViewById<EditText>(R.id.edit_expiry_date)
-        bankDetailsForm = findViewById<View>(R.id.bank_details_form)
 
+        expiryEditText = findViewById(R.id.edit_expiry_date)
+        bankDetailsForm = findViewById<View>(R.id.bank_details_form)
         paymentMethodGroup = findViewById(R.id.payment_method_group)
         cardDetailsForm = findViewById(R.id.card_details_form)
         completePaymentButton = findViewById(R.id.button_complete_payment)
@@ -109,6 +111,8 @@ class PaymentActivity : AppCompatActivity() {
         fun validatePayment (encryptedCardData: EncryptedCardData) {
             // validate payment
         }
+
+
         // payMethod()
         completePaymentButton.setOnClickListener {
             val selectedPaymentId = paymentMethodGroup.checkedRadioButtonId
@@ -117,11 +121,10 @@ class PaymentActivity : AppCompatActivity() {
             if (selectedPaymentId == R.id.radio_credit_card) {
                 // Toast.makeText(this, "Επεξεργασία πληρωμής με κάρτα", Toast.LENGTH_SHORT).show()
                 val cardNumber = findViewById<EditText>(R.id.edit_card_number).text.toString()
-                val expiryDate = findViewById<EditText>(R.id.edit_expiry_date).text.toString()
                 val cvv = findViewById<EditText>(R.id.edit_cvv).text.toString()
                 val cardHolderName = findViewById<EditText>(R.id.edit_cardholder_name).text.toString()
 
-                val encryptedData = dataEncryption(cardNumber, expiryDate, cvv, cardHolderName)
+                val encryptedData = dataEncryption(cardNumber, expiryEditText.toString(), cvv, cardHolderName)
                 validatePayment(encryptedData)
 
                 paymentMethod = PaymentMethod.CREDIT_CARD
@@ -138,7 +141,10 @@ class PaymentActivity : AppCompatActivity() {
                 orderId = 0,
                 renter = userId,
                 price = price,
-                paymentMethod = paymentMethod
+                paymentMethod = paymentMethod,
+                listingId = intent.getIntExtra("listingId", -1),
+                startDate = intent.getIntExtra("startDate", -1),
+                endDate = intent.getIntExtra("endDate", -1)
             )
             saveTransaction(newOrder)
             // sendReceipt() will go here
@@ -153,6 +159,7 @@ class PaymentActivity : AppCompatActivity() {
             }
 
             clearCart(userId)
+            setResult(Activity.RESULT_OK)
             finish()
         }
     }

@@ -64,9 +64,13 @@ class ProfileFragment : Fragment() {
             startActivity(intent)
         }
 
-        binding.premiumButton.setOnClickListener {
+        fun navigateToPremium() {
             findNavController().navigate(R.id.navigation_premium)
         }
+        binding.premiumButton.setOnClickListener {
+            navigateToPremium()
+        }
+
     }
 
     override fun onDestroyView() {

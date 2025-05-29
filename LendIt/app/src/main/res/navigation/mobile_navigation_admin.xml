@@ -8,7 +8,7 @@
 >
     <fragment
         android:id="@+id/navigation_reports"
-        android:name="com.example.lendit.ui.reports.ReportsFragment"
+        android:name="com.example.lendit.ui.report.ReportsFragment"
         android:label="@string/title_reports"
         tools:layout="@layout/fragment_reports"
     />

@@ -1,5 +1,6 @@
 package com.example.lendit
 
+import Converters
 import EquipmentListing
 import android.Manifest
 import android.app.Activity
@@ -11,6 +12,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.widget.*
+import android.widget.Button
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -22,9 +24,17 @@ import com.bumptech.glide.Glide
 import com.example.lendit.ListingActivity
 import com.example.lendit.data.local.entities.Report
 import com.example.lendit.data.local.entities.UserCart
+import com.google.android.material.datepicker.CalendarConstraints
+import com.google.android.material.datepicker.DateValidatorPointForward
+import com.google.android.material.datepicker.MaterialDatePicker
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.text.SimpleDateFormat
+import java.time.Instant
+import java.time.ZoneId
+import java.util.Date
+import java.util.Locale
 import kotlin.properties.Delegates
 
 class ListingDetailsActivity : AppCompatActivity() {
@@ -32,10 +42,15 @@ class ListingDetailsActivity : AppCompatActivity() {
     private val selectedFiles = mutableListOf<Uri>()
     private var attachmentStatusTextRef: TextView? = null
     private lateinit var adapter: RelatedListingsAdapter
+    private var formattedStart: Int? = null
+    private var formattedEnd: Int? = null
+    private lateinit var dateButton: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_listing_details)
+
+        dateButton = findViewById<Button>(R.id.date_button)
 
         val listingId = intent.getIntExtra("listing_id", -1)
         val db = AppDatabase.getInstance(applicationContext)
@@ -51,6 +66,43 @@ class ListingDetailsActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
+        /** Date Picker Listener */
+        dateButton.setOnClickListener {
+            val constraintsBuilder = CalendarConstraints.Builder()
+                .setValidator(DateValidatorPointForward.now())      // Disable past dates
+
+            val builder = MaterialDatePicker.Builder.dateRangePicker()
+                .setTitleText("Επιλέξτε εύρος ημερομηνιών")
+                .setCalendarConstraints(constraintsBuilder.build()) // Set constraints
+
+            val picker = builder.build()                            // Build Date picker
+
+            picker.show(supportFragmentManager, "DATE_PICKER")
+
+            picker.addOnPositiveButtonClickListener { selection ->
+                val startDate = selection.first  // Long timestamp in ms
+                val endDate = selection.second   // Long timestamp in ms
+
+                // Convert Long timestamp -> LocalDateTime
+                val startLocalDateTime = Instant.ofEpochMilli(startDate)
+                    .atZone(ZoneId.systemDefault())
+                    .toLocalDate()
+                val endLocalDateTime = Instant.ofEpochMilli(endDate)
+                    .atZone(ZoneId.systemDefault())
+                    .toLocalDate()
+
+                val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+                val startDisplay = formatter.format(Date(startDate))
+                val endDisplay = formatter.format(Date(endDate))
+
+                // Format LocalDateTime -> String using formatter
+                formattedStart = Converters().fromLocalDate(startLocalDateTime)
+                formattedEnd = Converters().fromLocalDate(endLocalDateTime)
+
+                // ISO_LOCAL_DATE_TIME strings to use
+                dateButton.text = "$startDisplay - $endDisplay"
+            }
+        }
 
         fun findSimilar(relatedListings: List<EquipmentListing>){
             adapter.update(relatedListings)
@@ -64,13 +116,18 @@ class ListingDetailsActivity : AppCompatActivity() {
             val category = db.listingDao().getCategoryById(listingId)
             val relatedListings = db.listingDao().getRelatedListings(category, listingId)
             findSimilar(relatedListings)
-
         }
 
-        // Set up report button click listener
+        // Set up lend now button click listener
         findViewById<Button>(R.id.lendNowButton).setOnClickListener {
-            lifecycleScope.launch {
-                addToCart(listingId)
+            if(formattedStart == null || formattedEnd == null){
+                Toast.makeText(this, "Δεν έχει επιλεχθεί ημερομηνία", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+            else {
+                lifecycleScope.launch {
+                    addToCart(listingId)
+                }
             }
         }
 
@@ -103,7 +160,6 @@ class ListingDetailsActivity : AppCompatActivity() {
                 }
 
                 findViewById<TextView>(R.id.listingCreationDate).text = "Creation date: ${listing.creationDate}"
-
                 findViewById<TextView>(R.id.listingCreator).text = "Owner: ${listing.ownerName}"
 
 
@@ -114,8 +170,6 @@ class ListingDetailsActivity : AppCompatActivity() {
             }
         }
     }
-
-
 
 
     private fun showReportDialog() {
@@ -200,7 +254,6 @@ class ListingDetailsActivity : AppCompatActivity() {
         val intent = Intent(Intent.ACTION_GET_CONTENT)
         intent.type = "*/*"
         intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
-        startActivityForResult(intent, REQUEST_CODE_PICK_FILES)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -317,7 +370,9 @@ class ListingDetailsActivity : AppCompatActivity() {
             // Create UserCart object
             val userCart = UserCart(
                 userId = userId,
-                listingId = listingId
+                listingId = listingId,
+                startDate = formattedStart!!,
+                endDate = formattedEnd!!
             )
 
             // Save to database

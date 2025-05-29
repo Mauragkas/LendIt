@@ -5,5 +5,8 @@ import androidx.room.Entity
 @Entity(primaryKeys = ["userId", "listingId"])
 data class UserCart(
     val userId: Int,
-    val listingId: Int
+    val listingId: Int,
+    val startDate: Int,
+    val endDate: Int
 )
+/// TODO: implment listing availability with orders

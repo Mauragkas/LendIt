@@ -14,6 +14,7 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
+import android.util.Log
 import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
@@ -283,6 +284,7 @@ class ListingActivity : AppCompatActivity() {
             }
         }
         return true
+
     }
 
     private fun temporarySave1() {
@@ -495,6 +497,7 @@ class ListingActivity : AppCompatActivity() {
                     if (isEditMode) {
                         // Update existing listing
                         db.listingDao().updateListing(listing)
+                        Log.d("DB_LOG", "SQL Query: UPDATE equipment_listings SET ... WHERE listingId = ${listing.listingId}")
                         android.util.Log.d(
                                 "ListingActivity",
                                 "Listing updated with ID: ${listing.listingId}"
@@ -502,6 +505,7 @@ class ListingActivity : AppCompatActivity() {
                     } else {
                         // Insert new listing
                         val id = db.listingDao().insert(listing)
+                        Log.d("DB_LOG", "SQL Query: INSERT INTO equipment_listings VALUES (...)")
                         android.util.Log.d("ListingActivity", "Listing created with ID: $id")
                     }
                 }

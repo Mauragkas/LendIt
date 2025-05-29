@@ -15,6 +15,9 @@ interface UserDao {
     @Query("SELECT * FROM user")
     suspend fun getAllUsers(): List<UserEntity>
 
+    @Query("SELECT COUNT(*) FROM user")
+    suspend fun getUserNumber(): Int
+
     @Query("SELECT * FROM user WHERE email = :email AND password = :password LIMIT 1")
     suspend fun getUserByEmailAndPassword(email: String, password: String): UserEntity?
 
@@ -22,7 +25,7 @@ interface UserDao {
     suspend fun getUserByEmail(email: String): UserEntity?
 
     @Query("UPDATE user SET premiumStatus = :premiumStatus, premiumPlan = :premiumPlan WHERE email = :email")
-    suspend fun updatePremiumStatus(email: String, premiumStatus: Boolean, premiumPlan: String?)
+    suspend fun updateUserStatus(email: String, premiumStatus: Boolean, premiumPlan: String?)
 
     @Update
     suspend fun updateUser(user: UserEntity)

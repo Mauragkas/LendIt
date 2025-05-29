@@ -9,7 +9,7 @@
     android:paddingStart="16dp"
     android:paddingEnd="16dp"
     android:paddingBottom="80dp"
-    tools:context=".ui.reports.ReportsFragment"
+    tools:context=".ui.report.ReportsFragment"
 >
 
     <TextView
