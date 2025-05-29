@@ -46,6 +46,9 @@ interface ListingDao {
     
     @Delete
     suspend fun deleteListing(listing: EquipmentListing)
+    
+    @Query("SELECT * FROM listing WHERE ownerName = :ownerName ORDER BY listingId DESC LIMIT 1")
+    suspend fun getMostRecentListingByOwner(ownerName: String): EquipmentListing?
 
     @Query("SELECT EXISTS(SELECT 1 FROM listing WHERE title = :title AND description = :description AND price = :price AND location = :location AND category = :category AND ownerName = :ownerName AND availableFrom = :availableFrom AND availableUntil = :availableUntil)")
     suspend fun listingExists(
