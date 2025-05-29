@@ -67,6 +67,17 @@
             android:text="Review"
         />
 
+        <TextView
+            android:id="@+id/reviewedStatusText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="✓ Reviewed"
+            android:textColor="@android:color/holo_green_dark"
+            android:textStyle="bold"
+            android:visibility="gone"
+            android:layout_gravity="center_vertical"
+        />
+
     </LinearLayout>
 
 </androidx.cardview.widget.CardView>

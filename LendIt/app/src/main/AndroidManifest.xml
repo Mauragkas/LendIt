@@ -40,6 +40,9 @@
 
         <activity android:name=".ReviewActivity" android:exported="true" />
 
+        <!-- Add the missing WriteReviewActivity declaration here -->
+        <activity android:name=".WriteReviewActivity" android:exported="true" />
+
         <!--        Search activity -->
         <activity android:name=".SearchActivity" android:exported="true" />
 
