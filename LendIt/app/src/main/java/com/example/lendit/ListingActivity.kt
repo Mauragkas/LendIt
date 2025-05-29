@@ -447,16 +447,7 @@ class ListingActivity : AppCompatActivity() {
             return false
         }
 
-        // Check if at least one photo is added
-        if (selectedImageUris.isEmpty()) {
-            Toast.makeText(
-                            this,
-                            "Παρακαλώ προσθέστε τουλάχιστον μία φωτογραφία",
-                            Toast.LENGTH_SHORT
-                    )
-                    .show()
-            return false
-        }
+        // No need to check for at least one photo
 
         return true
     }
