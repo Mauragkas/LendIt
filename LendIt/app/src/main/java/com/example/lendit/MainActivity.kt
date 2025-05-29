@@ -15,6 +15,8 @@ import com.google.android.material.textfield.TextInputEditText
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
+    private lateinit var navView: BottomNavigationView
+    private lateinit var navController: androidx.navigation.NavController
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -22,12 +24,30 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val navView: BottomNavigationView = binding.navView
+        navView = binding.navView
 
-        val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment_activity_main) as NavHostFragment
+        val navHostFragment = supportFragmentManager.findFragmentById(
+            R.id.nav_host_fragment_activity_main
+        ) as NavHostFragment
 
-        val navController = navHostFragment.navController
+        navController = navHostFragment.navController
 
         navView.setupWithNavController(navController)
+
+        // Handle navigation from intent
+        if (intent.getBooleanExtra("NAVIGATE_TO_FAVORITES", false)) {
+            navView.selectedItemId = R.id.navigation_favorites
+        }
+    }
+
+    // Handle new intents when activity is already running
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+
+        // Check if we need to navigate to favorites
+        if (intent.getBooleanExtra("NAVIGATE_TO_FAVORITES", false)) {
+            navView.selectedItemId = R.id.navigation_favorites
+        }
     }
 }

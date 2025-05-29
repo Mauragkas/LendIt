@@ -25,7 +25,11 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import com.example.lendit.data.local.entities.Favorite
-
+import android.widget.Button
+import androidx.navigation.NavController
+import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.fragment.findNavController
+import com.google.android.material.bottomnavigation.BottomNavigationView
 
 class ListingAdapter(private val items: MutableList<EquipmentListing>) :
     RecyclerView.Adapter<ListingAdapter.MyViewHolder>() {
@@ -42,6 +46,8 @@ class ListingAdapter(private val items: MutableList<EquipmentListing>) :
         val creator: TextView = itemView.findViewById(R.id.listingCreator)
         val favoriteButton : ImageButton = itemView.findViewById(R.id.imageFavoriteButtonListings)
         val cartButton : ImageButton = itemView.findViewById(R.id.removeFromCartButton)
+        val goToFavoritesButton : Button = itemView.findViewById(R.id.goToFavoritesButtonLayout)
+
 
     }
 
@@ -62,6 +68,8 @@ class ListingAdapter(private val items: MutableList<EquipmentListing>) :
         val favoriteDao = db.FavoriteDao()
         val sharedPref = context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
         val userId = sharedPref.getInt("user_id", -1)
+        val goToFavoritesButton = holder.goToFavoritesButton
+
 
         if (userId == -1) {
             Log.e("ListingAdapter", "User ID not found in SharedPreferences")
@@ -73,9 +81,9 @@ class ListingAdapter(private val items: MutableList<EquipmentListing>) :
             val isFavorite = favoriteDao.isFavorite(userId, currentItem.listingId)
             withContext(Dispatchers.Main) {
                 holder.favoriteButton.setImageResource(
-                    if (isFavorite) R.drawable.ic_favorite_filled
-                    else R.drawable.ic_favorite_border
+                    if (isFavorite) R.drawable.ic_favorite_filled else R.drawable.ic_favorite_border
                 )
+                goToFavoritesButton.visibility = if (isFavorite) View.VISIBLE else View.GONE
             }
         }
 
@@ -87,18 +95,38 @@ class ListingAdapter(private val items: MutableList<EquipmentListing>) :
                     favoriteDao.removeFromFavorites(userId, currentItem.listingId)
                     withContext(Dispatchers.Main) {
                         holder.favoriteButton.setImageResource(R.drawable.ic_favorite_border)
+                        goToFavoritesButton.visibility = View.GONE
                         Toast.makeText(context, "Removed from favorites", Toast.LENGTH_SHORT).show()
                     }
                 } else {
                     favoriteDao.addToFavorites(Favorite(userId = userId, listingId = currentItem.listingId))
                     withContext(Dispatchers.Main) {
                         holder.favoriteButton.setImageResource(R.drawable.ic_favorite_filled)
+                        goToFavoritesButton.visibility = View.VISIBLE
                         Toast.makeText(context, "Added to favorites", Toast.LENGTH_SHORT).show()
                     }
                 }
             }
         }
 
+        holder.goToFavoritesButton.setOnClickListener {
+            try {
+                val activity = context as? AppCompatActivity
+                if (activity != null) {
+                    // Start a new instance of MainActivity with a special flag to navigate to Favorites
+                    val intent = Intent(activity, MainActivity::class.java)
+                    intent.putExtra("NAVIGATE_TO_FAVORITES", true)
+                    intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                    activity.startActivity(intent)
+                    Toast.makeText(context, "Opening favorites", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(context, "Could not get activity instance", Toast.LENGTH_SHORT).show()
+                }
+            } catch (e: Exception) {
+                Log.e("ListingAdapter", "Navigation error: ${e.message}", e)
+                Toast.makeText(context, "Could not navigate: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+        }
 
         Log.d("ListingAdapter", "onBindViewHolder for position $position, title: ${currentItem.title}") // <-- ADD LOG
 

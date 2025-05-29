@@ -10,6 +10,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.lendit.FavoritesAdapter
+import com.example.lendit.ListingAdapter
 import com.example.lendit.R
 import com.example.lendit.databinding.FragmentFavoritesBinding
 import EquipmentListing
@@ -24,6 +25,7 @@ class FavoritesFragment : Fragment() {
     private val binding get() = _binding!!
     private lateinit var availableAdapter: FavoritesAdapter
     private lateinit var unavailableAdapter: FavoritesAdapter
+    private lateinit var similarAdapter: ListingAdapter
     private lateinit var db: AppDatabase
 
     override fun onCreateView(
@@ -44,6 +46,7 @@ class FavoritesFragment : Fragment() {
         // Initialize adapters
         availableAdapter = FavoritesAdapter(mutableListOf())
         unavailableAdapter = FavoritesAdapter(mutableListOf())
+        similarAdapter = ListingAdapter(mutableListOf())
 
         // Setup RecyclerViews
         binding.recyclerAvailableFavorites.apply {
@@ -54,6 +57,11 @@ class FavoritesFragment : Fragment() {
         binding.recyclerUnavailableFavorites.apply {
             layoutManager = LinearLayoutManager(context)
             adapter = unavailableAdapter
+        }
+
+        binding.recyclerSimilar.apply {
+            layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+            adapter = similarAdapter
         }
 
         loadFavorites()
@@ -94,10 +102,53 @@ class FavoritesFragment : Fragment() {
                         if (available.isEmpty()) View.GONE else View.VISIBLE
                     binding.recyclerUnavailableFavorites.visibility =
                         if (unavailable.isEmpty()) View.GONE else View.VISIBLE
+
+                    // Load similar listings if we have favorites
+                    if (favorites.isNotEmpty()) {
+                        loadSimilarListings(favorites)
+                    } else {
+                        binding.textViewSimilar.visibility = View.GONE
+                        binding.recyclerSimilar.visibility = View.GONE
+                    }
                 }
             } catch (e: Exception) {
                 // Handle error
                 e.printStackTrace()
+            }
+        }
+    }
+
+    private fun loadSimilarListings(favorites: List<EquipmentListing>) {
+        lifecycleScope.launch {
+            try {
+                // Extract categories from favorites
+                val favoriteCategories = favorites.map { it.category }.distinct()
+                val favoriteCategoryNames = favoriteCategories.map { it.name } // Convert to strings
+                val favoriteIds = favorites.map { it.listingId }
+
+                // Find similar listings based on categories but exclude favorites
+                val similarListings = withContext(Dispatchers.IO) {
+                    db.listingDao().getListingsByCategories(favoriteCategoryNames)
+                        .filter { it.listingId !in favoriteIds } // Exclude items already in favorites
+                        .filter { it.status == ListingStatus.UNAVAILABLE } // Only show available items
+                        .take(10) // Limit to 10 items
+                }
+
+                withContext(Dispatchers.Main) {
+                    // Update UI
+                    if (similarListings.isNotEmpty()) {
+                        similarAdapter.update(similarListings)
+                        binding.textViewSimilar.visibility = View.VISIBLE
+                        binding.recyclerSimilar.visibility = View.VISIBLE
+                    } else {
+                        binding.textViewSimilar.visibility = View.GONE
+                        binding.recyclerSimilar.visibility = View.GONE
+                    }
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                binding.textViewSimilar.visibility = View.GONE
+                binding.recyclerSimilar.visibility = View.GONE
             }
         }
     }
@@ -107,3 +158,4 @@ class FavoritesFragment : Fragment() {
         _binding = null
     }
 }
+

@@ -23,7 +23,6 @@
         android:paddingTop="8dp"
         android:paddingBottom="8dp">
 
-
         <ImageButton
             android:id="@+id/imageFavoriteButtonListings"
             android:layout_width="match_parent"
@@ -31,6 +30,17 @@
             android:layout_marginStart="100dp"
             android:background="@android:color/transparent"
             app:srcCompat="@drawable/ic_favorite_border" />
+
+        <!-- New "Go to Favorites" button -->
+        <Button
+            android:id="@+id/goToFavoritesButtonLayout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="100dp"
+            android:layout_marginTop="4dp"
+            android:text="Favorites"
+            android:textSize="10dp"
+            android:visibility="gone"/>
 
         <ImageButton
             android:id="@+id/removeFromCartButton"
@@ -89,7 +99,7 @@
             android:layout_height="wrap_content"
             android:textSize="10sp"
             android:layout_marginBottom="6dp"
-            android:gravity="end"/>
+            android:gravity="end" />
 
         <TextView
             android:id="@+id/listingCreator"
