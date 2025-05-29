@@ -10,6 +10,8 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
+import android.widget.ScrollView
+import android.widget.LinearLayout
 import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.RecyclerView
 import com.example.lendit.ListingDetailsActivity
@@ -31,20 +33,143 @@ class ReportAdapter(
         private val reportCounts: MutableMap<Int, Int> = mutableMapOf()
 ) : RecyclerView.Adapter<ReportAdapter.ReportViewHolder>() {
 
+    // Keep track of expanded items
+    private val expandedItems = mutableSetOf<Int>()
+
     class ReportViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val reportIdTextView: TextView = itemView.findViewById(R.id.reportId)
+        // Compact view elements
+        val compactView: LinearLayout = itemView.findViewById(R.id.compactView)
         val listingIdTextView: TextView = itemView.findViewById(R.id.listingId)
+        val statusTextView: TextView = itemView.findViewById(R.id.reportStatus)
+
+        // Expanded view elements
+        val expandedView: LinearLayout = itemView.findViewById(R.id.expandedView)
+        val reportIdTextView: TextView = itemView.findViewById(R.id.reportId)
         val reasonTextView: TextView = itemView.findViewById(R.id.reportReason)
         val commentsTextView: TextView = itemView.findViewById(R.id.reportComments)
-        val statusTextView: TextView = itemView.findViewById(R.id.reportStatus)
         val dateTextView: TextView = itemView.findViewById(R.id.reportDate)
         val viewDetailsButton: Button = itemView.findViewById(R.id.viewDetailsButton)
         val markReviewedButton: Button = itemView.findViewById(R.id.markReviewedButton)
+        val viewAllReportsButton: Button = itemView.findViewById(R.id.viewAllReportsButton)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ReportViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.item_report, parent, false)
         return ReportViewHolder(view)
+    }
+
+    private fun showReportDetailsDialog(report: Report) {
+        // Create a formatted string with all details
+        val detailsBuilder = StringBuilder()
+
+        detailsBuilder.append("Report #${report.reportId}\n\n")
+        detailsBuilder.append("Listing ID: ${report.listingId}\n")
+        detailsBuilder.append("Reason: ${report.reason}\n\n")
+        detailsBuilder.append("Comments:\n${report.comments}\n\n")
+
+        // Format date
+        val sdf = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
+        val dateString = sdf.format(Date(report.reportDate))
+        detailsBuilder.append("Reported on: $dateString\n")
+        detailsBuilder.append("Status: ${report.status}\n\n")
+
+        // Check if there are attachments
+        if (!report.attachments.isNullOrEmpty()) {
+            detailsBuilder.append("Attachments: ${report.attachments}\n")
+        } else {
+            detailsBuilder.append("No attachments provided")
+        }
+
+        // Create and show the dialog
+        val textView = TextView(context).apply {
+            text = detailsBuilder.toString()
+            setPadding(30, 30, 30, 30)
+            textSize = 16f
+        }
+
+        AlertDialog.Builder(context)
+            .setTitle("Report Details")
+            .setView(textView)
+            .setPositiveButton("Close", null)
+            .create()
+            .show()
+    }
+
+    // Add this method to ReportAdapter class
+    private fun showAllReportsForListingDialog(listingId: Int) {
+        scope.launch {
+            try {
+                val db = AppDatabase.getInstance(context)
+                val allReportsForListing = db.reportDao().getReportsForListing(listingId)
+
+                if (allReportsForListing.isEmpty()) {
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(context, "No reports found for this listing", Toast.LENGTH_SHORT).show()
+                    }
+                    return@launch
+                }
+
+                // Get listing details
+                val listing = db.listingDao().getListingById(listingId)
+                val listingTitle = listing?.title ?: "Unknown Listing"
+
+                // Create a formatted list of all reports for this listing
+                val reportsBuilder = StringBuilder()
+
+                reportsBuilder.append("Listing #$listingId: $listingTitle\n")
+                reportsBuilder.append("Total Reports: ${allReportsForListing.size}\n")
+                reportsBuilder.append("----------------------------------------\n\n")
+
+                // Sort reports by date (newest first)
+                val sortedReports = allReportsForListing.sortedByDescending { it.reportDate }
+
+                sortedReports.forEach { report ->
+                    // Format date
+                    val sdf = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
+                    val dateString = sdf.format(Date(report.reportDate))
+
+                    reportsBuilder.append("REPORT #${report.reportId} (${dateString})\n")
+                    reportsBuilder.append("Status: ${report.status}\n")
+                    reportsBuilder.append("Reason: ${report.reason}\n")
+                    reportsBuilder.append("Comments: ${report.comments}\n")
+
+                    // Add attachment info if available
+                    if (!report.attachments.isNullOrEmpty()) {
+                        reportsBuilder.append("Attachments: ${report.attachments}\n")
+                    }
+
+                    reportsBuilder.append("----------------------------------------\n\n")
+                }
+
+                withContext(Dispatchers.Main) {
+                    // Create scrollable text view for the dialog
+                    val scrollView = ScrollView(context).apply {
+                        val textView = TextView(context).apply {
+                            text = reportsBuilder.toString()
+                            setPadding(30, 30, 30, 30)
+                            textSize = 14f
+                        }
+                        addView(textView)
+                    }
+
+                    // Show dialog with all reports
+                    AlertDialog.Builder(context)
+                        .setTitle("All Reports for This Listing")
+                        .setView(scrollView)
+                        .setPositiveButton("Close", null)
+                        .create()
+                        .show()
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(
+                        context,
+                        "Error loading reports: ${e.message}",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+        }
     }
 
     override fun onBindViewHolder(holder: ReportViewHolder, position: Int) {
@@ -53,16 +178,9 @@ class ReportAdapter(
         // Get report count for this listing
         val reportCount = reportCounts[report.listingId] ?: 1
 
-        holder.reportIdTextView.text = "Report #${report.reportId}"
+        // Set up compact view
         holder.listingIdTextView.text = "Listing: ${report.listingId} (${reportCount} reports)"
-        holder.reasonTextView.text = report.reason
-        holder.commentsTextView.text = report.comments
         holder.statusTextView.text = report.status
-
-        // Format date
-        val sdf = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
-        val dateString = sdf.format(Date(report.reportDate))
-        holder.dateTextView.text = dateString
 
         // Set status color
         when (report.status) {
@@ -80,14 +198,36 @@ class ReportAdapter(
                     )
         }
 
-        // Handle visibility of buttons based on report status
+        // Set up expanded view
+        holder.reportIdTextView.text = "Report #${report.reportId}"
+        holder.reasonTextView.text = report.reason
+        holder.commentsTextView.text = report.comments
+
+        // Format date
+        val sdf = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
+        val dateString = sdf.format(Date(report.reportDate))
+        holder.dateTextView.text = dateString
+
+        // Handle visibility of expanded view based on expanded state
+        holder.expandedView.visibility = if (expandedItems.contains(position)) View.VISIBLE else View.GONE
+
+        // Set click listener on compact view to toggle expanded view
+        holder.compactView.setOnClickListener {
+            if (expandedItems.contains(position)) {
+                expandedItems.remove(position)
+                holder.expandedView.visibility = View.GONE
+            } else {
+                expandedItems.add(position)
+                holder.expandedView.visibility = View.VISIBLE
+            }
+        }
+
+        // Handle buttons visibility and setup
         if (report.status == "CLOSED") {
-            // For closed reports, hide both buttons or show a disabled state
             holder.viewDetailsButton.visibility = View.GONE
             holder.markReviewedButton.text = "Closed"
             holder.markReviewedButton.isEnabled = false
         } else {
-            // For active reports (PENDING or REVIEWED), show appropriate buttons
             holder.viewDetailsButton.visibility = View.VISIBLE
 
             // Set up view details button
@@ -107,21 +247,19 @@ class ReportAdapter(
                             } else {
                                 // If listing doesn't exist anymore
                                 Toast.makeText(
-                                                context,
-                                                "This listing is no longer available",
-                                                Toast.LENGTH_SHORT
-                                        )
-                                        .show()
+                                        context,
+                                        "This listing is no longer available",
+                                        Toast.LENGTH_SHORT
+                                ).show()
                             }
                         }
                     } catch (e: Exception) {
                         withContext(Dispatchers.Main) {
                             Toast.makeText(
-                                            context,
-                                            "Error checking listing: ${e.message}",
-                                            Toast.LENGTH_SHORT
-                                    )
-                                    .show()
+                                    context,
+                                    "Error checking listing: ${e.message}",
+                                    Toast.LENGTH_SHORT
+                            ).show()
                         }
                     }
                 }
@@ -135,6 +273,11 @@ class ReportAdapter(
                 holder.markReviewedButton.text = "Close Report"
                 holder.markReviewedButton.setOnClickListener { closeReport(report) }
             }
+        }
+
+        // Set up the View All Reports button
+        holder.viewAllReportsButton.setOnClickListener {
+            showAllReportsForListingDialog(report.listingId)
         }
     }
 
@@ -316,13 +459,16 @@ class ReportAdapter(
         }
     }
 
-    // Update this method to accept the report counts
+    // Update this method to include handling of expanded items
     fun updateReports(newReports: List<Report>, newReportCounts: Map<Int, Int> = emptyMap()) {
         reports.clear()
         reports.addAll(newReports)
 
         reportCounts.clear()
         reportCounts.putAll(newReportCounts)
+
+        // Reset expanded items when data changes
+        expandedItems.clear()
 
         notifyDataSetChanged()
     }

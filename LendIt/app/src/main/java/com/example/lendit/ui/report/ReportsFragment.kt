@@ -7,12 +7,16 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.lendit.data.local.entities.Report
 import com.example.lendit.databinding.FragmentReportsBinding
 import kotlinx.coroutines.launch
+import androidx.appcompat.app.AlertDialog
+import com.example.lendit.R
 
 class ReportsFragment : Fragment() {
 
@@ -65,8 +69,22 @@ class ReportsFragment : Fragment() {
             adapter = this@ReportsFragment.adapter
         }
 
+        // Add listener for "View All Report Reasons" button
+        binding.viewAllReasonsButton.setOnClickListener {
+            showReportReasonsDialog()
+        }
+
         // Load reports
         loadReports()
+    }
+
+    private fun filterReports(allReports: List<Report>, filter: String): List<Report> {
+        return when (filter) {
+            "Pending" -> allReports.filter { it.status == "PENDING" }
+            "Reviewed" -> allReports.filter { it.status == "REVIEWED" }
+            "Closed" -> allReports.filter { it.status == "CLOSED" }
+            else -> allReports
+        }
     }
 
     private fun loadReports() {
@@ -81,12 +99,7 @@ class ReportsFragment : Fragment() {
                 val reportCountByListing = allReports.groupingBy { it.listingId }.eachCount()
 
                 // Filter reports based on selected filter
-                val filteredReports = when (currentFilter) {
-                    "Pending" -> allReports.filter { it.status == "PENDING" }
-                    "Reviewed" -> allReports.filter { it.status == "REVIEWED" }
-                    "Closed" -> allReports.filter { it.status == "CLOSED" }
-                    else -> allReports
-                }
+                val filteredReports = filterReports(allReports, currentFilter)
 
                 if (filteredReports.isNotEmpty()) {
                     // Group by listing ID and take the most recent report for each listing
@@ -111,6 +124,57 @@ class ReportsFragment : Fragment() {
                 Toast.makeText(
                     requireContext(),
                     "Error loading reports: ${e.message}",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+    }
+
+    private fun showReportReasonsDialog() {
+        lifecycleScope.launch {
+            try {
+                val db = AppDatabase.getInstance(requireContext())
+                val allReports = db.reportDao().getAllReports()
+
+                // Create a formatted list of all report reasons with their comments and media
+                val reportDetailsBuilder = StringBuilder()
+
+                allReports.forEach { report ->
+                    reportDetailsBuilder.append("Report #${report.reportId} (Listing #${report.listingId}):\n")
+                    reportDetailsBuilder.append("Reason: ${report.reason}\n")
+                    reportDetailsBuilder.append("Comments: ${report.comments}\n")
+
+                    // Check if there are attachments
+                    if (!report.attachments.isNullOrEmpty()) {
+                        reportDetailsBuilder.append("Attachments: ${report.attachments}\n")
+                    } else {
+                        reportDetailsBuilder.append("Attachments: None\n")
+                    }
+
+                    reportDetailsBuilder.append("Status: ${report.status}\n")
+                    reportDetailsBuilder.append("----------------------------\n\n")
+                }
+
+                val reportDetails = reportDetailsBuilder.toString()
+
+                // Create and show the dialog using a simple TextView
+                val textView = TextView(requireContext()).apply {
+                    text = reportDetails
+                    setPadding(20, 20, 20, 20)
+                    textSize = 14f
+                }
+
+                // Use AlertDialog.Builder properly
+                val builder = AlertDialog.Builder(requireContext())
+                builder.setTitle("All Report Reasons")
+                builder.setView(textView)
+                builder.setPositiveButton("Close", null)
+                builder.create().show()
+
+            } catch (e: Exception) {
+                Toast.makeText(
+                    requireContext(),
+                    "Error loading report reasons: ${e.message}",
                     Toast.LENGTH_SHORT
                 ).show()
             }
