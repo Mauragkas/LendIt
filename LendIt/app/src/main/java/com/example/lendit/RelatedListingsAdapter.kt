@@ -5,15 +5,19 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import android.view.LayoutInflater
+import android.view.ViewGroup
+
 
 class RelatedListingsAdapter(
-    private val listings: List<EquipmentListing>,
+    private var listings: List<EquipmentListing>,
     private val onItemClick: (EquipmentListing) -> Unit
 ) : RecyclerView.Adapter<RelatedListingsAdapter.ViewHolder>() {
 
     inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val image = view.findViewById<ImageView>(R.id.relatedListingImage)
-        val title = view.findViewById<TextView>(R.id.relatedListingTitle)
+        val image = view.findViewById<ImageView>(R.id.listingImage)
+        val title = view.findViewById<TextView>(R.id.listingTitle)
 
         init {
             view.setOnClickListener {
@@ -24,7 +28,7 @@ class RelatedListingsAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.item_related_listing, parent, false)
+            .inflate(R.layout.item_related_layout, parent, false)
         return ViewHolder(view)
     }
 
@@ -38,45 +42,9 @@ class RelatedListingsAdapter(
             .load(photoList.firstOrNull())
             .into(holder.image)
     }
+    fun update(newListings: List<EquipmentListing>) {
+        listings = newListings
+        notifyDataSetChanged()
+    }
+
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

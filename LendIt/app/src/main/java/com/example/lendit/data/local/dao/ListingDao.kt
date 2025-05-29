@@ -26,8 +26,11 @@ interface ListingDao {
     @Query("SELECT * FROM listing WHERE listingId = :id LIMIT 1")
     suspend fun getListingById(id: Int): EquipmentListing?
 
-    @Query("SELECT * FROM listing WHERE category = :categoryId AND listingId != :currentId LIMIT 5")
-    suspend fun getRelatedListings(categoryId: Int, currentId: Int): List<EquipmentListing>
+    @Query("SELECT category FROM listing WHERE listingId = :listingId LIMIT 1")
+    suspend fun getCategoryById(listingId: Int): String
+
+    @Query("SELECT * FROM listing WHERE category = :category AND listingId != :listingId LIMIT 5")
+    suspend fun getRelatedListings(category: String, listingId: Int): List<EquipmentListing>
 
     @Query("SELECT COUNT(*) FROM listing")
     suspend fun getCount(): Int
@@ -43,7 +46,21 @@ interface ListingDao {
     
     @Delete
     suspend fun deleteListing(listing: EquipmentListing)
+
+    @Query("SELECT EXISTS(SELECT 1 FROM listing WHERE title = :title AND description = :description AND price = :price AND location = :location AND category = :category AND ownerName = :ownerName AND availableFrom = :availableFrom AND availableUntil = :availableUntil)")
+    suspend fun listingExists(
+        title: String,
+        description: String,
+        price: Double,
+        location: String,
+        category: String,
+        ownerName: String,
+        availableFrom: Int?,
+        availableUntil: Int?
+    ): Boolean
+
 }
+
 
 fun buildQuery(f: ListingFilters): SupportSQLiteQuery {
     val queryBuilder = StringBuilder("SELECT * FROM listing INNER JOIN user ON user.name = listing.ownerName WHERE 1=1")

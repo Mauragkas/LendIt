@@ -79,7 +79,7 @@ class ListingAdapter(private val items: MutableList<EquipmentListing>) :
             }
         }
 
-        // Set click listener
+        // Set favorites click listener
         holder.favoriteButton.setOnClickListener {
             context.lifecycleScope.launch(Dispatchers.IO) {
                 val isFavorite = favoriteDao.isFavorite(userId, currentItem.listingId)
@@ -129,11 +129,15 @@ class ListingAdapter(private val items: MutableList<EquipmentListing>) :
         }
 
         // Update the click behavior
-        holder.itemView.setOnClickListener {
+        fun selectTool() {
             val context = holder.itemView.context
             val intent = Intent(context, ListingDetailsActivity::class.java)
             intent.putExtra("listing_id", currentItem.listingId)
             context.startActivity(intent)
+        }
+
+        holder.itemView.setOnClickListener {
+            selectTool()
         }
 
         // Visual indication for inactive listings

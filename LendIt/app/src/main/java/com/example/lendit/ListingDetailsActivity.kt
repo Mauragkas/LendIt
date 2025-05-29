@@ -1,5 +1,6 @@
 package com.example.lendit
 
+import EquipmentListing
 import android.Manifest
 import android.app.Activity
 import android.content.Intent
@@ -15,6 +16,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.lendit.ListingActivity
 import com.example.lendit.data.local.entities.Report
@@ -28,7 +31,7 @@ class ListingDetailsActivity : AppCompatActivity() {
 
     private val selectedFiles = mutableListOf<Uri>()
     private var attachmentStatusTextRef: TextView? = null
-    private var userId by Delegates.notNull<Int>()
+    private lateinit var adapter: RelatedListingsAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,6 +43,28 @@ class ListingDetailsActivity : AppCompatActivity() {
         // Set up report button click listener
         findViewById<Button>(R.id.reportButton).setOnClickListener {
             showReportDialog()
+        }
+
+        adapter = RelatedListingsAdapter(emptyList()) { clicked ->
+            val intent = Intent(this, ListingDetailsActivity::class.java)
+            intent.putExtra("listing_id", clicked.listingId)
+            startActivity(intent)
+        }
+
+
+        fun findSimilar(relatedListings: List<EquipmentListing>){
+            adapter.update(relatedListings)
+        }
+
+        val recycler = findViewById<RecyclerView>(R.id.relatedListingsRecyclerView)
+        recycler.adapter = adapter
+        recycler.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        lifecycleScope.launch {
+
+            val category = db.listingDao().getCategoryById(listingId)
+            val relatedListings = db.listingDao().getRelatedListings(category, listingId)
+            findSimilar(relatedListings)
+
         }
 
         // Set up report button click listener

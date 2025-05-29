@@ -8,13 +8,10 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.lendit.ListingAdapter
 import com.example.lendit.databinding.FragmentArchiveBinding
-import EquipmentListing
 import ListingStatus
 import AppDatabase
 import com.example.lendit.OwnerAdapter
-import com.example.lendit.R
 import kotlinx.coroutines.launch
 
 class ArchiveFragment : Fragment() {

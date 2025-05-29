@@ -1,5 +1,6 @@
 package com.example.lendit.ui.home
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -30,14 +31,26 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        val searchButton = binding.searchInputLayoutMain
+
         val searchEditText = binding.searchEditTextMain
 
-        searchEditText.setOnClickListener {
-            displaySearch()
+        val sharedPref = requireContext().getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE)
+        val userType = sharedPref.getString("userType", "")?.lowercase()
+
+
+        if (userType == "renter") {
+            searchEditText.visibility = View.VISIBLE
+            searchButton.visibility = View.VISIBLE
+            searchEditText.setOnClickListener {
+                displaySearch()
+            }
+        } else {
+            searchButton.visibility = View.GONE
+            searchEditText.visibility = View.GONE
+
         }
     }
-
-
 
 
     override fun onDestroyView() {

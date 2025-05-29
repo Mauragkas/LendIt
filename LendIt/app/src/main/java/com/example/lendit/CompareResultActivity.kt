@@ -57,7 +57,7 @@ class CompareResultActivity : AppCompatActivity() {
                 return
             }
 
-            displayComparison()
+            compareListings()
         } catch (e: Exception) {
             binding.errorMessage.visibility = View.VISIBLE
             binding.errorMessage.text = "Error loading listings: ${e.message}"
@@ -65,7 +65,7 @@ class CompareResultActivity : AppCompatActivity() {
         }
     }
 
-    private fun displayComparison() {
+    private fun compareListings() {
         // Make sure the content is visible
         binding.errorMessage.visibility = View.GONE
         binding.comparisonContent.visibility = View.VISIBLE
@@ -77,7 +77,7 @@ class CompareResultActivity : AppCompatActivity() {
         binding.category1.text = listing1.category.toString()
         binding.location1.text = listing1.location.toString()
         binding.description1.text = listing1.description
-        binding.viewButton1.setOnClickListener { openListingDetails(listing1.listingId) }
+        binding.viewButton1.setOnClickListener { selectTool(listing1.listingId) }
 
         // Use the photos string directly without Converters
         val photoList1 = listing1.photos.split(",").filter { it.isNotEmpty() }
@@ -95,7 +95,7 @@ class CompareResultActivity : AppCompatActivity() {
         binding.category2.text = listing2.category.toString()
         binding.location2.text = listing2.location.toString()
         binding.description2.text = listing2.description
-        binding.viewButton2.setOnClickListener { openListingDetails(listing2.listingId) }
+        binding.viewButton2.setOnClickListener { selectTool(listing2.listingId) }
 
         val photoList2 = listing2.photos.split(",").filter { it.isNotEmpty() }
         if (photoList2.isNotEmpty()) {
@@ -118,7 +118,7 @@ class CompareResultActivity : AppCompatActivity() {
             binding.category3.text = listing3.category.toString()
             binding.location3.text = listing3.location.toString()
             binding.description3.text = listing3.description
-            binding.viewButton3.setOnClickListener { openListingDetails(listing3.listingId) }
+            binding.viewButton3.setOnClickListener { selectTool(listing3.listingId) }
 
             val photoList3 = listing3.photos.split(",").filter { it.isNotEmpty() }
             if (photoList3.isNotEmpty()) {
@@ -130,6 +130,7 @@ class CompareResultActivity : AppCompatActivity() {
         }
 
         // For now, just show a placeholder AI comparison text
+        // formAnswer()
         binding.aiComparisonText.text =
                 "AI Comparison: Based on your selected items, the ${listings[0].title} " +
                         "appears to be more suitable for professional use, while the ${listings[1].title} " +
@@ -137,7 +138,7 @@ class CompareResultActivity : AppCompatActivity() {
                         "costs more, while the second option offers better value for money for occasional use."
     }
 
-    private fun openListingDetails(listingId: Int) {
+    private fun selectTool(listingId: Int) {
         val intent = Intent(this, ListingDetailsActivity::class.java)
         intent.putExtra("listing_id", listingId)
         startActivity(intent)

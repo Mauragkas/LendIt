@@ -145,6 +145,21 @@
             android:text="Αποδέχομαι τους όρους και προϋποθέσεις της πλατφόρμας"
         />
 
+        <CheckBox
+            android:id="@+id/longTermDiscountCheckBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="Προσφορά έκπτωσης για μακροχρόνιες ενοικιάσεις"
+            />
+
+        <Spinner
+            android:id="@+id/discountSpinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:visibility="gone" />
+
         <!-- Publish Button -->
         <Button
             android:id="@+id/publishListingButton"

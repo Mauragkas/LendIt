@@ -1,5 +1,6 @@
 package com.example.lendit.ui.premium
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -11,6 +12,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.example.lendit.R
 import com.example.lendit.databinding.FragmentPremiumBinding
+import com.example.lendit.ui.payment.PaymentActivity
 import kotlinx.coroutines.launch
 
 class PremiumFragment : Fragment() {
@@ -128,10 +130,13 @@ class PremiumFragment : Fragment() {
             .setTitle("Επιβεβαίωση αγοράς")
             .setMessage("Είστε βέβαιοι ότι θέλετε να αποκτήσετε το πλάνο ${viewModel.selectedPlan} για €${viewModel.planPrice}?")
             .setPositiveButton("Συνέχεια στην πληρωμή") { _, _ ->
-                // Here you would navigate to payment screen
-                // For demo, we'll simulate successful payment
-                simulateSuccessfulPayment()
+                val intent = Intent(context, PaymentActivity::class.java).apply {
+                    putExtra("selectedPlan", viewModel.selectedPlan)
+                    putExtra("planPrice", viewModel.planPrice)
+                }
+                startActivity(intent)
             }
+
             .setNegativeButton("Άκυρο", null)
             .show()
     }

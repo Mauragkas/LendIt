@@ -13,6 +13,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.lendit.CompareResultActivity
+import com.example.lendit.SearchActivity
 import com.example.lendit.databinding.FragmentCompareBinding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -42,7 +43,7 @@ class CompareFragment : Fragment() {
         adapter =
                 CompareListingAdapter(
                         mutableListOf(),
-                        onItemSelected = { listing -> addToCompare(listing) }
+                        onItemSelected = { listing -> modifyCompare(listing) }
                 )
         binding.favoritesRecyclerView.apply {
             layoutManager = LinearLayoutManager(context)
@@ -59,7 +60,7 @@ class CompareFragment : Fragment() {
                         )
                         .show()
             } else {
-                startComparison()
+                performComparison()
             }
         }
 
@@ -71,20 +72,20 @@ class CompareFragment : Fragment() {
         }
 
         // Load favorite listings
-        loadFavorites()
+        getFavorites()
 
         // Initialize UI
         updateSelectionUI()
     }
 
-    private fun loadFavorites() {
+    private fun getFavorites() {
         viewLifecycleOwner.lifecycleScope.launch {
             try {
                 val sharedPref = context?.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
                 val userId = sharedPref?.getInt("user_id", -1) ?: -1
 
                 if (userId == -1) {
-                    showEmptyState("Please log in to view favorites")
+                    Toast.makeText(requireContext(), "Please Log in", Toast.LENGTH_SHORT).show()
                     return@launch
                 }
 
@@ -98,25 +99,27 @@ class CompareFragment : Fragment() {
                         }
 
                 if (favorites.isEmpty()) {
-                    showEmptyState("No favorites found. Add some items to your favorites first!")
+                    Toast.makeText(requireContext(), "No favorites found. Add some items to your favorites first!", Toast.LENGTH_SHORT).show()
+                    showSearchActivity()
                 } else {
                     binding.emptyStateContainer.visibility = View.GONE
                     binding.contentContainer.visibility = View.VISIBLE
                     adapter.update(favorites)
                 }
             } catch (e: Exception) {
-                showEmptyState("Error loading favorites: ${e.message}")
+                Toast.makeText(requireContext(), "Error Loading Favorites!", Toast.LENGTH_SHORT).show()
             }
         }
     }
 
-    private fun showEmptyState(message: String) {
-        binding.emptyStateContainer.visibility = View.VISIBLE
-        binding.contentContainer.visibility = View.GONE
-        binding.emptyStateMessage.text = message
+    private fun showSearchActivity() {
+        val intent = Intent(requireContext(), SearchActivity::class.java)
+        startActivity(intent)
     }
 
-    private fun addToCompare(listing: EquipmentListing) {
+
+
+    private fun modifyCompare(listing: EquipmentListing) {
         if (selectedListings.any { it.listingId == listing.listingId }) {
             // If already selected, remove it
             selectedListings.removeIf { it.listingId == listing.listingId }
@@ -151,7 +154,7 @@ class CompareFragment : Fragment() {
                 else "Selection 3 (optional)"
     }
 
-    private fun startComparison() {
+    private fun performComparison() {
         // Store the IDs to pass to the comparison activity
         val listingIds = selectedListings.map { it.listingId }.toIntArray()
 

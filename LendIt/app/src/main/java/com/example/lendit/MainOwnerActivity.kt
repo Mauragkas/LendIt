@@ -26,13 +26,13 @@ class MainOwnerActivity : AppCompatActivity() {
 
         navView.setOnItemSelectedListener { item ->
             when (item.itemId) {
+                // createListing()
                 R.id.navigation_new_listing -> {
                     val intent = Intent(this, ListingActivity::class.java)
                     startActivity(intent)
                     false // Do not select this item in the navbar
                 }
                 else -> {
-                    // Let the Navigation Component handle the rest
                     NavigationUI.onNavDestinationSelected(item, navController)
                     true
                 }

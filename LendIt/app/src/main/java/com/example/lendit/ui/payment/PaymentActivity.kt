@@ -133,6 +133,7 @@ class PaymentActivity : AppCompatActivity() {
                 paymentMethod = PaymentMethod.BANK_TRANSFER
             }
             // Save to Room
+            // saveMethod(paymentMethod)
             val newOrder = Order(
                 orderId = 0,
                 renter = userId,
@@ -140,10 +141,11 @@ class PaymentActivity : AppCompatActivity() {
                 paymentMethod = paymentMethod
             )
             saveTransaction(newOrder)
-            // sendReceipt()
+            // sendReceipt() will go here
 
 
             val listingIds = intent.getIntegerArrayListExtra("listingIds")
+
             listingIds?.forEach { listingId ->
                 lifecycleScope.launch {
                     updateListingStatus(applicationContext, listingId, ListingStatus.UNAVAILABLE)

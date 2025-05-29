@@ -120,7 +120,6 @@ class SearchActivity : AppCompatActivity() {
                 // ISO_LOCAL_DATE_TIME strings to use
                 dateButton.text = "$startDisplay - $endDisplay"
             }
-
         }
 
         /** Region Selector Listener */
@@ -259,12 +258,13 @@ class SearchActivity : AppCompatActivity() {
         filteredList = when (filters.sortBy) {
             SortBy.ASC -> filteredList.sortedBy { it.price }
             SortBy.DESC -> filteredList.sortedByDescending { it.price }
-            else -> filteredList // SortBy.SUGGESTED or null
+            else -> filteredList
         }
 
         listings = filteredList
         adapter.update(listings)
         if (listings.isEmpty()) {
+            // informUser()
             Toast.makeText(this@SearchActivity, "No listings match your filters.", Toast.LENGTH_SHORT).show()
         }
     }
