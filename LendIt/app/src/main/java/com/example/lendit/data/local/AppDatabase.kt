@@ -31,7 +31,7 @@ import kotlinx.coroutines.launch
                         Coupon::class,
                         Rental::class,
                         Review::class],
-        version = 16
+        version = 17
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun userDao(): UserDao
