@@ -488,8 +488,10 @@ class ListingActivity : AppCompatActivity() {
                                 availableFrom = listingData["startDate"] as Int?,
                                 availableUntil = listingData["endDate"] as Int?,
                                 longTermDiscount =
-                                        selectedDiscount // Use our selected discount value
+                                        0.0 // Initially set to 0, will be updated by addSale()
                         )
+
+                var listingId = -1L
 
                 withContext(Dispatchers.IO) {
                     val db = AppDatabase.getInstance(this@ListingActivity)
@@ -497,16 +499,20 @@ class ListingActivity : AppCompatActivity() {
                     if (isEditMode) {
                         // Update existing listing
                         db.listingDao().updateListing(listing)
-                        Log.d("DB_LOG", "SQL Query: UPDATE equipment_listings SET ... WHERE listingId = ${listing.listingId}")
+                        listingId = editingListingId.toLong()
                         android.util.Log.d(
                                 "ListingActivity",
                                 "Listing updated with ID: ${listing.listingId}"
                         )
                     } else {
                         // Insert new listing
-                        val id = db.listingDao().insert(listing)
-                        Log.d("DB_LOG", "SQL Query: INSERT INTO equipment_listings VALUES (...)")
-                        android.util.Log.d("ListingActivity", "Listing created with ID: $id")
+                        listingId = db.listingDao().insert(listing)
+                        android.util.Log.d("ListingActivity", "Listing created with ID: $listingId")
+                    }
+
+                    // Now add the sale with discount
+                    if (listingId > 0) {
+                        addSale(listingId.toInt(), selectedDiscount)
                     }
                 }
 
@@ -521,6 +527,45 @@ class ListingActivity : AppCompatActivity() {
                 android.util.Log.e("ListingActivity", "Error creating/updating listing", e)
                 Toast.makeText(this@ListingActivity, "Σφάλμα: ${e.message}", Toast.LENGTH_LONG)
                         .show()
+            }
+        }
+    }
+
+    // Add this new function to handle the discount separately
+    private suspend fun addSale(listingId: Int, discountPercentage: Double) {
+        withContext(Dispatchers.IO) {
+            try {
+                val db = AppDatabase.getInstance(this@ListingActivity)
+
+                // Update the listing with the discount
+                val listing = db.listingDao().getListingById(listingId)
+                if (listing != null) {
+                    // Create updated listing with discount
+                    val updatedListing = listing.copy(longTermDiscount = discountPercentage)
+
+                    // Save the updated listing
+                    db.listingDao().updateListing(updatedListing)
+
+                    android.util.Log.d(
+                            "ListingActivity",
+                            "Added discount of $discountPercentage to listing ID: $listingId"
+                    )
+                } else {
+                    android.util.Log.e(
+                            "ListingActivity",
+                            "Could not find listing with ID $listingId for adding discount"
+                    )
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("ListingActivity", "Error adding discount to listing", e)
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(
+                                    this@ListingActivity,
+                                    "Σφάλμα προσθήκης έκπτωσης: ${e.message}",
+                                    Toast.LENGTH_SHORT
+                            )
+                            .show()
+                }
             }
         }
     }
