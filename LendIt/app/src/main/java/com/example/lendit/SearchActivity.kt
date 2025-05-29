@@ -38,7 +38,6 @@ class SearchActivity : AppCompatActivity() {
     private var formattedEnd: Int? = null
     private var selectedRegion: Region? = null
     private lateinit var adapter: ListingAdapter
-    private var allListings: List<EquipmentListing> = emptyList() // Store all fetched listings
     private var listings: List<EquipmentListing> = emptyList()
 
     /**
@@ -175,21 +174,23 @@ class SearchActivity : AppCompatActivity() {
         val searchTerm = binding.searchEditText.text.toString()
         if (searchTerm.isBlank()) {
             Toast.makeText(this, "Please enter a search term.", Toast.LENGTH_SHORT).show()
-            allListings = emptyList()
             listings = emptyList()
             adapter.update(listings)
             binding.filterButtonContainer.visibility = View.GONE
             return
         }
+        searchTool(searchTerm)
 
+    }
+    fun searchTool(searchTerm: String){
         lifecycleScope.launch {
             try {
                 // Only filter by title in the initial DB query
                 val initialFilters = ListingFilters(title = searchTerm)
-                allListings = withContext(Dispatchers.IO) {
+                listings = withContext(Dispatchers.IO) {
                     AppDatabase.getListings(applicationContext, initialFilters)
                 }
-                insertFilters() // Apply all other filters to the fetched list
+                updateAdapter()
                 binding.filterButtonContainer.visibility = View.VISIBLE
             } catch (e: Exception) {
                 Toast.makeText(this@SearchActivity, "Failed to fetch listings.", Toast.LENGTH_SHORT).show()
@@ -197,7 +198,9 @@ class SearchActivity : AppCompatActivity() {
             }
         }
     }
-
+    fun updateAdapter() {
+        adapter.update(listings)
+    }
     private fun getFilters(): ListingFilters {
         var category: ListingCategory? = null
         var sortBy: SortBy? = null
@@ -230,7 +233,7 @@ class SearchActivity : AppCompatActivity() {
         val filters = getFilters()
 
         // Start with all listings fetched based on the initial title search
-        var filteredList = allListings
+        var filteredList = listings
 
         // Filter by min price
         filters.minPrice?.let { min ->
@@ -262,7 +265,8 @@ class SearchActivity : AppCompatActivity() {
         }
 
         listings = filteredList
-        adapter.update(listings)
+        updateAdapter()
+
         if (listings.isEmpty()) {
             // informUser()
             Toast.makeText(this@SearchActivity, "No listings match your filters.", Toast.LENGTH_SHORT).show()

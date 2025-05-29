@@ -22,7 +22,7 @@ import com.example.lendit.data.local.entities.UserCart
     UserCart::class,
     Favorite::class,
     Order::class,
-    Coupon::class], version = 15)
+    Coupon::class], version = 16)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun userDao(): UserDao
     abstract fun couponDao(): CouponDao
@@ -113,6 +113,8 @@ abstract class AppDatabase : RoomDatabase() {
                             database.userDao().deleteAllUsers()
 
                             populateDatabase(database.userDao())
+                            populateDatabase(database.listingDao())
+                            insertCoupons(database.couponDao())
 
                             val existingCoupons = database.couponDao().getAllCoupons()
 
@@ -127,132 +129,136 @@ abstract class AppDatabase : RoomDatabase() {
                 }
         }
 
-        private suspend fun populateDatabase(userDao: UserDao) {
-            // insert dummy data here, e.g.:
-            val renter =
-                UserEntity(
-                    userId = 1,
-                    name = "paflou Renter",
-                    email = "paflou@renter.com",
-                    password = "123",
-                    phoneNumber = "1112223333",
-                    location = "CityA",
-                    userType = "Renter",
-                )
-
-            val owner =
-                UserEntity(
-                    userId = 2,
-                    name = "mavragas owner",
-                    email = "mavragas@owner.com",
-                    password = "123",
-                    phoneNumber = "1112223333",
-                    location = "CityA",
-                    userType = "Owner",
-                    premiumStatus = false,
-                    premiumPlan = null,
-                    ratings = 4.5f
-                )
-
-            val admin =
-                UserEntity(
-                    userId = 3,
-                    name = "natalia admin",
-                    email = "natalia@admin.com",
-                    password = "123",
-                    phoneNumber = "1112223333",
-                    location = "CityA",
-                    userType = "Admin",
-                    staffId = "staff123"
-                )
-            userDao.insertAll(listOf(renter, owner, admin))
-        }
-
-        private suspend fun populateDatabase(listingDao: ListingDao) {
-
-            val photoUriStrings =
-                listOf(
-                    "https://picsum.photos/200/300",
-                    "https://picsum.photos/200/300",
-                    "https://picsum.photos/200/300",
+        internal suspend fun populateDatabase(userDao: UserDao) {
+            if(userDao.getUserNumber() == 0) {
+                val renter =
+                    UserEntity(
+                        userId = 1,
+                        name = "paflou Renter",
+                        email = "paflou@renter.com",
+                        password = "123",
+                        phoneNumber = "1112223333",
+                        location = "CityA",
+                        userType = "Renter",
                     )
-            val photos = Converters().fromList(photoUriStrings)
 
-            val listing1 =
-                EquipmentListing(
-                    listingId = 0,
-                    title = "Listing 1",
-                    description = "Description of listing 1",
-                    ownerName = "mavragas owner",
-                    category = ListingCategory.ELECTRIC,
-                    location = Region.CENTRAL_MACEDONIA,
-                    status = ListingStatus.AVAILABLE,
-                    price = 100.0,
-                    photos = photos,
-                    creationDate = Converters().fromLocalDate(LocalDate.of(2025, 5, 15)),
-                    availableFrom = Converters().fromLocalDate(LocalDate.of(2025, 5, 15)),
-                    availableUntil = Converters().fromLocalDate(LocalDate.of(2026, 5, 15)),
-                    longTermDiscount = 0.0
-                )
+                val owner =
+                    UserEntity(
+                        userId = 2,
+                        name = "mavragas owner",
+                        email = "mavragas@owner.com",
+                        password = "123",
+                        phoneNumber = "1112223333",
+                        location = "CityA",
+                        userType = "Owner",
+                        premiumStatus = false,
+                        premiumPlan = null,
+                        ratings = 4.5f
+                    )
 
-            val listing2 =
-                EquipmentListing(
-                    listingId = 0,
-                    title = "Listing 2",
-                    description = "Description of listing 2",
-                    ownerName = "mavragas owner",
-                    category = ListingCategory.ELECTRIC,
-                    location = Region.CRETE,
-                    status = ListingStatus.INACTIVE,
-                    price = 150.0,
-                    photos = photos,
-                    creationDate = Converters().fromLocalDate(LocalDate.of(2025, 5, 10)),
-                    availableFrom = Converters().fromLocalDate(LocalDate.of(2025, 5, 15)),
-                    availableUntil = Converters().fromLocalDate(LocalDate.of(2026, 5, 15)),
-                    longTermDiscount = 5.0
-                )
-
-            val listing3 =
-                EquipmentListing(
-                    listingId = 0,
-                    title = "Listing 3",
-                    description = "Description of listing 3",
-                    ownerName = "mavragas owner",
-                    category = ListingCategory.MANUAL,
-                    location = Region.ATTICA,
-                    status = ListingStatus.AVAILABLE,
-                    price = 200.0,
-                    photos = photos,
-                    creationDate = Converters().fromLocalDate(LocalDate.of(2025, 5, 10)),
-                    availableFrom = Converters().fromLocalDate(LocalDate.of(2025, 5, 15)),
-                    availableUntil = Converters().fromLocalDate(LocalDate.of(2026, 5, 15)),
-                    longTermDiscount = 10.0
-                )
-
-            val listing4 =
-                EquipmentListing(
-                    listingId = 0,
-                    title = "Listing 4",
-                    description = "Description of listing 4",
-                    ownerName = "mavragas owner",
-                    category = ListingCategory.MANUAL,
-                    location = Region.PELOPONNESE,
-                    status = ListingStatus.UNAVAILABLE,
-                    price = 250.0,
-                    photos = photos,
-                    creationDate = Converters().fromLocalDate(LocalDate.of(2025, 5, 10)),
-                    availableFrom = Converters().fromLocalDate(LocalDate.of(2025, 5, 15)),
-                    availableUntil = Converters().fromLocalDate(LocalDate.of(2026, 5, 15)),
-                    longTermDiscount = 15.0
-                )
-
-            val listings = listOf<EquipmentListing>(listing1, listing2, listing3, listing4)
-            listingDao.insertAll(listings)
+                val admin =
+                    UserEntity(
+                        userId = 3,
+                        name = "natalia admin",
+                        email = "natalia@admin.com",
+                        password = "123",
+                        phoneNumber = "1112223333",
+                        location = "CityA",
+                        userType = "Admin",
+                        staffId = "staff123"
+                    )
+                userDao.insertAll(listOf(renter, owner, admin))
+            }
         }
 
-        private suspend fun insertCoupons(couponDao: CouponDao) {
-            couponDao.insert(Coupon("save30",30))
-            couponDao.insert(Coupon("nikos15",15))
+        internal suspend fun populateDatabase(listingDao: ListingDao) {
+            if(listingDao.getCount() == 0) {
+                val photoUriStrings =
+                    listOf(
+                        "https://picsum.photos/200/300",
+                        "https://picsum.photos/200/300",
+                        "https://picsum.photos/200/300",
+                    )
+                val photos = Converters().fromList(photoUriStrings)
+
+                val listing1 =
+                    EquipmentListing(
+                        listingId = 0,
+                        title = "Listing 1",
+                        description = "Description of listing 1",
+                        ownerName = "mavragas owner",
+                        category = ListingCategory.ELECTRIC,
+                        location = Region.CENTRAL_MACEDONIA,
+                        status = ListingStatus.AVAILABLE,
+                        price = 100.0,
+                        photos = photos,
+                        creationDate = Converters().fromLocalDate(LocalDate.of(2025, 5, 15)),
+                        availableFrom = Converters().fromLocalDate(LocalDate.of(2025, 5, 15)),
+                        availableUntil = Converters().fromLocalDate(LocalDate.of(2026, 5, 15)),
+                        longTermDiscount = 0.0
+                    )
+
+                val listing2 =
+                    EquipmentListing(
+                        listingId = 0,
+                        title = "Listing 2",
+                        description = "Description of listing 2",
+                        ownerName = "mavragas owner",
+                        category = ListingCategory.ELECTRIC,
+                        location = Region.CRETE,
+                        status = ListingStatus.INACTIVE,
+                        price = 150.0,
+                        photos = photos,
+                        creationDate = Converters().fromLocalDate(LocalDate.of(2025, 5, 10)),
+                        availableFrom = Converters().fromLocalDate(LocalDate.of(2025, 5, 15)),
+                        availableUntil = Converters().fromLocalDate(LocalDate.of(2026, 5, 15)),
+                        longTermDiscount = 5.0
+                    )
+
+                val listing3 =
+                    EquipmentListing(
+                        listingId = 0,
+                        title = "Listing 3",
+                        description = "Description of listing 3",
+                        ownerName = "mavragas owner",
+                        category = ListingCategory.MANUAL,
+                        location = Region.ATTICA,
+                        status = ListingStatus.AVAILABLE,
+                        price = 200.0,
+                        photos = photos,
+                        creationDate = Converters().fromLocalDate(LocalDate.of(2025, 5, 10)),
+                        availableFrom = Converters().fromLocalDate(LocalDate.of(2025, 5, 15)),
+                        availableUntil = Converters().fromLocalDate(LocalDate.of(2026, 5, 15)),
+                        longTermDiscount = 10.0
+                    )
+
+                val listing4 =
+                    EquipmentListing(
+                        listingId = 0,
+                        title = "Listing 4",
+                        description = "Description of listing 4",
+                        ownerName = "mavragas owner",
+                        category = ListingCategory.MANUAL,
+                        location = Region.PELOPONNESE,
+                        status = ListingStatus.UNAVAILABLE,
+                        price = 250.0,
+                        photos = photos,
+                        creationDate = Converters().fromLocalDate(LocalDate.of(2025, 5, 10)),
+                        availableFrom = Converters().fromLocalDate(LocalDate.of(2025, 5, 15)),
+                        availableUntil = Converters().fromLocalDate(LocalDate.of(2026, 5, 15)),
+                        longTermDiscount = 15.0
+                    )
+
+                val listings = listOf<EquipmentListing>(listing1, listing2, listing3, listing4)
+                listingDao.insertAll(listings)
+            }
+        }
+
+        internal suspend fun insertCoupons(couponDao: CouponDao) {
+            if(couponDao.getAllCoupons().isEmpty()) {
+                couponDao.insert(Coupon("save30", 30))
+                couponDao.insert(Coupon("nikos15", 15))
+            }
         }
 
         suspend fun showCart(

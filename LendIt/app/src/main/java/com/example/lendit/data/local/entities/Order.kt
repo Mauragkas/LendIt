@@ -17,4 +17,7 @@ data class Order(
     val renter: Int,
     val price: Double,
     val paymentMethod: PaymentMethod,
+    val listingId: Int,
+    val startDate: Int,
+    val endDate: Int
 )

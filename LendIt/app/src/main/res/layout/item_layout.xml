@@ -108,6 +108,16 @@
             android:textSize="10sp"
             android:gravity="end" />
 
+        <TextView
+            android:id="@+id/listingDatesPicked"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Date(s) Picked: N/A"
+            android:textSize="10sp"
+            android:layout_marginBottom="6dp"
+            android:gravity="end" />
+
+
     </LinearLayout>
 
 </LinearLayout>

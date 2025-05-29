@@ -27,6 +27,8 @@ class LoginActivity : AppCompatActivity() {
         // Initialize database and DAO
         val db = AppDatabase.getLogin(applicationContext, lifecycleScope)
         val userDao = db.userDao()
+        val listingDao = db.listingDao()
+        val couponDao = db.couponDao()
 
         // Check if user is already logged in
         val sharedPref = getSharedPreferences("MyAppPrefs", MODE_PRIVATE)
@@ -37,7 +39,7 @@ class LoginActivity : AppCompatActivity() {
             // Redirect based on saved user type
             val destination = when (savedUserType?.lowercase()) {
                 "owner" -> MainOwnerActivity::class.java
-//                "admin" -> AdminActivity::class.java
+                "admin" -> AdminActivity::class.java
                 else -> MainActivity::class.java
             }
             startActivity(Intent(this, destination))
