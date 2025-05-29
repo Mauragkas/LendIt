@@ -17,6 +17,8 @@ import com.example.lendit.data.local.ListingManager.Companion.updateListingStatu
 import com.example.lendit.data.local.entities.Order
 import com.example.lendit.data.local.entities.PaymentMethod
 import com.example.lendit.data.local.entities.Rental
+import com.example.lendit.data.repository.OrderRepository
+import com.example.lendit.data.repository.RepositoryProvider
 import kotlinx.coroutines.launch
 import kotlin.math.log
 
@@ -28,6 +30,9 @@ class PaymentActivity : AppCompatActivity() {
     private lateinit var completePaymentButton: Button
     private lateinit var expiryEditText: EditText
 
+    // Initialize repository
+    private lateinit var orderRepository: OrderRepository
+
     private fun sendReceipt() {
         Toast.makeText(this@PaymentActivity, "Η παραγγελία καταχωρήθηκε!", Toast.LENGTH_LONG).show()
     }
@@ -35,6 +40,9 @@ class PaymentActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_payment)
+
+        // Initialize repository
+        orderRepository = RepositoryProvider.getOrderRepository(applicationContext)
 
         expiryEditText = findViewById(R.id.edit_expiry_date)
         bankDetailsForm = findViewById<View>(R.id.bank_details_form)
@@ -204,42 +212,35 @@ class PaymentActivity : AppCompatActivity() {
                 val encryptedData = dataEncryption(iban)
                 validatePayment(encryptedData)
             }
-            // Save to Room
-            // saveMethod(paymentMethod)
-            val newOrder = Order(
-                orderId = 0,
-                renter = userId,
-                price = price,
-                paymentMethod = paymentMethod,
-                listingId = intent.getIntExtra("listingId", -1),
-                startDate = intent.getIntExtra("startDate", -1),
-                endDate = intent.getIntExtra("endDate", -1)
-            )
-            saveTransaction(newOrder)
 
+            lifecycleScope.launch {
+                try {
+                    val userId = intent.getIntExtra("userId", -1)
+                    val price = intent.getDoubleExtra("price", 0.0)
+                    val listingIds = intent.getIntegerArrayListExtra("listingIds") ?: arrayListOf()
 
-            val listingIds = intent.getIntegerArrayListExtra("listingIds")
-
-            listingIds?.forEach { listingId ->
-                lifecycleScope.launch {
-                    // Update listing status
-                    updateListingStatus(applicationContext, listingId, ListingStatus.UNAVAILABLE)
-
-                    // Create rental record for review
-                    val rental = Rental(
+                    // Create order using repository
+                    val orderId = orderRepository.createOrderFromCart(
                         userId = userId,
-                        listingId = listingId,
-                        rentalDate = System.currentTimeMillis(),
-                        isReviewed = false
+                        listingIds = listingIds.toList(),
+                        totalPrice = price,
+                        paymentMethod = paymentMethod,
+                        startDate = intent.getIntExtra("startDate", -1),
+                        endDate = intent.getIntExtra("endDate", -1)
                     )
-                    AppDatabase.getInstance(applicationContext).rentalDao().insert(rental)
+
+                    // Clear cart and finish
+                    clearCart(userId)
+                    setResult(RESULT_OK)
+                    finish()
+                } catch (e: Exception) {
+                    Toast.makeText(
+                        this@PaymentActivity,
+                        "Error processing payment: ${e.message}",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             }
-
-            // if called by owner (premium) it does nothing (not ideal but for demo purposes its enough)
-            clearCart(userId)
-            setResult(RESULT_OK)
-            finish()
         }
     }
 
