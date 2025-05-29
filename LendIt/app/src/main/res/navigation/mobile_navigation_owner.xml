@@ -18,8 +18,12 @@
         android:id="@+id/navigation_profile"
         android:name="com.example.lendit.ui.profile.ProfileFragment"
         android:label="@string/title_profile"
-        tools:layout="@layout/fragment_profile"
-    />
+        tools:layout="@layout/fragment_profile">
+
+        <action
+            android:id="@+id/action_navigation_profile_to_navigation_premium"
+            app:destination="@id/navigation_premium" />
+    </fragment>
 
     <fragment
         android:id="@+id/navigation_compare"
@@ -36,7 +40,6 @@
 
     <fragment
         android:id="@+id/navigation_new_listing"
-        android:name="com.example.lendit.ui.show_listings.ShowListingsFragment"
         android:label="@string/title_cart"
         tools:layout="@layout/activity_listing_creation"
     />

@@ -9,6 +9,14 @@ android {
     namespace = "com.example.lendit"
     compileSdk = 35
 
+    packagingOptions {
+        resources {
+            excludes += setOf(
+                "META-INF/NOTICE.md",
+                "META-INF/LICENSE.md"
+            )
+        }
+    }
     defaultConfig {
         applicationId = "com.example.lendit"
         minSdk = 33
@@ -42,6 +50,8 @@ android {
 
 dependencies {
     implementation(libs.gson)
+    implementation(libs.androidx.databinding.compiler)
+    implementation(libs.firebase.firestore.ktx)
     androidTestImplementation("androidx.test.espresso:espresso-intents:3.5.1")
     implementation("androidx.room:room-runtime") // OR replace with androidx.room:room-runtime alias
     implementation(libs.androidx.room.ktx)

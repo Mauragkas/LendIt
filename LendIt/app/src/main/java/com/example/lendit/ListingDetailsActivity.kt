@@ -10,6 +10,7 @@ import android.content.pm.PackageManager
 import android.database.sqlite.SQLiteConstraintException
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.widget.*
 import android.widget.Button
@@ -66,8 +67,7 @@ class ListingDetailsActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
-        /** Date Picker Listener */
-        dateButton.setOnClickListener {
+        fun setupDates() {
             val constraintsBuilder = CalendarConstraints.Builder()
                 .setValidator(DateValidatorPointForward.now())      // Disable past dates
 
@@ -102,6 +102,12 @@ class ListingDetailsActivity : AppCompatActivity() {
                 // ISO_LOCAL_DATE_TIME strings to use
                 dateButton.text = "$startDisplay - $endDisplay"
             }
+        }
+
+        /** Date Picker Listener */
+        dateButton.setOnClickListener {
+            Log.d("ListingDetailsActivity", "Date button clicked")
+                setupDates()
         }
 
         fun findSimilar(relatedListings: List<EquipmentListing>){

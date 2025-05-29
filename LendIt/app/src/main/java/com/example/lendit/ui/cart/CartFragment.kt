@@ -1,6 +1,7 @@
 package com.example.lendit.ui.cart
 
 import EquipmentListing
+import android.app.Activity
 import android.content.Context.MODE_PRIVATE
 import android.content.Intent
 import android.content.SharedPreferences
@@ -28,6 +29,9 @@ import kotlinx.coroutines.withContext
 import kotlin.properties.Delegates
 import android.text.Editable
 import android.text.TextWatcher
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.navigation.fragment.findNavController
 
 
 class CartFragment : Fragment() {
@@ -44,11 +48,22 @@ class CartFragment : Fragment() {
 
     private lateinit var couponDao: CouponDao
 
+    // CartFragment.kt
+    private val paymentLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                // payment succeeded – go home or refresh UI
+                findNavController().navigate(R.id.navigation_home)
+            }
+        }
+
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+
         //get the user Name to properly save it
         val sharedPref = requireContext().getSharedPreferences("MyAppPrefs", MODE_PRIVATE)
         userId = sharedPref.getInt("userId", -1)
@@ -66,11 +81,13 @@ class CartFragment : Fragment() {
 
         if (matchedCoupon != null) {
             withContext(Dispatchers.Main) {
+                // informUser()
                 Toast.makeText(requireContext(), "Coupon is valid!", Toast.LENGTH_SHORT).show()
             }
             discount = matchedCoupon.discountPercentage
         } else {
             withContext(Dispatchers.Main) {
+                // informUser()
                 Toast.makeText(requireContext(), "Invalid coupon code.", Toast.LENGTH_SHORT).show()
             }
         }
@@ -84,14 +101,14 @@ class CartFragment : Fragment() {
     }
 
     private fun displayPayment() {
-        val intent = Intent(requireContext(), PaymentActivity::class.java)
-        intent.putExtra("userId", userId)
-        intent.putExtra("price", total)
-        val listingIds = ArrayList(listings.map { it.listingId })
-        intent.putIntegerArrayListExtra("listingIds", listingIds)
-
-        startActivity(intent)
+        val intent = Intent(requireContext(), PaymentActivity::class.java).apply {
+            putExtra("userId", userId)
+            putExtra("price", total)
+            putIntegerArrayListExtra("listingIds", ArrayList(listings.map { it.listingId }))
+        }
+        paymentLauncher.launch(intent)   // ✅ use the already-registered launcher
     }
+
 
     private fun getProduct() {
         displayPayment()
@@ -104,7 +121,7 @@ class CartFragment : Fragment() {
 
         couponDao = AppDatabase.getInstance(requireContext()).couponDao()
 
-        // Placeholder listener for Apply Coupon button
+        // Listener for Apply Coupon button
         binding.applyCouponButton.setOnClickListener {
             val couponCode = binding.couponEditText.text.toString()
             if (couponCode.isNotBlank()) {
@@ -120,15 +137,6 @@ class CartFragment : Fragment() {
 
         continueToPaymentButton.isEnabled = false // Disable by default
 
-        deliveryAddressEditText.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                continueToPaymentButton.isEnabled = !s.isNullOrBlank()
-            }
-
-            override fun afterTextChanged(s: Editable?) {}
-        })
 
         // Placeholder listener for Continue to Payment button
         binding.continueToPaymentButton.setOnClickListener {
@@ -140,6 +148,16 @@ class CartFragment : Fragment() {
                 listings = withContext(Dispatchers.IO) {
                     AppDatabase.showCart(requireContext(), userId)
                 }
+                deliveryAddressEditText.addTextChangedListener(object : TextWatcher {
+                    override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+
+                    override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                        if(listings.isNotEmpty())
+                            continueToPaymentButton.isEnabled = !s.isNullOrBlank()
+                    }
+
+                    override fun afterTextChanged(s: Editable?) {}
+                })
 
                 if (listings.isNotEmpty()) {
                     adapter.update(listings)                         // refresh rows

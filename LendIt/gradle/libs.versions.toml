@@ -20,6 +20,8 @@ roomRuntimeAndroid ="2.7.1"
 engageCore = "1.5.8"
 cardview = "1.0.0"
 espresso = "3.5.1"
+databindingCompiler = "8.10.1"
+firebaseFirestoreKtx = "25.1.4"
 
 [libraries]
 espresso-intents = { group = "androidx.test.espresso", name = "espresso-intents", version.ref = "espresso" }
@@ -44,7 +46,9 @@ androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = 
 androidx-room-common-jvm = { group = "androidx.room", name = "room-common-jvm", version.ref = "roomCommonJvm" }
 androidx-room-runtime = { group = "androidx.room", name = "room-runtime-android", version.ref = "roomRuntimeAndroid" }
 engage-core = { group = "com.google.android.engage", name = "engage-core", version.ref = "engageCore" }
-androidx-cardview = { group = "androidx.cardview", name = "cardview", version.ref = "cardview" } # Added for Kotlin extensions, using the 'room' version.ref
+androidx-cardview = { group = "androidx.cardview", name = "cardview", version.ref = "cardview" }
+androidx-databinding-compiler = { group = "androidx.databinding", name = "databinding-compiler", version.ref = "databindingCompiler" }
+firebase-firestore-ktx = { group = "com.google.firebase", name = "firebase-firestore-ktx", version.ref = "firebaseFirestoreKtx" } # Added for Kotlin extensions, using the 'room' version.ref
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

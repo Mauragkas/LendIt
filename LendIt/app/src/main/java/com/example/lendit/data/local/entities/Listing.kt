@@ -25,6 +25,7 @@ enum class SortBy {
     DESC,
     SUGGESTED
 }
+
 enum class Region {
     ATTICA,
     CENTRAL_MACEDONIA,

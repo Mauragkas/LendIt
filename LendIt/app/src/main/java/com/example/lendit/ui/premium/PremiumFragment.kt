@@ -62,19 +62,19 @@ class PremiumFragment : Fragment() {
         updateUI(isPremium)
 
 
-            paymentLauncher = registerForActivityResult(
+        paymentLauncher = registerForActivityResult(
             ActivityResultContracts.StartActivityForResult()
         ) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
                 // Payment was successful
                 updateUserStatus(hasPremium = true)
-                showProfile()
                 android.widget.Toast.makeText(requireContext(), "Είστε πλέον Premium!", android.widget.Toast.LENGTH_SHORT).show()
             } else {
                 // Payment was cancelled or failed
                 // notifyUser()
                 android.widget.Toast.makeText(requireContext(), "Η πληρωμή ακυρώθηκε ή απέτυχε.", android.widget.Toast.LENGTH_SHORT).show()
             }
+            showProfile()
         }
 
         // Setup learn more button

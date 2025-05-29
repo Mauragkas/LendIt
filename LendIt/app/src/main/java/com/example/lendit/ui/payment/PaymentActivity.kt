@@ -5,16 +5,19 @@ import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import com.example.lendit.MainActivity
 import com.example.lendit.R
 import com.example.lendit.data.local.ListingManager.Companion.updateListingStatus
 import com.example.lendit.data.local.entities.Order
 import com.example.lendit.data.local.entities.PaymentMethod
 import kotlinx.coroutines.launch
+import kotlin.math.log
 
 class PaymentActivity : AppCompatActivity() {
 
@@ -23,6 +26,10 @@ class PaymentActivity : AppCompatActivity() {
     private lateinit var bankDetailsForm: View
     private lateinit var completePaymentButton: Button
     private lateinit var expiryEditText: EditText
+
+    private fun sendReceipt() {
+        Toast.makeText(this@PaymentActivity, "Η παραγγελία καταχωρήθηκε!", Toast.LENGTH_LONG).show()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,7 +42,7 @@ class PaymentActivity : AppCompatActivity() {
         completePaymentButton = findViewById(R.id.button_complete_payment)
 
 
-        paymentMethodGroup.setOnCheckedChangeListener { _, checkedId ->
+        fun showForm(checkedId: Int){
             completePaymentButton.visibility = View.VISIBLE
 
             when (checkedId) {
@@ -49,6 +56,9 @@ class PaymentActivity : AppCompatActivity() {
                 }
                 else -> { cardDetailsForm.visibility = View.GONE; bankDetailsForm.visibility = View.GONE }
             }
+        }
+        paymentMethodGroup.setOnCheckedChangeListener { _, checkedId ->
+            showForm(checkedId)
         }
 
         expiryEditText.addTextChangedListener(object : TextWatcher {
@@ -81,7 +91,6 @@ class PaymentActivity : AppCompatActivity() {
         fun saveTransaction(order: Order) {
             lifecycleScope.launch {
                 AppDatabase.getInstance(applicationContext).OrderDao().insert(order)
-                Toast.makeText(this@PaymentActivity, "Η παραγγελία καταχωρήθηκε!", Toast.LENGTH_LONG).show()
                 finish() // optionally close the activity
             }
         }
@@ -92,6 +101,9 @@ class PaymentActivity : AppCompatActivity() {
             val encryptedCVV: String,
             val encryptedCardHolderName: String
         )
+        data class EncryptediBan(
+            val encryptedIban: String
+        )
 
         fun dataEncryption(
             cardNumber: String,
@@ -99,6 +111,7 @@ class PaymentActivity : AppCompatActivity() {
             cvv: String,
             cardHolderName: String
         ): EncryptedCardData {
+            Log.d("PaymentActivity", "Encrypting data: CardNumber=$cardNumber, ExpiryDate=$expiryDate, CVV=$cvv, CardHolderName=$cardHolderName")
             // return dummy "encrypted" values
             return EncryptedCardData(
                 encryptedCardNumber = "enc($cardNumber)",
@@ -106,14 +119,65 @@ class PaymentActivity : AppCompatActivity() {
                 encryptedCVV = "enc($cvv)",
                 encryptedCardHolderName = "enc($cardHolderName)"
             )
+            Log.d("PaymentActivity", "Encryption complete")
+        }
+        fun dataEncryption(
+            iBan: String,
+        ): EncryptediBan {
+            Log.d("PaymentActivity", "Encrypting data: iBan=$iBan")
+            // return dummy "encrypted" values
+            return EncryptediBan(
+                encryptedIban = "enc($iBan)"
+            )
+            Log.d("PaymentActivity", "Encryption complete")
+        }
+
+
+        fun validatePayment (encryptediBan: EncryptediBan) {
+            // validate payment
+            Log.d("PaymentActivity", "Validating payment with data: $encryptediBan")
+            val validIban = (
+                    encryptediBan.encryptedIban == "enc(000000000000000000000000000)"
+                    )
+            Toast.makeText(this, "Επικοινωνία με την τράπεζα", Toast.LENGTH_SHORT).show()
+            Log.d("PaymentActivity", "Card validity: $validIban")
+
+            return if (validIban) {
+                Log.d("PaymentActivity", "Payment is valid. Sending receipt.")
+                sendReceipt()
+            } else {
+                Log.d("PaymentActivity", "Payment is not valid.")
+                Toast.makeText(this, "Η πληρωμή δεν είναι έγκυρη", Toast.LENGTH_SHORT).show()
+                setResult(RESULT_CANCELED)
+                finish()
+            }
         }
 
         fun validatePayment (encryptedCardData: EncryptedCardData) {
             // validate payment
+            Log.d("PaymentActivity", "Validating payment with data: $encryptedCardData")
+            val validCard = (
+                    encryptedCardData.encryptedCardNumber == "enc(0000000000000000)" &&
+                            encryptedCardData.encryptedExpiryDate == "enc(12/30)" &&
+                            encryptedCardData.encryptedCVV == "enc(123)" &&
+                            encryptedCardData.encryptedCardHolderName == "enc(JOHN DOE)"
+                    )
+            Toast.makeText(this, "Επικοινωνία με την τράπεζα", Toast.LENGTH_SHORT).show()
+            Log.d("PaymentActivity", "Card validity: $validCard")
+
+            return if (validCard) {
+                Log.d("PaymentActivity", "Payment is valid. Sending receipt.")
+                sendReceipt()
+            } else {
+                Log.d("PaymentActivity", "Payment is not valid.")
+                Toast.makeText(this, "Η πληρωμή δεν είναι έγκυρη", Toast.LENGTH_SHORT).show()
+                setResult(RESULT_CANCELED)
+                finish()
+            }
         }
 
 
-        // payMethod()
+        // completePayment()
         completePaymentButton.setOnClickListener {
             val selectedPaymentId = paymentMethodGroup.checkedRadioButtonId
             lateinit var paymentMethod: PaymentMethod
@@ -123,8 +187,9 @@ class PaymentActivity : AppCompatActivity() {
                 val cardNumber = findViewById<EditText>(R.id.edit_card_number).text.toString()
                 val cvv = findViewById<EditText>(R.id.edit_cvv).text.toString()
                 val cardHolderName = findViewById<EditText>(R.id.edit_cardholder_name).text.toString()
+                val expiryDate = expiryEditText.text.toString().trim()
 
-                val encryptedData = dataEncryption(cardNumber, expiryEditText.toString(), cvv, cardHolderName)
+                val encryptedData = dataEncryption(cardNumber, expiryDate, cvv, cardHolderName)
                 validatePayment(encryptedData)
 
                 paymentMethod = PaymentMethod.CREDIT_CARD
@@ -134,6 +199,9 @@ class PaymentActivity : AppCompatActivity() {
             } else if (selectedPaymentId == R.id.radio_bank_transfer) {
                 // Toast.makeText(this, "Επεξεργασία πληρωμής μέσω τραπεζικής κατάθεσης", Toast.LENGTH_SHORT).show()
                 paymentMethod = PaymentMethod.BANK_TRANSFER
+                val iban = findViewById<EditText>(R.id.edit_bank_number).text.toString()
+                val encryptedData = dataEncryption(iban)
+                validatePayment(encryptedData)
             }
             // Save to Room
             // saveMethod(paymentMethod)
@@ -147,19 +215,19 @@ class PaymentActivity : AppCompatActivity() {
                 endDate = intent.getIntExtra("endDate", -1)
             )
             saveTransaction(newOrder)
-            // sendReceipt() will go here
 
 
             val listingIds = intent.getIntegerArrayListExtra("listingIds")
 
             listingIds?.forEach { listingId ->
                 lifecycleScope.launch {
-                    updateListingStatus(applicationContext, listingId, ListingStatus.UNAVAILABLE)
+                    updateListingStatus(applicationContext,listingId,ListingStatus.UNAVAILABLE)
                 }
             }
 
+            // if called by owner (premium) it does nothing (not ideal but for demo purposes its enough)
             clearCart(userId)
-            setResult(Activity.RESULT_OK)
+            setResult(RESULT_OK)
             finish()
         }
     }
