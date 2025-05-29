@@ -47,8 +47,10 @@ class ProfileFragment : Fragment() {
         // Show Premium button only for owners
         if (userType == "owner") {
             binding.premiumButton.visibility = View.VISIBLE
+            binding.reviewButton.visibility= View.GONE
         } else {
             binding.premiumButton.visibility = View.GONE
+            binding.reviewButton.visibility = View.VISIBLE
         }
 
         binding.logoutButtonProfile.setOnClickListener {

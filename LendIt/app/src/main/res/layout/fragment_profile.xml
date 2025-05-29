@@ -8,6 +8,31 @@
     tools:context=".ui.profile.ProfileFragment"
 >
 
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/reviewButton"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+        android:layout_width="294dp"
+        android:layout_height="48dp"
+        android:layout_marginBottom="288dp"
+        android:backgroundTint="@android:color/white"
+        android:paddingLeft="12dp"
+        android:paddingTop="6dp"
+        android:paddingRight="12dp"
+        android:paddingBottom="6dp"
+        android:text="Review"
+        android:textColor="@color/black"
+        android:textSize="14sp"
+        app:cornerRadius="50dp"
+        app:iconGravity="textStart"
+        app:iconPadding="8dp"
+        app:iconTint="@color/black"
+        app:layout_constraintBottom_toTopOf="@+id/premiumButton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.495"
+        app:layout_constraintStart_toStartOf="parent"
+        app:strokeColor="@color/black"
+        app:strokeWidth="1dp" />
+
     <TextView
         android:id="@+id/text_profile"
         android:layout_width="match_parent"

@@ -38,6 +38,8 @@
         <!--        Main activity -->
         <activity android:name=".MainActivity" android:exported="true" />
 
+        <activity android:name=".ReviewActivity" android:exported="true" />
+
         <!--        Search activity -->
         <activity android:name=".SearchActivity" android:exported="true" />
 
