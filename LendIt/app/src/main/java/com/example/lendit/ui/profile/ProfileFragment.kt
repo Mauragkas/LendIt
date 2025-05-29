@@ -11,28 +11,27 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import com.example.lendit.LoginActivity
 import com.example.lendit.R
+import com.example.lendit.ReviewActivity
 import com.example.lendit.databinding.FragmentProfileBinding
 
 class ProfileFragment : Fragment() {
 
     private var _binding: FragmentProfileBinding? = null
-    private val binding get() = _binding!!
+    private val binding
+        get() = _binding!!
 
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
+            inflater: LayoutInflater,
+            container: ViewGroup?,
+            savedInstanceState: Bundle?
     ): View {
-        val profileViewModel =
-            ViewModelProvider(this).get(ProfileViewModel::class.java)
+        val profileViewModel = ViewModelProvider(this).get(ProfileViewModel::class.java)
 
         _binding = FragmentProfileBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
         val textView: TextView = binding.textProfile
-        profileViewModel.text.observe(viewLifecycleOwner) {
-            textView.text = it
-        }
+        profileViewModel.text.observe(viewLifecycleOwner) { textView.text = it }
 
         return root
     }
@@ -41,16 +40,24 @@ class ProfileFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         // Get user type from SharedPreferences
-        val sharedPref = requireActivity().getSharedPreferences("MyAppPrefs", android.content.Context.MODE_PRIVATE)
+        val sharedPref =
+                requireActivity()
+                        .getSharedPreferences("MyAppPrefs", android.content.Context.MODE_PRIVATE)
         val userType = sharedPref.getString("userType", "")?.lowercase() ?: ""
 
         // Show Premium button only for owners
         if (userType == "owner") {
             binding.premiumButton.visibility = View.VISIBLE
-            binding.reviewButton.visibility= View.GONE
+            binding.reviewButton.visibility = View.GONE
         } else {
             binding.premiumButton.visibility = View.GONE
             binding.reviewButton.visibility = View.VISIBLE
+
+            // Add click listener for review button (only for renters)
+            binding.reviewButton.setOnClickListener {
+                val intent = Intent(requireContext(), ReviewActivity::class.java)
+                startActivity(intent)
+            }
         }
 
         binding.logoutButtonProfile.setOnClickListener {
