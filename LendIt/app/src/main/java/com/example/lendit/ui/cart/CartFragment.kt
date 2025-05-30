@@ -33,6 +33,7 @@ import android.text.TextWatcher
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.navigation.fragment.findNavController
+import com.example.lendit.data.local.entities.CartManager
 import com.example.lendit.data.repository.RepositoryProvider
 
 
@@ -41,15 +42,16 @@ class CartFragment : Fragment() {
     private var _binding: FragmentCartBinding? = null
 
     private val binding get() = _binding!!
-    lateinit var listings: List<EquipmentListing>
+    // lateinit var listings: List<EquipmentListing>
     var userId by Delegates.notNull<Int>()
     private lateinit var adapter: CartAdapter
     private var total = 0.0
-
+    private lateinit var cartManager: CartManager
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
         adapter = CartAdapter(context, mutableListOf())
+        cartManager= CartManager(requireContext(), adapter, couponRepository)
     }
     private val couponRepository by lazy {
         RepositoryProvider.getCouponRepository(requireContext())
@@ -81,37 +83,12 @@ class CartFragment : Fragment() {
         return root
     }
 
-    private suspend fun validateCoupon(coupon: String): Int {
-        var discount = 0
-        val availableCoupons = couponRepository.getAllCoupons()
-        val matchedCoupon = availableCoupons.find { it.code.equals(coupon, ignoreCase = true) }
-
-        if (matchedCoupon != null) {
-            withContext(Dispatchers.Main) {
-                // informUser()
-                Toast.makeText(requireContext(), "Coupon is valid!", Toast.LENGTH_SHORT).show()
-            }
-            discount = matchedCoupon.discountPercentage
-        } else {
-            withContext(Dispatchers.Main) {
-                // informUser()
-                Toast.makeText(requireContext(), "Invalid coupon code.", Toast.LENGTH_SHORT).show()
-            }
-        }
-        return discount
-    }
-
-    private fun calculateCost(discount: Int): Double {
-        adapter.update(listings) // refresh rows
-        total = adapter.getTotalPrice() * (1 - discount * 0.01)
-        return total
-    }
 
     private fun displayPayment() {
         val intent = Intent(requireContext(), PaymentActivity::class.java).apply {
             putExtra("userId", userId)
             putExtra("price", total)
-            putIntegerArrayListExtra("listingIds", ArrayList(listings.map { it.listingId }))
+            putIntegerArrayListExtra("listingIds", ArrayList(cartManager.listings.map { it.listingId }))
         }
         paymentLauncher.launch(intent)   // ✅ use the already-registered launcher
     }
@@ -130,13 +107,15 @@ class CartFragment : Fragment() {
         binding.applyCouponButton.setOnClickListener {
             val couponCode = binding.couponEditText.text.toString()
             if (couponCode.isNotBlank()) {
+                cartManager.calculateTotal()
                 viewLifecycleOwner.lifecycleScope.launch {
-                    val discount = validateCoupon(couponCode)
-                    val total = calculateCost(discount)
-                    binding.totalPriceTextView.text = "Total: ${"%.2f€".format(total)}"
+                    cartManager.validateCoupon(couponCode)
+                    cartManager.calculateTotal()
+                    binding.totalPriceTextView.text = cartManager.getFormattedTotal()
                 }
             }
         }
+
         val deliveryAddressEditText = view.findViewById<EditText>(R.id.addressEditText)
         val continueToPaymentButton = view.findViewById<Button>(R.id.continueToPaymentButton)
 
@@ -150,25 +129,24 @@ class CartFragment : Fragment() {
 
         viewLifecycleOwner.lifecycleScope.launch {
             try {
-                listings = withContext(Dispatchers.IO) {
+                cartManager.listings = withContext(Dispatchers.IO) {
                     AppDatabase.showCart(requireContext(), userId)
                 }
                 deliveryAddressEditText.addTextChangedListener(object : TextWatcher {
                     override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
 
                     override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                        if(listings.isNotEmpty())
+                        if(cartManager.listings.isNotEmpty())
                             continueToPaymentButton.isEnabled = !s.isNullOrBlank()
                     }
 
                     override fun afterTextChanged(s: Editable?) {}
                 })
 
-                if (listings.isNotEmpty()) {
-                    adapter.update(listings)                         // refresh rows
-                    val total = adapter.getTotalPrice()
-                    binding.totalPriceTextView.text = "Total: ${"%.2f€".format(total)}"
-
+                if (cartManager.listings .isNotEmpty()) {
+                    adapter.update(cartManager.listings)                         // refresh rows
+                    adapter.getTotalPrice()
+                    binding.totalPriceTextView.text = cartManager.getFormattedTotal()
                 } else {
                     Toast.makeText(context, "No listings available.", Toast.LENGTH_SHORT).show()
                 }
