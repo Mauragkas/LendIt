@@ -174,7 +174,13 @@ class WriteReviewActivity : AppCompatActivity() {
                             )
                             .show()
 
-                    // Navigate back to previous screen
+                    // Navigate to listing details
+                    val intent =
+                            Intent(this@WriteReviewActivity, ListingDetailsActivity::class.java)
+                    intent.putExtra("listing_id", listingId)
+                    startActivity(intent)
+
+                    // Close the review activity
                     finish()
                 }
             } catch (e: Exception) {
