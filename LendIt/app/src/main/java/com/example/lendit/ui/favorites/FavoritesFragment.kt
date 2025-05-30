@@ -15,6 +15,7 @@ import com.example.lendit.R
 import com.example.lendit.databinding.FragmentFavoritesBinding
 import EquipmentListing
 import ListingStatus
+import com.example.lendit.data.repository.RepositoryProvider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -26,7 +27,15 @@ class FavoritesFragment : Fragment() {
     private lateinit var availableAdapter: FavoritesAdapter
     private lateinit var unavailableAdapter: FavoritesAdapter
     private lateinit var similarAdapter: ListingAdapter
-    private lateinit var db: AppDatabase
+
+
+    private val getFavoriteRepository by lazy {
+        RepositoryProvider.getFavoriteRepository(requireContext())
+    }
+    private val getListingRepository by lazy {
+        RepositoryProvider.getListingRepository(requireContext())
+    }
+
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -40,13 +49,10 @@ class FavoritesFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Initialize database
-        db = AppDatabase.getInstance(requireContext())
-
         // Initialize adapters
-        availableAdapter = FavoritesAdapter(mutableListOf())
-        unavailableAdapter = FavoritesAdapter(mutableListOf())
-        similarAdapter = ListingAdapter(mutableListOf())
+        availableAdapter = FavoritesAdapter(requireContext(), mutableListOf())
+        unavailableAdapter = FavoritesAdapter(requireContext(), mutableListOf())
+        similarAdapter = ListingAdapter(requireContext(), mutableListOf())
 
         // Setup RecyclerViews
         binding.recyclerAvailableFavorites.apply {
@@ -78,15 +84,11 @@ class FavoritesFragment : Fragment() {
             }
 
             try {
-                val favorites = withContext(Dispatchers.IO) {
-                    // 1. Get all favorite records for this user
-                    val favoriteRecords = db.FavoriteDao().getFavorites(userId)
-
-                    // 2. Get details for each favorited listing
-                    favoriteRecords.mapNotNull { favorite ->
-                        db.listingDao().getListingById(favorite.listingId)
-                    }
+                val favoriteRecords = getFavoriteRepository.getFavorites(userId)
+                val favorites = favoriteRecords.mapNotNull { favorite ->
+                    getListingRepository.getListingById(favorite.listingId)
                 }
+
 
                 // Separate into available and unavailable
                 val available = favorites.filter { it.status == ListingStatus.AVAILABLE }
@@ -127,12 +129,10 @@ class FavoritesFragment : Fragment() {
                 val favoriteIds = favorites.map { it.listingId }
 
                 // Find similar listings based on categories but exclude favorites
-                val similarListings = withContext(Dispatchers.IO) {
-                    db.listingDao().getListingsByCategories(favoriteCategoryNames)
+                val similarListings = getListingRepository.getListingsByCategories(favoriteCategoryNames)
                         .filter { it.listingId !in favoriteIds } // Exclude items already in favorites
                         .filter { it.status == ListingStatus.UNAVAILABLE } // Only show available items
                         .take(10) // Limit to 10 items
-                }
 
                 withContext(Dispatchers.Main) {
                     // Update UI

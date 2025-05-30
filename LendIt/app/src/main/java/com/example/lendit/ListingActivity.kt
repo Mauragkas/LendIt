@@ -23,6 +23,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.lendit.data.repository.RepositoryProvider
 import com.example.lendit.databinding.ActivityListingCreation2Binding
 import com.example.lendit.databinding.ActivityListingCreationBinding
 import com.google.android.material.datepicker.CalendarConstraints
@@ -40,6 +41,9 @@ import kotlinx.coroutines.withContext
 
 class ListingActivity : AppCompatActivity() {
 
+    private val listingRepository by lazy {
+        RepositoryProvider.getListingRepository(this)
+    }
     private lateinit var bindingStep1: ActivityListingCreationBinding
     private lateinit var bindingStep2: ActivityListingCreation2Binding
     private var currentStep = 1
@@ -114,8 +118,8 @@ class ListingActivity : AppCompatActivity() {
     private fun loadExistingListing(listingId: Int) {
         lifecycleScope.launch {
             try {
-                val db = AppDatabase.getInstance(this@ListingActivity)
-                val listing = db.listingDao().getListingById(listingId)
+
+                val listing = listingRepository.getListingById(listingId)
 
                 if (listing != null) {
                     // Pre-populate the form with existing data
@@ -306,9 +310,7 @@ class ListingActivity : AppCompatActivity() {
         val db = AppDatabase.getInstance(this@ListingActivity)
 
         lifecycleScope.launch {
-            val exists =
-                    db.listingDao()
-                            .listingExists(
+            val exists = listingRepository.listingExists(
                                     title = toolName,
                                     description = bindingStep1.descriptionField.toString(),
                                     price = price.toDouble(),
@@ -395,7 +397,6 @@ class ListingActivity : AppCompatActivity() {
     private fun checkForDuplicatesAndProceed() {
         lifecycleScope.launch {
             try {
-                val db = AppDatabase.getInstance(this@ListingActivity)
 
                 // Skip duplicate check in edit mode
                 if (isEditMode) {
@@ -411,9 +412,7 @@ class ListingActivity : AppCompatActivity() {
                 val startDate = listingData["startDate"] as Int?
                 val endDate = listingData["endDate"] as Int?
 
-                val exists =
-                        db.listingDao()
-                                .listingExists(
+                val exists = listingRepository.listingExists(
                                         title = title,
                                         description = description,
                                         price = price,
@@ -533,11 +532,9 @@ class ListingActivity : AppCompatActivity() {
                 var listingId = -1L
 
                 withContext(Dispatchers.IO) {
-                    val db = AppDatabase.getInstance(this@ListingActivity)
-
                     if (isEditMode) {
                         // Update existing listing
-                        db.listingDao().updateListing(listing)
+                        listingRepository.updateListing(listing)
                         listingId = editingListingId.toLong()
                         android.util.Log.d(
                                 "ListingActivity",
@@ -545,7 +542,7 @@ class ListingActivity : AppCompatActivity() {
                         )
                     } else {
                         // Insert new listing
-                        listingId = db.listingDao().insert(listing)
+                        listingId = listingRepository.addListing(listing)
                         android.util.Log.d("ListingActivity", "Listing created with ID: $listingId")
                     }
 
@@ -574,16 +571,14 @@ class ListingActivity : AppCompatActivity() {
     private suspend fun addSale(listingId: Int, discountPercentage: Double) {
         withContext(Dispatchers.IO) {
             try {
-                val db = AppDatabase.getInstance(this@ListingActivity)
-
                 // Update the listing with the discount
-                val listing = db.listingDao().getListingById(listingId)
+                val listing = listingRepository.getListingById(listingId)
                 if (listing != null) {
                     // Create updated listing with discount
                     val updatedListing = listing.copy(longTermDiscount = discountPercentage)
 
                     // Save the updated listing
-                    db.listingDao().updateListing(updatedListing)
+                    listingRepository.updateListing(updatedListing)
 
                     android.util.Log.d(
                             "ListingActivity",
@@ -613,8 +608,6 @@ class ListingActivity : AppCompatActivity() {
     private fun showTool() {
         lifecycleScope.launch(Dispatchers.IO) {
             try {
-                val db = AppDatabase.getInstance(this@ListingActivity)
-
                 // If we're in edit mode, we already know the ID
                 val listingId =
                         if (isEditMode) {
@@ -622,7 +615,7 @@ class ListingActivity : AppCompatActivity() {
                         } else {
                             // For new listings, find the most recently created listing by this user
                             val recentListing =
-                                    db.listingDao().getMostRecentListingByOwner(userName)
+                                listingRepository.getMostRecentListingByOwner(userName)
                             recentListing?.listingId ?: -1
                         }
 

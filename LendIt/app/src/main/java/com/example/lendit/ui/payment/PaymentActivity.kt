@@ -24,6 +24,9 @@ import kotlin.math.log
 
 class PaymentActivity : AppCompatActivity() {
 
+    private val cartRepository by lazy {
+        RepositoryProvider.getCartRepository(this)
+    }
     private lateinit var paymentMethodGroup: RadioGroup
     private lateinit var cardDetailsForm: View
     private lateinit var bankDetailsForm: View
@@ -93,16 +96,6 @@ class PaymentActivity : AppCompatActivity() {
                 isFormatting = false
             }
         })
-
-        val userId = intent.getIntExtra("userId", -1)
-        val price = intent.getDoubleExtra("price", 0.0)
-
-        fun saveTransaction(order: Order) {
-            lifecycleScope.launch {
-                AppDatabase.getInstance(applicationContext).OrderDao().insert(order)
-                finish() // optionally close the activity
-            }
-        }
 
         data class EncryptedCardData(
             val encryptedCardNumber: String,
@@ -246,7 +239,7 @@ class PaymentActivity : AppCompatActivity() {
 
     private fun clearCart(userId: Int) {
         lifecycleScope.launch {
-            AppDatabase.getInstance(applicationContext).cartDao().deleteCart(userId)
+            cartRepository.deleteCart(userId)
         }
     }
 }

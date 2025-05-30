@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import com.example.lendit.data.repository.RepositoryProvider
 import com.example.lendit.databinding.ActivityReportDetailsBinding
 import kotlinx.coroutines.launch
 
@@ -11,6 +12,12 @@ class ReportDetailsActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityReportDetailsBinding
 
+    private val reportRepository by lazy {
+        RepositoryProvider.getReportRepository(this)
+    }
+    private val listingRepository by lazy {
+        RepositoryProvider.getListingRepository(this)
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityReportDetailsBinding.inflate(layoutInflater)
@@ -31,8 +38,7 @@ class ReportDetailsActivity : AppCompatActivity() {
     private fun loadReportDetails(reportId: Int) {
         lifecycleScope.launch {
             try {
-                val db = AppDatabase.getInstance(applicationContext)
-                val report = db.reportDao().getReportById(reportId)
+                val report = reportRepository.getReportById(reportId)
 
                 if (report != null) {
                     binding.reportIdText.text = "Report #${report.reportId}"
@@ -41,7 +47,7 @@ class ReportDetailsActivity : AppCompatActivity() {
                     binding.reportStatusText.text = report.status
 
                     // Load the listing details
-                    val listing = db.listingDao().getListingById(report.listingId)
+                    val listing = listingRepository.getListingById(report.listingId)
                     if (listing != null) {
                         binding.listingTitleText.text = listing.title
                         binding.listingDescriptionText.text = listing.description

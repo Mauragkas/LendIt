@@ -6,6 +6,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.lendit.data.repository.RepositoryProvider
 import com.example.lendit.databinding.ActivityReviewBinding
 import java.text.SimpleDateFormat
 import java.util.*
@@ -17,6 +18,12 @@ class ReviewActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityReviewBinding
     private lateinit var adapter: ReviewAdapter
+    private val reviewRepository by lazy {
+        RepositoryProvider.getReviewRepository(applicationContext)
+    }
+    private val listingRepository by lazy {
+        RepositoryProvider.getListingRepository(applicationContext)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,6 +34,7 @@ class ReviewActivity : AppCompatActivity() {
         binding.reviewRecyclerView.layoutManager = LinearLayoutManager(this)
         adapter = ReviewAdapter(mutableListOf())
         binding.reviewRecyclerView.adapter = adapter
+
 
         // Set up back button
         binding.backButton.setOnClickListener { finish() }
@@ -54,11 +62,7 @@ class ReviewActivity : AppCompatActivity() {
                 }
 
                 // Get unreviewed rentals from database
-                val db = AppDatabase.getInstance(this@ReviewActivity)
-                val unreviewedListingIds =
-                        withContext(Dispatchers.IO) {
-                            db.rentalDao().getUnreviewedRentalsForUser(userId)
-                        }
+                val unreviewedListingIds = reviewRepository.getUnreviewedRentalListingIds(userId)
 
                 if (unreviewedListingIds.isEmpty()) {
                     showEmptyState(true, "You don't have any items to review yet")
@@ -69,7 +73,7 @@ class ReviewActivity : AppCompatActivity() {
                 val unreviewedListings =
                         withContext(Dispatchers.IO) {
                             unreviewedListingIds.mapNotNull { listingId ->
-                                db.listingDao().getListingById(listingId)
+                                listingRepository.getListingById(listingId)
                             }
                         }
 

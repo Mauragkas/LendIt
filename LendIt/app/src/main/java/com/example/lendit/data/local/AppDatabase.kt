@@ -269,7 +269,75 @@ abstract class AppDatabase : RoomDatabase() {
                                 longTermDiscount = 15.0
                         )
 
-                val listings = listOf<EquipmentListing>(listing1, listing2, listing3, listing4)
+                val listing5 =
+                        EquipmentListing(
+                                listingId = 0,
+                                title = "Listing 5 - Electric Drill",
+                                description = "Powerful electric drill for various tasks.",
+                                ownerName = "mavragas owner",
+                                category = ListingCategory.ELECTRIC,
+                                location = Region.THESSALY,
+                                status = ListingStatus.AVAILABLE,
+                                price = 120.0,
+                                photos = photos,
+                                creationDate = Converters().fromLocalDate(LocalDate.of(2025, 6, 1)),
+                                availableFrom = Converters().fromLocalDate(LocalDate.of(2025, 6, 5)),
+                                availableUntil = Converters().fromLocalDate(LocalDate.of(2026, 6, 5)),
+                                longTermDiscount = 2.0
+                        )
+
+                val listing6 =
+                        EquipmentListing(
+                                listingId = 0,
+                                title = "Listing 6 - Manual Saw",
+                                description = "Sharp manual saw for cutting wood.",
+                                ownerName = "mavragas owner",
+                                category = ListingCategory.MANUAL,
+                                location = Region.EPIRUS,
+                                status = ListingStatus.AVAILABLE,
+                                price = 80.0,
+                                photos = photos,
+                                creationDate = Converters().fromLocalDate(LocalDate.of(2025, 6, 10)),
+                                availableFrom = Converters().fromLocalDate(LocalDate.of(2025, 6, 15)),
+                                availableUntil = Converters().fromLocalDate(LocalDate.of(2026, 6, 15)),
+                                longTermDiscount = 0.0
+                        )
+
+                val listing7 =
+                        EquipmentListing(
+                                listingId = 0,
+                                title = "Listing 7 - Heavy Duty Jackhammer",
+                                description = "For breaking concrete and other tough materials.",
+                                ownerName = "mavragas owner",
+                                category = ListingCategory.ELECTRIC,
+                                location = Region.WESTERN_GREECE,
+                                status = ListingStatus.AVAILABLE,
+                                price = 300.0,
+                                photos = photos,
+                                creationDate = Converters().fromLocalDate(LocalDate.of(2025, 7, 1)),
+                                availableFrom = Converters().fromLocalDate(LocalDate.of(2025, 7, 5)),
+                                availableUntil = Converters().fromLocalDate(LocalDate.of(2026, 7, 5)),
+                                longTermDiscount = 20.0
+                        )
+
+                val listing8 =
+                        EquipmentListing(
+                                listingId = 0,
+                                title = "Listing 8 - Gardening Tools Set",
+                                description = "Complete set for gardening enthusiasts.",
+                                ownerName = "mavragas owner",
+                                category = ListingCategory.MANUAL,
+                                location = Region.IONIAN_ISLANDS,
+                                status = ListingStatus.AVAILABLE,
+                                price = 90.0,
+                                photos = photos,
+                                creationDate = Converters().fromLocalDate(LocalDate.of(2025, 7, 15)),
+                                availableFrom = Converters().fromLocalDate(LocalDate.of(2025, 7, 20)),
+                                availableUntil = Converters().fromLocalDate(LocalDate.of(2026, 7, 20)),
+                                longTermDiscount = 5.0
+                        )
+
+                val listings = listOf<EquipmentListing>(listing1, listing2, listing3, listing4, listing5, listing6, listing7, listing8)
                 listingDao.insertAll(listings)
             }
         }
@@ -313,7 +381,6 @@ abstract class AppDatabase : RoomDatabase() {
         }
 
         suspend fun showCart(context: Context, userId: Int): List<EquipmentListing> {
-
             val db = getInstance(context) // see helper below
 
             if (db.cartDao().getCartCount(userId) == 0) {

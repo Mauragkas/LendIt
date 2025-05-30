@@ -15,6 +15,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.example.lendit.R
+import com.example.lendit.data.repository.RepositoryProvider
 import com.example.lendit.databinding.FragmentPremiumBinding
 import com.example.lendit.ui.payment.PaymentActivity
 import kotlinx.coroutines.launch
@@ -28,7 +29,9 @@ class PremiumFragment : Fragment() {
     private lateinit var sharedPref: SharedPreferences
     private lateinit var userEmail: String
 
-
+    private val userRepository by lazy {
+        RepositoryProvider.getUserRepository(requireContext())
+    }
     fun showProfile() {
         findNavController().navigate(R.id.navigation_profile)
     }
@@ -162,11 +165,9 @@ class PremiumFragment : Fragment() {
     }
 
     fun updateUserStatus(hasPremium: Boolean) {
-        val db = AppDatabase.getLogin(requireContext(), lifecycleScope)
-        val userDao = db.userDao()
         lifecycleScope.launch {
             // Update premium status in database
-            userDao.updateUserStatus(userEmail, hasPremium, null)
+            userRepository.updateUserStatus(userEmail,hasPremium, null)
 
             // Update shared preferences
             with(sharedPref.edit()) {

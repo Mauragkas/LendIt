@@ -82,6 +82,7 @@ class CompareListingAdapter(
 
     override fun getItemCount() = items.size
 
+
     fun update(newItems: List<EquipmentListing>) {
         items.clear()
         items.addAll(newItems)

@@ -29,11 +29,17 @@ import android.widget.Button
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.fragment.findNavController
+import com.example.lendit.data.repository.RepositoryProvider
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
-class ListingAdapter(private val items: MutableList<EquipmentListing>) :
+class ListingAdapter(
+    private val context: Context,
+    private val items: MutableList<EquipmentListing>) :
     RecyclerView.Adapter<ListingAdapter.MyViewHolder>() {
 
+    private val favoritesRepository by lazy {
+        RepositoryProvider.getFavoriteRepository(context)
+    }
     class MyViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val titleTextView: TextView = itemView.findViewById(R.id.listingTitle)
         val descriptionTextView: TextView = itemView.findViewById(R.id.listingDescription)
@@ -64,8 +70,6 @@ class ListingAdapter(private val items: MutableList<EquipmentListing>) :
         // Load other item data
         holder.titleTextView.text = currentItem.title
 
-        val db = AppDatabase.getDatabase(context)
-        val favoriteDao = db.FavoriteDao()
         val sharedPref = context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
         val userId = sharedPref.getInt("user_id", -1)
         val goToFavoritesButton = holder.goToFavoritesButton
@@ -78,7 +82,7 @@ class ListingAdapter(private val items: MutableList<EquipmentListing>) :
 
         // Check initial favorite status
         (context as AppCompatActivity).lifecycleScope.launch(Dispatchers.IO) {
-            val isFavorite = favoriteDao.isFavorite(userId, currentItem.listingId)
+            val isFavorite = favoritesRepository.isFavorite(userId, currentItem.listingId)
             withContext(Dispatchers.Main) {
                 holder.favoriteButton.setImageResource(
                     if (isFavorite) R.drawable.ic_favorite_filled else R.drawable.ic_favorite_border
@@ -90,16 +94,16 @@ class ListingAdapter(private val items: MutableList<EquipmentListing>) :
         // Set favorites click listener
         holder.favoriteButton.setOnClickListener {
             context.lifecycleScope.launch(Dispatchers.IO) {
-                val isFavorite = favoriteDao.isFavorite(userId, currentItem.listingId)
+                val isFavorite = favoritesRepository.isFavorite(userId, currentItem.listingId)
                 if (isFavorite) {
-                    favoriteDao.removeFromFavorites(userId, currentItem.listingId)
+                    favoritesRepository.removeFromFavorites(userId, currentItem.listingId)
                     withContext(Dispatchers.Main) {
                         holder.favoriteButton.setImageResource(R.drawable.ic_favorite_border)
                         goToFavoritesButton.visibility = View.GONE
                         Toast.makeText(context, "Removed from favorites", Toast.LENGTH_SHORT).show()
                     }
                 } else {
-                    favoriteDao.addToFavorites(Favorite(userId = userId, listingId = currentItem.listingId))
+                    favoritesRepository.addToFavorites(Favorite(userId = userId, listingId = currentItem.listingId))
                     withContext(Dispatchers.Main) {
                         holder.favoriteButton.setImageResource(R.drawable.ic_favorite_filled)
                         goToFavoritesButton.visibility = View.VISIBLE

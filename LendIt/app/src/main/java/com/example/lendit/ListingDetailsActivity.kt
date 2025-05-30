@@ -25,6 +25,7 @@ import com.bumptech.glide.Glide
 import com.example.lendit.ListingActivity
 import com.example.lendit.data.local.entities.Report
 import com.example.lendit.data.local.entities.UserCart
+import com.example.lendit.data.repository.RepositoryProvider
 import com.google.android.material.datepicker.CalendarConstraints
 import com.google.android.material.datepicker.DateValidatorPointForward
 import com.google.android.material.datepicker.MaterialDatePicker
@@ -47,6 +48,16 @@ class ListingDetailsActivity : AppCompatActivity() {
     private var formattedEnd: Int? = null
     private lateinit var dateButton: Button
 
+    private val listingRepository by lazy {
+        RepositoryProvider.getListingRepository(this)
+    }
+    private val reportRepository by lazy {
+        RepositoryProvider.getReportRepository(this)
+    }
+    private val cartRepository by lazy {
+        RepositoryProvider.getCartRepository(this)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_listing_details)
@@ -54,7 +65,6 @@ class ListingDetailsActivity : AppCompatActivity() {
         dateButton = findViewById<Button>(R.id.date_button)
 
         val listingId = intent.getIntExtra("listing_id", -1)
-        val db = AppDatabase.getInstance(applicationContext)
 
         // Set up report button click listener
         findViewById<Button>(R.id.reportButton).setOnClickListener {
@@ -119,8 +129,8 @@ class ListingDetailsActivity : AppCompatActivity() {
         recycler.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         lifecycleScope.launch {
 
-            val category = db.listingDao().getCategoryById(listingId)
-            val relatedListings = db.listingDao().getRelatedListings(category, listingId)
+            val category = listingRepository.getCategoryById(listingId)
+            val relatedListings = listingRepository.getRelatedListings(category, listingId)
             findSimilar(relatedListings)
         }
 
@@ -138,7 +148,7 @@ class ListingDetailsActivity : AppCompatActivity() {
         }
 
         lifecycleScope.launch {
-            val listing = db.listingDao().getListingById(listingId)
+            val listing = listingRepository.getListingById(listingId)
 
             if (listing != null) {
                 // Populate UI
@@ -326,8 +336,7 @@ class ListingDetailsActivity : AppCompatActivity() {
 
                 // Save to database
                 withContext(Dispatchers.IO) {
-                    val db = AppDatabase.getInstance(applicationContext)
-                    db.reportDao().insert(report)
+                    reportRepository.insertReport(report)
                 }
 
                 // Show success message
@@ -383,8 +392,7 @@ class ListingDetailsActivity : AppCompatActivity() {
 
             // Save to database
             withContext(Dispatchers.IO) {
-                val db = AppDatabase.getInstance(applicationContext)
-                db.cartDao().insert(userCart)
+                cartRepository.insert(userCart)
             }
 
             // Show success toast on main thread

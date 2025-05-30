@@ -8,6 +8,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
+import com.example.lendit.data.repository.RepositoryProvider
 import com.example.lendit.databinding.ActivityCompareResultBinding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -18,6 +19,9 @@ class CompareResultActivity : AppCompatActivity() {
     private lateinit var binding: ActivityCompareResultBinding
     private var listings = mutableListOf<EquipmentListing>()
 
+    private val listingRepository by lazy {
+        RepositoryProvider.getListingRepository(this)
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityCompareResultBinding.inflate(layoutInflater)
@@ -35,14 +39,12 @@ class CompareResultActivity : AppCompatActivity() {
 
     private suspend fun loadListings(listingIds: List<Int>) {
         try {
-            val db = AppDatabase.getInstance(this)
-
             // Load each listing - explicitly specifying the return type
             listings =
                     withContext(Dispatchers.IO) {
                         val resultList = mutableListOf<EquipmentListing>()
                         for (id in listingIds) {
-                            val listing = db.listingDao().getListingById(id)
+                            val listing = listingRepository.getListingById(id)
                             if (listing != null) {
                                 resultList.add(listing)
                             }

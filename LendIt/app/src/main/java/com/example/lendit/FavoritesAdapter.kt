@@ -18,12 +18,20 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.example.lendit.data.local.entities.Favorite
+import com.example.lendit.data.repository.RepositoryProvider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class FavoritesAdapter(private val items: MutableList<EquipmentListing>) :
+class FavoritesAdapter(
+    private val context: Context,
+    private val items: MutableList<EquipmentListing>
+) :
     RecyclerView.Adapter<FavoritesAdapter.MyViewHolder>() {
+
+    private val favoritesRepository by lazy {
+        RepositoryProvider.getFavoriteRepository(context)
+    }
 
     class MyViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val titleTextView: TextView = itemView.findViewById(R.id.listingTitle)
@@ -49,13 +57,11 @@ class FavoritesAdapter(private val items: MutableList<EquipmentListing>) :
         val currentItem = items[position]
         val context = holder.itemView.context
 
-        val db = AppDatabase.getDatabase(context)
-        val favoriteDao = db.FavoriteDao()
         val sharedPref = context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
         val userId = sharedPref.getInt("user_id", -1)
 
         (context as AppCompatActivity).lifecycleScope.launch(Dispatchers.IO) {
-            val isFavorite = favoriteDao.isFavorite(userId, currentItem.listingId)
+            val isFavorite = favoritesRepository.isFavorite(userId, currentItem.listingId)
             withContext(Dispatchers.Main) {
                 holder.favoriteButton.setImageResource(
                     if (isFavorite) R.drawable.ic_favorite_filled
@@ -66,15 +72,15 @@ class FavoritesAdapter(private val items: MutableList<EquipmentListing>) :
 
         holder.favoriteButton.setOnClickListener {
             (context as AppCompatActivity).lifecycleScope.launch(Dispatchers.IO) {
-                val isFavorite = favoriteDao.isFavorite(userId, currentItem.listingId)
+                val isFavorite = favoritesRepository.isFavorite(userId, currentItem.listingId)
                 if (isFavorite) {
-                    favoriteDao.removeFromFavorites(userId, currentItem.listingId)
+                    favoritesRepository.removeFromFavorites(userId, currentItem.listingId)
                     withContext(Dispatchers.Main) {
                         holder.favoriteButton.setImageResource(R.drawable.ic_favorite_border)
                         Toast.makeText(context, "Removed from favorites", Toast.LENGTH_SHORT).show()
                     }
                 } else {
-                    favoriteDao.addToFavorites(Favorite(userId = userId, listingId = currentItem.listingId))
+                    favoritesRepository.addToFavorites(Favorite(userId = userId, listingId = currentItem.listingId))
                     withContext(Dispatchers.Main) {
                         holder.favoriteButton.setImageResource(R.drawable.ic_favorite_filled)
                         Toast.makeText(context, "Added to favorites", Toast.LENGTH_SHORT).show()

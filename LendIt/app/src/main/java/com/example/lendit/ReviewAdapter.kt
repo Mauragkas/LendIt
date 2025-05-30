@@ -12,9 +12,11 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.example.lendit.data.repository.RepositoryProvider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import com.example.lendit.data.repository.OrderRepository
 
 class ReviewAdapter(private val items: List<RentalItem>) :
         RecyclerView.Adapter<ReviewAdapter.ViewHolder>() {
@@ -32,12 +34,15 @@ class ReviewAdapter(private val items: List<RentalItem>) :
         val view =
                 LayoutInflater.from(parent.context)
                         .inflate(R.layout.review_item_layout, parent, false)
+
         return ViewHolder(view)
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = items[position]
         val context = holder.itemView.context
+
+        var reviewRepository = RepositoryProvider.getReviewRepository(context)
 
         holder.itemTitle.text = item.title
         holder.rentalDate.text = "Rented on: ${item.rentalDate}"
@@ -53,16 +58,12 @@ class ReviewAdapter(private val items: List<RentalItem>) :
 
         // Check if the item has already been reviewed
         (context as? AppCompatActivity)?.lifecycleScope?.launch {
-            val db = AppDatabase.getInstance(context)
             val userId = context.getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE)
                     .getInt("userId", -1)
 
-            val hasReviewed = withContext(Dispatchers.IO) {
-                db.reviewDao().hasUserReviewedListing(userId, item.id)
-            }
 
             withContext(Dispatchers.Main) {
-                if (hasReviewed) {
+                if(reviewRepository.hasUserReviewedListing(userId, item.id)) {
                     // Item already reviewed
                     holder.reviewButton.visibility = View.GONE
                     holder.reviewedStatusText.visibility = View.VISIBLE

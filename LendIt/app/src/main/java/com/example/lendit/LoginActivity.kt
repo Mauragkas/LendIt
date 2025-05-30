@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
 import android.content.Context
+import com.example.lendit.data.repository.RepositoryProvider
 
 
 class LoginActivity : AppCompatActivity() {
@@ -20,20 +21,20 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var loginBtn: Button
     private lateinit var signupBtn: Button
 
+    private val userRepository by lazy {
+        RepositoryProvider.getUserRepository(this)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
-
-        // Initialize database and DAO
-        val db = AppDatabase.getLogin(applicationContext, lifecycleScope)
-        val userDao = db.userDao()
-        val listingDao = db.listingDao()
-        val couponDao = db.couponDao()
 
         // Check if user is already logged in
         val sharedPref = getSharedPreferences("MyAppPrefs", MODE_PRIVATE)
         val isLoggedIn = sharedPref.getInt("userId", -1)
         val savedUserType = sharedPref.getString("userType", "renter")
+
+        AppDatabase.getLogin(applicationContext, lifecycleScope)
 
         if (isLoggedIn != -1) {
             // Redirect based on saved user type
@@ -79,7 +80,7 @@ class LoginActivity : AppCompatActivity() {
 
             lifecycleScope.launch {
                 try {
-                    val user = userDao.getUserByEmailAndPassword(email, password)
+                    val user = userRepository.getUserByEmailAndPassword(email, password)
 
                     if (user != null) {
                         // Save login state and user info
@@ -108,13 +109,11 @@ class LoginActivity : AppCompatActivity() {
                         finish()
 
                     } else {
-                        runOnUiThread {
                             Toast.makeText(
                                 this@LoginActivity,
                                 "Invalid email or password",
                                 Toast.LENGTH_SHORT
                             ).show()
-                        }
                     }
                 } catch (e: Exception) {
                     runOnUiThread {

@@ -15,6 +15,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.lendit.data.local.entities.Review
+import com.example.lendit.data.repository.RepositoryProvider
 import com.google.android.material.textfield.TextInputEditText
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -29,7 +30,9 @@ class WriteReviewActivity : AppCompatActivity() {
     private lateinit var backButton: ImageButton
     private lateinit var addPhotoButton: Button
     private lateinit var photosRecyclerView: RecyclerView
-
+    private val reviewRepository by lazy {
+        RepositoryProvider.getReviewRepository(applicationContext)
+    }
     private val selectedPhotos = mutableListOf<Uri>()
     private lateinit var photoAdapter: PhotoAdapter
 
@@ -160,11 +163,8 @@ class WriteReviewActivity : AppCompatActivity() {
                         )
 
                 // Save to database
-                withContext(Dispatchers.IO) {
-                    val db = AppDatabase.getInstance(this@WriteReviewActivity)
-                    db.reviewDao().insert(review)
-                    db.rentalDao().markAsReviewed(userId, listingId)
-                }
+                reviewRepository.addReview(review)
+                reviewRepository.markRentalAsReviewed(userId, listingId)
 
                 withContext(Dispatchers.Main) {
                     Toast.makeText(

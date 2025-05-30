@@ -1,6 +1,5 @@
 package com.example.lendit.ui.compare
 
-import AppDatabase
 import EquipmentListing
 import android.content.Context
 import android.content.Intent
@@ -14,6 +13,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.lendit.CompareResultActivity
 import com.example.lendit.SearchActivity
+import com.example.lendit.data.repository.RepositoryProvider
 import com.example.lendit.databinding.FragmentCompareBinding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -22,10 +22,16 @@ import kotlinx.coroutines.withContext
 class CompareFragment : Fragment() {
 
     private var _binding: FragmentCompareBinding? = null
-    private val binding
-        get() = _binding!!
+    private val binding get() = _binding!!
     private lateinit var adapter: CompareListingAdapter
     private val selectedListings = mutableListOf<EquipmentListing>()
+
+    private val getFavoriteRepository by lazy {
+        RepositoryProvider.getFavoriteRepository(requireContext())
+    }
+    private val getListingRepository by lazy {
+        RepositoryProvider.getListingRepository(requireContext())
+    }
 
     override fun onCreateView(
             inflater: LayoutInflater,
@@ -89,14 +95,10 @@ class CompareFragment : Fragment() {
                     return@launch
                 }
 
-                val db = AppDatabase.getInstance(requireContext())
-                val favorites =
-                        withContext(Dispatchers.IO) {
-                            val favoriteRecords = db.FavoriteDao().getFavorites(userId)
-                            favoriteRecords.mapNotNull { favorite ->
-                                db.listingDao().getListingById(favorite.listingId)
-                            }
-                        }
+                val favoriteRecords = getFavoriteRepository.getFavorites(userId)
+                val favorites = favoriteRecords.mapNotNull { favorite ->
+                    getListingRepository.getListingById(favorite.listingId)
+                }
 
                 if (favorites.isEmpty()) {
                     Toast.makeText(requireContext(), "No favorites found. Add some items to your favorites first!", Toast.LENGTH_SHORT).show()

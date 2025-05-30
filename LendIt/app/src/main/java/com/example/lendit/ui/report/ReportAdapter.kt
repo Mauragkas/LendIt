@@ -13,11 +13,13 @@ import android.widget.Toast
 import android.widget.ScrollView
 import android.widget.LinearLayout
 import androidx.appcompat.app.AlertDialog
+import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.recyclerview.widget.RecyclerView
 import com.example.lendit.ListingDetailsActivity
 import com.example.lendit.R
 import com.example.lendit.data.local.ListingManager
 import com.example.lendit.data.local.entities.Report
+import com.example.lendit.data.repository.RepositoryProvider
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -35,6 +37,13 @@ class ReportAdapter(
 
     // Keep track of expanded items
     private val expandedItems = mutableSetOf<Int>()
+
+    private val reportRepository by lazy {
+        RepositoryProvider.getReportRepository(context)
+    }
+    private val listingRepository by lazy {
+        RepositoryProvider.getListingRepository(context)
+    }
 
     class ReportViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         // Compact view elements
@@ -99,8 +108,7 @@ class ReportAdapter(
     private fun showAllReportsForListingDialog(listingId: Int) {
         scope.launch {
             try {
-                val db = AppDatabase.getInstance(context)
-                val allReportsForListing = db.reportDao().getReportsForListing(listingId)
+                val allReportsForListing = reportRepository.getReportsForListing(listingId)
 
                 if (allReportsForListing.isEmpty()) {
                     withContext(Dispatchers.Main) {
@@ -110,7 +118,7 @@ class ReportAdapter(
                 }
 
                 // Get listing details
-                val listing = db.listingDao().getListingById(listingId)
+                val listing = listingRepository.getListingById(listingId)
                 val listingTitle = listing?.title ?: "Unknown Listing"
 
                 // Create a formatted list of all reports for this listing
@@ -235,8 +243,7 @@ class ReportAdapter(
                 // First check if the listing still exists before navigating
                 scope.launch {
                     try {
-                        val db = AppDatabase.getInstance(context)
-                        val listing = db.listingDao().getListingById(report.listingId)
+                        val listing = listingRepository.getListingById(report.listingId)
 
                         withContext(Dispatchers.Main) {
                             if (listing != null) {
@@ -311,9 +318,8 @@ class ReportAdapter(
     private fun markAsReviewed(report: Report) {
         scope.launch {
             try {
-                val db = AppDatabase.getInstance(context)
                 val updatedReport = report.copy(status = "REVIEWED")
-                db.reportDao().updateReport(updatedReport)
+                reportRepository.updateReport(updatedReport)
 
                 withContext(Dispatchers.Main) {
                     Toast.makeText(context, "Report marked as reviewed", Toast.LENGTH_SHORT).show()
@@ -343,17 +349,16 @@ class ReportAdapter(
     private fun removeListing(report: Report) {
         scope.launch {
             try {
-                val db = AppDatabase.getInstance(context)
-                val listing = db.listingDao().getListingById(report.listingId)
+                val listing = listingRepository.getListingById(report.listingId)
 
                 if (listing != null) {
-                    db.listingDao().deleteListing(listing)
+                    listingRepository.deleteListing(listing)
 
                     // Update all related reports
-                    val relatedReports = db.reportDao().getReportsForListing(report.listingId)
+                    val relatedReports = reportRepository.getReportsForListing(report.listingId)
                     for (relatedReport in relatedReports) {
                         val updatedReport = relatedReport.copy(status = "CLOSED")
-                        db.reportDao().updateReport(updatedReport)
+                        reportRepository.updateReport(updatedReport)
                     }
 
                     withContext(Dispatchers.Main) {
@@ -388,9 +393,8 @@ class ReportAdapter(
 
                 if (result) {
                     // Update report status
-                    val db = AppDatabase.getInstance(context)
                     val updatedReport = report.copy(status = "REVIEWED")
-                    db.reportDao().updateReport(updatedReport)
+                    reportRepository.updateReport(updatedReport)
 
                     withContext(Dispatchers.Main) {
                         Toast.makeText(context, "Listing deactivated", Toast.LENGTH_SHORT).show()
@@ -416,9 +420,8 @@ class ReportAdapter(
     private fun dismissReport(report: Report) {
         scope.launch {
             try {
-                val db = AppDatabase.getInstance(context)
                 val updatedReport = report.copy(status = "CLOSED")
-                db.reportDao().updateReport(updatedReport)
+                reportRepository.updateReport(updatedReport)
 
                 withContext(Dispatchers.Main) {
                     Toast.makeText(context, "Report dismissed", Toast.LENGTH_SHORT).show()
@@ -439,9 +442,8 @@ class ReportAdapter(
     private fun closeReport(report: Report) {
         scope.launch {
             try {
-                val db = AppDatabase.getInstance(context)
                 val updatedReport = report.copy(status = "CLOSED")
-                db.reportDao().updateReport(updatedReport)
+                reportRepository.updateReport(updatedReport)
 
                 withContext(Dispatchers.Main) {
                     Toast.makeText(context, "Report closed", Toast.LENGTH_SHORT).show()

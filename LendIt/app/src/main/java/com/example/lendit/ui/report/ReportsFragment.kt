@@ -17,6 +17,8 @@ import com.example.lendit.databinding.FragmentReportsBinding
 import kotlinx.coroutines.launch
 import androidx.appcompat.app.AlertDialog
 import com.example.lendit.R
+import com.example.lendit.data.local.entities.ReportClass
+import com.example.lendit.data.repository.RepositoryProvider
 
 class ReportsFragment : Fragment() {
 
@@ -24,6 +26,9 @@ class ReportsFragment : Fragment() {
     private val binding get() = _binding!!
     private lateinit var adapter: ReportAdapter
     private var currentFilter = "All"
+    private val reportRepository by lazy {
+        RepositoryProvider.getReportRepository(requireContext())
+    }
 
     override fun onCreateView(
             inflater: LayoutInflater,
@@ -78,41 +83,28 @@ class ReportsFragment : Fragment() {
         loadReports()
     }
 
-    private fun filterReports(allReports: List<Report>, filter: String): List<Report> {
-        return when (filter) {
-            "Pending" -> allReports.filter { it.status == "PENDING" }
-            "Reviewed" -> allReports.filter { it.status == "REVIEWED" }
-            "Closed" -> allReports.filter { it.status == "CLOSED" }
-            else -> allReports
-        }
-    }
 
     private fun loadReports() {
         lifecycleScope.launch {
             try {
-                val db = AppDatabase.getInstance(requireContext())
-
                 // Get all reports
-                val allReports = db.reportDao().getAllReports()
+                val allReports = reportRepository.getAllReports()
 
                 // Group reports by listing ID and count them
                 val reportCountByListing = allReports.groupingBy { it.listingId }.eachCount()
 
                 // Filter reports based on selected filter
-                val filteredReports = filterReports(allReports, currentFilter)
+                val reports = ReportClass.convertToReportClassList(allReports)
+                val filteredReports = ReportClass.filterReports(reports, currentFilter)
 
                 if (filteredReports.isNotEmpty()) {
                     // Group by listing ID and take the most recent report for each listing
-                    val uniqueReports = filteredReports
-                        .groupBy { it.listingId }
-                        .map { entry -> entry.value.maxByOrNull { it.reportDate }!! }
+                    val uniqueReports = ReportClass.getUniqueLatestReportsByListing(filteredReports)
+                    val sortedReports = ReportClass.sortReportsByReportCount(uniqueReports, reportCountByListing)
+                    val sortedReportEntities = ReportClass.convertToReportEntityList(sortedReports)
 
-                    // Sort by number of reports per listing (most reports first)
-                    val sortedReports = uniqueReports.sortedByDescending {
-                        reportCountByListing[it.listingId] ?: 0
-                    }
 
-                    adapter.updateReports(sortedReports, reportCountByListing)
+                    adapter.updateReports(sortedReportEntities, reportCountByListing)
                     binding.emptyStateLayout.visibility = View.GONE
                     binding.reportCountText.text = "Reports found: ${filteredReports.size} across ${reportCountByListing.size} listings"
                     binding.reportCountText.visibility = View.VISIBLE
@@ -133,8 +125,7 @@ class ReportsFragment : Fragment() {
     private fun showReportReasonsDialog() {
         lifecycleScope.launch {
             try {
-                val db = AppDatabase.getInstance(requireContext())
-                val allReports = db.reportDao().getAllReports()
+                val allReports = reportRepository.getAllReports()
 
                 // Create a formatted list of all report reasons with their comments and media
                 val reportDetailsBuilder = StringBuilder()

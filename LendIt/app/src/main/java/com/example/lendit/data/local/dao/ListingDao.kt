@@ -106,7 +106,7 @@ fun buildQuery(f: ListingFilters): SupportSQLiteQuery {
         args.add(f.availableUntil)  // filter end date
     }
 
-    queryBuilder.append(" ORDER BY user.premiumStatus DESC")
+    queryBuilder.append("AND status = 'AVAILABLE' ORDER BY user.premiumStatus DESC")
     when (f.sortBy ?: SortBy.SUGGESTED) {
         SortBy.ASC -> queryBuilder.append(", price ASC")
         SortBy.DESC -> queryBuilder.append(", price DESC")

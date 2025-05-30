@@ -60,7 +60,7 @@ class SearchActivity : AppCompatActivity() {
 
 
         /** Initialize RecyclerView */
-        adapter = ListingAdapter(mutableListOf())
+        adapter = ListingAdapter(this, mutableListOf())
         binding.listingRecyclerView.apply {
             layoutManager = LinearLayoutManager(this@SearchActivity)
             adapter = this@SearchActivity.adapter

@@ -58,8 +58,6 @@ class OwnerAdapter(private val items: MutableList<EquipmentListing>) :
         holder.titleTextView.text = currentItem.title
         // ... other view bindings ...
 
-        val db = AppDatabase.getDatabase(context)
-        val favoriteDao = db.FavoriteDao()
         val sharedPref = context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
         val userId = sharedPref.getInt("user_id", -1)
 

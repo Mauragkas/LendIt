@@ -2,6 +2,7 @@ package com.example.lendit.ui.cart
 
 import EquipmentListing
 import android.app.Activity
+import android.content.Context
 import android.content.Context.MODE_PRIVATE
 import android.content.Intent
 import android.content.SharedPreferences
@@ -32,21 +33,27 @@ import android.text.TextWatcher
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.navigation.fragment.findNavController
+import com.example.lendit.data.repository.RepositoryProvider
 
 
 class CartFragment : Fragment() {
 
     private var _binding: FragmentCartBinding? = null
 
-    // This property is only valid between onCreateView and
-    // onDestroyView.
     private val binding get() = _binding!!
     lateinit var listings: List<EquipmentListing>
     var userId by Delegates.notNull<Int>()
-    private val adapter = CartAdapter(mutableListOf())
+    private lateinit var adapter: CartAdapter
     private var total = 0.0
 
-    private lateinit var couponDao: CouponDao
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        adapter = CartAdapter(context, mutableListOf())
+    }
+    private val couponRepository by lazy {
+        RepositoryProvider.getCouponRepository(requireContext())
+    }
 
     // CartFragment.kt
     private val paymentLauncher =
@@ -76,7 +83,7 @@ class CartFragment : Fragment() {
 
     private suspend fun validateCoupon(coupon: String): Int {
         var discount = 0
-        val availableCoupons = couponDao.getAllCoupons()
+        val availableCoupons = couponRepository.getAllCoupons()
         val matchedCoupon = availableCoupons.find { it.code.equals(coupon, ignoreCase = true) }
 
         if (matchedCoupon != null) {
@@ -119,8 +126,6 @@ class CartFragment : Fragment() {
         binding.cartRecyclerView.layoutManager = LinearLayoutManager(requireContext())
         binding.cartRecyclerView.adapter = adapter
 
-        couponDao = AppDatabase.getInstance(requireContext()).couponDao()
-
         // Listener for Apply Coupon button
         binding.applyCouponButton.setOnClickListener {
             val couponCode = binding.couponEditText.text.toString()
@@ -138,7 +143,7 @@ class CartFragment : Fragment() {
         continueToPaymentButton.isEnabled = false // Disable by default
 
 
-        // Placeholder listener for Continue to Payment button
+        // Listener for Continue to Payment button
         binding.continueToPaymentButton.setOnClickListener {
             getProduct()
         }

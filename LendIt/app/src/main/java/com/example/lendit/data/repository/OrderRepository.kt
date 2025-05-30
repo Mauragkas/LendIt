@@ -4,8 +4,6 @@ import AppDatabase
 import com.example.lendit.data.local.entities.Order
 import com.example.lendit.data.local.entities.PaymentMethod
 import com.example.lendit.data.local.entities.Rental
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 
 /**
  * Repository for handling order-related operations
@@ -15,10 +13,9 @@ class OrderRepository(private val db: AppDatabase) {
     /**
      * Creates a new order in the database
      */
-    suspend fun createOrder(order: Order): Long =
-        withContext(Dispatchers.IO) {
-            db.OrderDao().insert(order)
-        }
+    suspend fun createOrder(order: Order): Long {
+        return db.OrderDao().insert(order)
+    }
 
     /**
      * Creates an order and related rental records from cart items
@@ -30,7 +27,7 @@ class OrderRepository(private val db: AppDatabase) {
         paymentMethod: PaymentMethod,
         startDate: Int,
         endDate: Int
-    ): Long = withContext(Dispatchers.IO) {
+    ): Long {
         // Create the order
         val order = Order(
             orderId = 0, // Auto-generated
@@ -55,14 +52,13 @@ class OrderRepository(private val db: AppDatabase) {
             db.rentalDao().insert(rental)
         }
 
-        orderId
+        return orderId
     }
 
     /**
      * Validates a coupon code
      */
-    suspend fun validateCoupon(couponCode: String): Int =
-        withContext(Dispatchers.IO) {
-            db.couponDao().validateCoupon(couponCode)
-        }
+    suspend fun validateCoupon(couponCode: String): Int {
+        return db.couponDao().validateCoupon(couponCode)
+    }
 }

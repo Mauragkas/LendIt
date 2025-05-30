@@ -18,6 +18,7 @@ import androidx.appcompat.app.AlertDialog
 import android.widget.PopupMenu
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.lifecycle.lifecycleScope
 import com.example.lendit.data.local.ListingManager
 import com.example.lendit.ui.archive.ArchiveFragment
@@ -26,10 +27,18 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import com.example.lendit.data.local.entities.Favorite
 import com.example.lendit.data.local.entities.UserCart
+import com.example.lendit.data.repository.RepositoryProvider
+import com.example.lendit.ui.cart.CartFragment
 
 
-class CartAdapter(private val items: MutableList<EquipmentListing>) :
+class CartAdapter(
+    private val context: Context,
+    private val items: MutableList<EquipmentListing>) :
     RecyclerView.Adapter<CartAdapter.MyViewHolder>() {
+
+    private val cartRepository by lazy {
+        RepositoryProvider.getCartRepository(context)
+    }
 
     class MyViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val titleTextView: TextView = itemView.findViewById(R.id.listingTitle)
@@ -44,7 +53,6 @@ class CartAdapter(private val items: MutableList<EquipmentListing>) :
         val favoriteButton : ImageButton = itemView.findViewById(R.id.imageFavoriteButtonListings)
         val cartButton : ImageButton = itemView.findViewById(R.id.removeFromCartButton)
     }
-
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyViewHolder {
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.item_layout, parent, false) // Use your actual layout file name
@@ -61,8 +69,6 @@ class CartAdapter(private val items: MutableList<EquipmentListing>) :
         val currentItem = items[position]
         val context = holder.itemView.context
 
-        val db = AppDatabase.getDatabase(context)
-        val cartDao = db.cartDao()
 
         // Load other item data
         holder.titleTextView.text = currentItem.title
@@ -116,10 +122,10 @@ class CartAdapter(private val items: MutableList<EquipmentListing>) :
         // Set click listener
         holder.cartButton.setOnClickListener {
             (context as AppCompatActivity).lifecycleScope.launch(Dispatchers.IO) {
-                val isInCart = cartDao.checkCart(userId, currentItem.listingId)
+                val isInCart = cartRepository.checkCart(userId, currentItem.listingId)
                 if (isInCart) {
                     // Remove from cart in db
-                    cartDao.deleteFromCart(userId, currentItem.listingId)
+                    cartRepository.deleteFromCart(userId, currentItem.listingId)
                     // Remove from cart in adapter
                     items.removeAt(holder.adapterPosition)
 

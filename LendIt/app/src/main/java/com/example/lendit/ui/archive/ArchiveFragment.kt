@@ -12,6 +12,7 @@ import com.example.lendit.databinding.FragmentArchiveBinding
 import ListingStatus
 import AppDatabase
 import com.example.lendit.OwnerAdapter
+import com.example.lendit.data.repository.RepositoryProvider
 import kotlinx.coroutines.launch
 
 class ArchiveFragment : Fragment() {
@@ -23,6 +24,9 @@ class ArchiveFragment : Fragment() {
     private val availableAdapter = OwnerAdapter(mutableListOf())
     private val unavailableAdapter = OwnerAdapter(mutableListOf())
     private val inactiveAdapter = OwnerAdapter(mutableListOf())
+    private val listingRepository by lazy {
+        RepositoryProvider.getListingRepository(requireContext())
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -126,8 +130,7 @@ class ArchiveFragment : Fragment() {
     private fun loadListingsByOwner(ownerName: String) {
         lifecycleScope.launch {
             try {
-                val db = AppDatabase.getInstance(requireContext())
-                val allListings = db.listingDao().getListingsByOwner(ownerName)
+                val allListings = listingRepository.getListingsByOwner(ownerName)
 
                 // Filter listings by status
                 val availableListings = allListings.filter { it.status == ListingStatus.AVAILABLE }
