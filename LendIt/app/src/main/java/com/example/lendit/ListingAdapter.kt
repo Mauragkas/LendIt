@@ -31,14 +31,16 @@ import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.fragment.findNavController
 import com.example.lendit.data.repository.RepositoryProvider
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.example.lendit.data.local.FavoritesManager
 
 class ListingAdapter(
     private val context: Context,
     private val items: MutableList<EquipmentListing>) :
     RecyclerView.Adapter<ListingAdapter.MyViewHolder>() {
 
-    private val favoritesRepository by lazy {
-        RepositoryProvider.getFavoriteRepository(context)
+    // Use FavoritesManager instead of direct repository access
+    private val favoritesManager by lazy {
+        FavoritesManager(context)
     }
     class MyViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val titleTextView: TextView = itemView.findViewById(R.id.listingTitle)
@@ -80,9 +82,9 @@ class ListingAdapter(
             return
         }
 
-        // Check initial favorite status
+        // Check initial favorite status using FavoritesManager
         (context as AppCompatActivity).lifecycleScope.launch(Dispatchers.IO) {
-            val isFavorite = favoritesRepository.isFavorite(userId, currentItem.listingId)
+            val isFavorite = favoritesManager.isFavorite(userId, currentItem.listingId)
             withContext(Dispatchers.Main) {
                 holder.favoriteButton.setImageResource(
                     if (isFavorite) R.drawable.ic_favorite_filled else R.drawable.ic_favorite_border
@@ -91,19 +93,19 @@ class ListingAdapter(
             }
         }
 
-        // Set favorites click listener
+        // Set favorites click listener using FavoritesManager
         holder.favoriteButton.setOnClickListener {
             context.lifecycleScope.launch(Dispatchers.IO) {
-                val isFavorite = favoritesRepository.isFavorite(userId, currentItem.listingId)
+                val isFavorite = favoritesManager.isFavorite(userId, currentItem.listingId)
                 if (isFavorite) {
-                    favoritesRepository.removeFromFavorites(userId, currentItem.listingId)
+                    favoritesManager.removeFromFavorites(userId, currentItem.listingId)
                     withContext(Dispatchers.Main) {
                         holder.favoriteButton.setImageResource(R.drawable.ic_favorite_border)
                         goToFavoritesButton.visibility = View.GONE
                         Toast.makeText(context, "Removed from favorites", Toast.LENGTH_SHORT).show()
                     }
                 } else {
-                    favoritesRepository.addToFavorites(Favorite(userId = userId, listingId = currentItem.listingId))
+                    favoritesManager.addToFavorites(userId, currentItem.listingId)
                     withContext(Dispatchers.Main) {
                         holder.favoriteButton.setImageResource(R.drawable.ic_favorite_filled)
                         goToFavoritesButton.visibility = View.VISIBLE

@@ -22,7 +22,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.example.lendit.ListingActivity
+import com.example.lendit.data.local.managers.ListingManager  // <-- Use correct import
 import com.example.lendit.data.local.entities.Report
 import com.example.lendit.data.local.entities.UserCart
 import com.example.lendit.data.repository.RepositoryProvider
@@ -58,9 +58,13 @@ class ListingDetailsActivity : AppCompatActivity() {
         RepositoryProvider.getCartRepository(this)
     }
 
+    private lateinit var listingManager: ListingManager
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_listing_details)
+
+        listingManager = ListingManager(this)
 
         dateButton = findViewById<Button>(R.id.date_button)
 
@@ -128,9 +132,8 @@ class ListingDetailsActivity : AppCompatActivity() {
         recycler.adapter = adapter
         recycler.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         lifecycleScope.launch {
-
-            val category = listingRepository.getCategoryById(listingId)
-            val relatedListings = listingRepository.getRelatedListings(category, listingId)
+            val category = listingManager.getCategoryById(listingId)
+            val relatedListings = listingManager.getRelatedListings(category, listingId)
             findSimilar(relatedListings)
         }
 
@@ -148,7 +151,7 @@ class ListingDetailsActivity : AppCompatActivity() {
         }
 
         lifecycleScope.launch {
-            val listing = listingRepository.getListingById(listingId)
+            val listing = listingManager.getListingById(listingId)
 
             if (listing != null) {
                 // Populate UI

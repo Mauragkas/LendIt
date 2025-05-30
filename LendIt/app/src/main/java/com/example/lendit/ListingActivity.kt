@@ -23,7 +23,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.lendit.data.repository.RepositoryProvider
+import com.example.lendit.data.local.managers.ListingManager  // <-- Use correct import
 import com.example.lendit.databinding.ActivityListingCreation2Binding
 import com.example.lendit.databinding.ActivityListingCreationBinding
 import com.google.android.material.datepicker.CalendarConstraints
@@ -41,9 +41,8 @@ import kotlinx.coroutines.withContext
 
 class ListingActivity : AppCompatActivity() {
 
-    private val listingRepository by lazy {
-        RepositoryProvider.getListingRepository(this)
-    }
+    private lateinit var listingManager: ListingManager
+
     private lateinit var bindingStep1: ActivityListingCreationBinding
     private lateinit var bindingStep2: ActivityListingCreation2Binding
     private var currentStep = 1
@@ -98,6 +97,8 @@ class ListingActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        listingManager = ListingManager(this)
+
         // Check if we're editing an existing listing
         editingListingId = intent.getIntExtra("edit_listing_id", -1)
         isEditMode = editingListingId != -1
@@ -118,8 +119,7 @@ class ListingActivity : AppCompatActivity() {
     private fun loadExistingListing(listingId: Int) {
         lifecycleScope.launch {
             try {
-
-                val listing = listingRepository.getListingById(listingId)
+                val listing = listingManager.getListingById(listingId)
 
                 if (listing != null) {
                     // Pre-populate the form with existing data
@@ -307,24 +307,29 @@ class ListingActivity : AppCompatActivity() {
             return false
         }
 
-        val db = AppDatabase.getInstance(this@ListingActivity)
-
+        // Check if listing exists (asynchronously)
         lifecycleScope.launch {
-            val exists = listingRepository.listingExists(
-                                    title = toolName,
-                                    description = bindingStep1.descriptionField.toString(),
-                                    price = price.toDouble(),
-                                    location = bindingStep1.regionSelectorButton.text.toString(),
-                                    category = category,
-                                    ownerName = userName,
-                                    availableFrom = formattedStart,
-                                    availableUntil = formattedEnd
-                            )
-            if (exists) {
-                Toast.makeText(this@ListingActivity, "Το εργαλείο υπάρχει ήδη", Toast.LENGTH_SHORT)
+            try {
+                val exists = listingManager.listingExists(
+                    title = toolName,
+                    description = bindingStep1.descriptionField.text.toString(),
+                    price = price.toDouble(),
+                    location = bindingStep1.regionSelectorButton.text.toString(),
+                    category = category,
+                    ownerName = userName,
+                    availableFrom = formattedStart,
+                    availableUntil = formattedEnd
+                )
+
+                if (exists) {
+                    Toast.makeText(this@ListingActivity, "Το εργαλείο υπάρχει ήδη", Toast.LENGTH_SHORT)
                         .show()
+                }
+            } catch (e: Exception) {
+                Log.e("ListingActivity", "Error checking if listing exists", e)
             }
         }
+
         return true
     }
 
@@ -343,7 +348,7 @@ class ListingActivity : AppCompatActivity() {
                 }
 
         // Location data
-        listingData["location"] = bindingStep1.regionSelectorButton.text
+        listingData["location"] = bindingStep1.regionSelectorButton.text.toString()
 
         // Price data
         listingData["price"] = bindingStep1.priceField.text.toString().toDoubleOrNull() ?: 0.0
@@ -397,7 +402,6 @@ class ListingActivity : AppCompatActivity() {
     private fun checkForDuplicatesAndProceed() {
         lifecycleScope.launch {
             try {
-
                 // Skip duplicate check in edit mode
                 if (isEditMode) {
                     querySale()
@@ -412,16 +416,16 @@ class ListingActivity : AppCompatActivity() {
                 val startDate = listingData["startDate"] as Int?
                 val endDate = listingData["endDate"] as Int?
 
-                val exists = listingRepository.listingExists(
-                                        title = title,
-                                        description = description,
-                                        price = price,
-                                        location = location,
-                                        category = category,
-                                        ownerName = userName,
-                                        availableFrom = startDate,
-                                        availableUntil = endDate
-                                )
+                val exists = listingManager.listingExists(
+                    title = title,
+                    description = description,
+                    price = price,
+                    location = location,
+                    category = category,
+                    ownerName = userName,
+                    availableFrom = startDate,
+                    availableUntil = endDate
+                )
 
                 if (exists) {
                     withContext(Dispatchers.Main) {
@@ -534,7 +538,7 @@ class ListingActivity : AppCompatActivity() {
                 withContext(Dispatchers.IO) {
                     if (isEditMode) {
                         // Update existing listing
-                        listingRepository.updateListing(listing)
+                        listingManager.updateListing(listing)
                         listingId = editingListingId.toLong()
                         android.util.Log.d(
                                 "ListingActivity",
@@ -542,7 +546,7 @@ class ListingActivity : AppCompatActivity() {
                         )
                     } else {
                         // Insert new listing
-                        listingId = listingRepository.addListing(listing)
+                        listingId = listingManager.addListing(listing)
                         android.util.Log.d("ListingActivity", "Listing created with ID: $listingId")
                     }
 
@@ -572,13 +576,13 @@ class ListingActivity : AppCompatActivity() {
         withContext(Dispatchers.IO) {
             try {
                 // Update the listing with the discount
-                val listing = listingRepository.getListingById(listingId)
+                val listing = listingManager.getListingById(listingId)
                 if (listing != null) {
                     // Create updated listing with discount
                     val updatedListing = listing.copy(longTermDiscount = discountPercentage)
 
                     // Save the updated listing
-                    listingRepository.updateListing(updatedListing)
+                    listingManager.updateListing(updatedListing)
 
                     android.util.Log.d(
                             "ListingActivity",
@@ -604,7 +608,7 @@ class ListingActivity : AppCompatActivity() {
         }
     }
 
-    // Keep the showTool() implementation as before
+    // Keep the showTool() implementation as before, but use listingManager for getMostRecentListingByOwner
     private fun showTool() {
         lifecycleScope.launch(Dispatchers.IO) {
             try {
@@ -615,7 +619,7 @@ class ListingActivity : AppCompatActivity() {
                         } else {
                             // For new listings, find the most recently created listing by this user
                             val recentListing =
-                                listingRepository.getMostRecentListingByOwner(userName)
+                                listingManager.getMostRecentListingByOwner(userName)
                             recentListing?.listingId ?: -1
                         }
 

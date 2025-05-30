@@ -37,7 +37,6 @@ class PaymentActivity : AppCompatActivity() {
         cardDetailsForm = findViewById(R.id.card_details_form)
         completePaymentButton = findViewById(R.id.button_complete_payment)
 
-
         fun showForm(checkedId: Int){
             completePaymentButton.visibility = View.VISIBLE
 
@@ -86,6 +85,12 @@ class PaymentActivity : AppCompatActivity() {
             lateinit var paymentMethod: PaymentMethod
             var isValidPayment = true
 
+            when (selectedPaymentId) {
+                R.id.radio_credit_card -> {
+                    val cardNumber = findViewById<EditText>(R.id.edit_card_number).text.toString()
+                    val cvv = findViewById<EditText>(R.id.edit_cvv).text.toString()
+                    val cardHolderName = findViewById<EditText>(R.id.edit_cardholder_name).text.toString()
+                    val expiryDate = expiryEditText.text.toString().trim()
             when (selectedPaymentId) {
                 R.id.radio_credit_card -> {
                     val cardNumber = findViewById<EditText>(R.id.edit_card_number).text.toString()

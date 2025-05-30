@@ -59,7 +59,7 @@ class WriteReviewActivity : AppCompatActivity() {
         // Set item title
         itemTitleText.text = itemTitle
 
-        // Initialize ReviewManager
+        // Initialize ReviewManager with proper dependencies
         reviewManager = ReviewManager(
             context = this,
             lifecycleScope = lifecycleScope,
