@@ -25,13 +25,6 @@ class FavoritesFragment : Fragment() {
 
     private lateinit var favoritesManager: FavoritesManager
 
-    private val getFavoriteRepository by lazy {
-        RepositoryProvider.getFavoriteRepository(requireContext())
-    }
-    private val getListingRepository by lazy {
-        RepositoryProvider.getListingRepository(requireContext())
-    }
-
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -45,7 +38,7 @@ class FavoritesFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        favoritesManager = FavoritesManager(getFavoriteRepository, getListingRepository)
+        favoritesManager = FavoritesManager(requireContext())
 
         // Initialize adapters
         availableAdapter = FavoritesAdapter(requireContext(), mutableListOf())
