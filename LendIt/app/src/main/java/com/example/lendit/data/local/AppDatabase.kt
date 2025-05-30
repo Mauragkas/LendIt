@@ -311,7 +311,7 @@ abstract class AppDatabase : RoomDatabase() {
                                 ownerName = "mavragas owner",
                                 category = ListingCategory.ELECTRIC,
                                 location = Region.WESTERN_GREECE,
-                                status = ListingStatus.AVAILABLE,
+                                status = ListingStatus.UNAVAILABLE,
                                 price = 300.0,
                                 photos = photos,
                                 creationDate = Converters().fromLocalDate(LocalDate.of(2025, 7, 1)),

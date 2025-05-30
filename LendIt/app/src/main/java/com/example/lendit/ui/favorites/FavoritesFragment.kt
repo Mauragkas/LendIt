@@ -78,14 +78,15 @@ class FavoritesFragment : Fragment() {
                 similarAdapter.update(favoritesManager.similar)
 
                 binding.recyclerAvailableFavorites.visibility =
-                    if (!favoritesManager.hasFavorites) View.GONE else View.VISIBLE
+                    if (favoritesManager.hasFavorites) View.VISIBLE else View.GONE
                 binding.recyclerUnavailableFavorites.visibility =
-                    if (!favoritesManager.hasFavorites) View.GONE else View.VISIBLE
+                    if (favoritesManager.hasFavorites) View.VISIBLE else View.GONE
 
                 binding.textViewSimilar.visibility =
-                    if (!favoritesManager.hasSimilar) View.VISIBLE else View.GONE
+                    if (favoritesManager.hasSimilar) View.VISIBLE else View.GONE
                 binding.recyclerSimilar.visibility =
-                    if (!favoritesManager.hasSimilar) View.VISIBLE else View.GONE
+                    if (favoritesManager.hasSimilar) View.VISIBLE else View.GONE
+
 
             } catch (e: Exception) {
                 e.printStackTrace()
