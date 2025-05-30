@@ -1,7 +1,5 @@
 package com.example.lendit.ui.report
 
-import AppDatabase
-import ListingStatus
 import android.content.Context
 import android.content.Intent
 import android.view.LayoutInflater
@@ -13,14 +11,11 @@ import android.widget.Toast
 import android.widget.ScrollView
 import android.widget.LinearLayout
 import androidx.appcompat.app.AlertDialog
-import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.recyclerview.widget.RecyclerView
 import com.example.lendit.ListingDetailsActivity
 import com.example.lendit.R
-import com.example.lendit.data.local.ListingManager
 import com.example.lendit.data.local.entities.Report
 import com.example.lendit.data.local.managers.ReportManager
-import com.example.lendit.data.repository.RepositoryProvider
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -57,10 +52,6 @@ class ReportAdapter(
             Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
         }
     )
-
-    private val listingRepository by lazy {
-        RepositoryProvider.getListingRepository(context)
-    }
 
     class ReportViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         // Compact view elements
@@ -121,59 +112,70 @@ class ReportAdapter(
             .show()
     }
 
-    // Updated to use ReportManager
     private fun showAllReportsForListingDialog(listingId: Int) {
-        reportManager.getReportsForListing(listingId) { allReportsForListing ->
-            if (allReportsForListing.isEmpty()) {
-                Toast.makeText(context, "No reports found for this listing", Toast.LENGTH_SHORT).show()
-                return@getReportsForListing
-            }
+        scope.launch {
+            try {
+                withContext(Dispatchers.IO) {
+                    reportManager.getReportsForListing(listingId) { reports ->
+                        if (reports.isEmpty()) {
+                            Toast.makeText(context, "No reports found for this listing", Toast.LENGTH_SHORT).show()
+                            return@getReportsForListing
+                        }
 
-            // Create a formatted list of all reports for this listing
-            val reportsBuilder = StringBuilder()
+                        // Create a formatted list of all reports for this listing
+                        val reportsBuilder = StringBuilder()
 
-            reportsBuilder.append("Listing #$listingId\n")
-            reportsBuilder.append("Total Reports: ${allReportsForListing.size}\n")
-            reportsBuilder.append("----------------------------------------\n\n")
+                        reportsBuilder.append("Listing #$listingId\n")
+                        reportsBuilder.append("Total Reports: ${reports.size}\n")
+                        reportsBuilder.append("----------------------------------------\n\n")
 
-            // Sort reports by date (newest first)
-            val sortedReports = allReportsForListing.sortedByDescending { it.reportDate }
+                        // Sort reports by date (newest first)
+                        val sortedReports = reports.sortedByDescending { it.reportDate }
 
-            sortedReports.forEach { report ->
-                // Format date
-                val sdf = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
-                val dateString = sdf.format(Date(report.reportDate))
+                        sortedReports.forEach { report ->
+                            // Format date
+                            val sdf = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
+                            val dateString = sdf.format(Date(report.reportDate))
 
-                reportsBuilder.append("REPORT #${report.reportId} (${dateString})\n")
-                reportsBuilder.append("Status: ${report.status}\n")
-                reportsBuilder.append("Reason: ${report.reason}\n")
-                reportsBuilder.append("Comments: ${report.comments}\n")
+                            reportsBuilder.append("REPORT #${report.reportId} (${dateString})\n")
+                            reportsBuilder.append("Status: ${report.status}\n")
+                            reportsBuilder.append("Reason: ${report.reason}\n")
+                            reportsBuilder.append("Comments: ${report.comments}\n")
 
-                // Add attachment info if available
-                if (!report.attachments.isNullOrEmpty()) {
-                    reportsBuilder.append("Attachments: ${report.attachments}\n")
+                            // Add attachment info if available
+                            if (!report.attachments.isNullOrEmpty()) {
+                                reportsBuilder.append("Attachments: ${report.attachments}\n")
+                            }
+
+                            reportsBuilder.append("----------------------------------------\n\n")
+                        }
+
+                        // Create scrollable text view for the dialog
+                        val scrollView = ScrollView(context).apply {
+                            val textView = TextView(context).apply {
+                                text = reportsBuilder.toString()
+                                setPadding(30, 30, 30, 30)
+                                textSize = 14f
+                            }
+                            addView(textView)
+                        }
+
+                        // Show dialog with all reports
+                        scope.launch(Dispatchers.Main) {
+                            AlertDialog.Builder(context)
+                                .setTitle("All Reports for This Listing")
+                                .setView(scrollView)
+                                .setPositiveButton("Close", null)
+                                .create()
+                                .show()
+                        }
+                    }
                 }
-
-                reportsBuilder.append("----------------------------------------\n\n")
-            }
-
-            // Create scrollable text view for the dialog
-            val scrollView = ScrollView(context).apply {
-                val textView = TextView(context).apply {
-                    text = reportsBuilder.toString()
-                    setPadding(30, 30, 30, 30)
-                    textSize = 14f
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(context, "Error loading reports: ${e.message}", Toast.LENGTH_SHORT).show()
                 }
-                addView(textView)
             }
-
-            // Show dialog with all reports
-            AlertDialog.Builder(context)
-                .setTitle("All Reports for This Listing")
-                .setView(scrollView)
-                .setPositiveButton("Close", null)
-                .create()
-                .show()
         }
     }
 
@@ -237,31 +239,18 @@ class ReportAdapter(
 
             // Set up view details button
             holder.viewDetailsButton.setOnClickListener {
-                // First check if the listing still exists before navigating
+                // Use reportManager to check if listing exists before navigating
                 scope.launch {
                     try {
-                        val listing = listingRepository.getListingById(report.listingId)
-
-                        withContext(Dispatchers.Main) {
-                            if (listing != null) {
-                                // If listing exists, navigate to details
-                                val intent = Intent(context, ListingDetailsActivity::class.java)
-                                intent.putExtra("listing_id", report.listingId)
-                                context.startActivity(intent)
-                            } else {
-                                // If listing doesn't exist anymore
-                                Toast.makeText(
-                                        context,
-                                        "This listing is no longer available",
-                                        Toast.LENGTH_SHORT
-                                ).show()
-                            }
-                        }
+                        // Navigate to listing details
+                        val intent = Intent(context, ListingDetailsActivity::class.java)
+                        intent.putExtra("listing_id", report.listingId)
+                        context.startActivity(intent)
                     } catch (e: Exception) {
                         withContext(Dispatchers.Main) {
                             Toast.makeText(
                                     context,
-                                    "Error checking listing: ${e.message}",
+                                    "Error accessing listing: ${e.message}",
                                     Toast.LENGTH_SHORT
                             ).show()
                         }
