@@ -25,7 +25,7 @@
 
     <fragment
         android:id="@+id/navigation_favorites"
-        android:name="com.example.lendit.ui.payment.FavoritesFragment"
+        android:name="com.example.lendit.ui.favorites.FavoritesFragment"
         android:label="@string/title_favorites"
         tools:layout="@layout/fragment_favorites" />
 

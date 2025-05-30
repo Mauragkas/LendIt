@@ -24,9 +24,6 @@ class PaymentActivity : AppCompatActivity() {
     // Create payment manager
     private lateinit var paymentManager: PaymentManager
 
-    private fun sendReceipt() {
-        Toast.makeText(this@PaymentActivity, "Η παραγγελία καταχωρήθηκε!", Toast.LENGTH_LONG).show()
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -109,9 +106,6 @@ class PaymentActivity : AppCompatActivity() {
                     val expiryDate = expiryEditText.text.toString().trim()
 
                     paymentManager.processCreditCardPayment(cardNumber, expiryDate, cvv, cardHolderName)
-                }
-                R.id.radio_cash_on_delivery -> {
-                    paymentManager.processCashOnDeliveryPayment()
                 }
                 R.id.radio_bank_transfer -> {
                     val iban = findViewById<EditText>(R.id.edit_bank_number).text.toString()

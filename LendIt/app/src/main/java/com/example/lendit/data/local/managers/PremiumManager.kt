@@ -2,6 +2,7 @@ package com.example.lendit.data.local.managers
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.util.Log
 import com.example.lendit.data.repository.RepositoryProvider
 import com.example.lendit.data.repository.UserRepository
 import kotlinx.coroutines.CoroutineScope
@@ -102,7 +103,7 @@ class PremiumManager(
                 }
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
-                    onError("Error updating premium status: ${e.message}")
+                    Log.e("PremiumManager", ("Error updating premium status"))
                 }
             }
         }

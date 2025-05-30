@@ -252,11 +252,4 @@ class PaymentManager(
         }
     }
 
-    /**
-     * Process a cash on delivery payment
-     */
-    fun processCashOnDeliveryPayment() {
-        val paymentMethod = PaymentMethod.CASH_ON_DELIVERY
-        processOrderWithPaymentMethod(paymentMethod)
-    }
 }

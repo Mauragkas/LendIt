@@ -34,12 +34,6 @@
                 android:text="Πιστωτική / Χρεωστική Κάρτα" />
 
             <RadioButton
-                android:id="@+id/radio_cash_on_delivery"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Αντικαταβολή" />
-
-            <RadioButton
                 android:id="@+id/radio_bank_transfer"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
