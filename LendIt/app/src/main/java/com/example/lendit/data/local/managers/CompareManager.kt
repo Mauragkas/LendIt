@@ -11,18 +11,17 @@ import kotlinx.coroutines.Dispatchers
 
 class CompareManager(
     private val context: Context,
-    val userId: Int,
-    val favoriteListings: List<EquipmentListing>,
-    val selectedListings: MutableList<EquipmentListing> = mutableListOf()
+    val userId: Int
 ) {
     // Initialize repositories internally
-    val favoriteRepository = RepositoryProvider.getFavoriteRepository(context)
-    val listingRepository = RepositoryProvider.getListingRepository(context)
+    private val favoriteRepository: FavoriteRepository = RepositoryProvider.getFavoriteRepository(context)
+    private val listingRepository: ListingRepository = RepositoryProvider.getListingRepository(context)
 
-    val favoriteRecords = favoriteRepository.getFavorites(userId)
-    val listings = favoriteRecords.mapNotNull { favorite ->
-        listingRepository.getListingById(favorite.listingId)
-    }
+    var favoriteListings: List<EquipmentListing> = emptyList()
+        private set
+
+    val selectedListings: MutableList<EquipmentListing> = mutableListOf()
+
 
     fun toggleSelection(listing: EquipmentListing, maxSelection: Int = 3): Boolean {
         val exists = selectedListings.any { it.listingId == listing.listingId }
@@ -51,10 +50,19 @@ class CompareManager(
         selectedListings.clear()
     }
 
-    companion object {
-        suspend fun loadFavorites(context: Context, userId: Int): CompareManager {
+    suspend fun loadFavorites() {
+        val favoriteRecords = favoriteRepository.getFavorites(userId)
+        favoriteListings = favoriteRecords.mapNotNull { favorite ->
+            listingRepository.getListingById(favorite.listingId)
+        }
+    }
 
-            return CompareManager(context, userId, listings)
+    companion object {
+        // Factory method to create the manager and load favorites
+        suspend fun create(context: Context, userId: Int): CompareManager {
+            val manager = CompareManager(context, userId)
+            manager.loadFavorites()
+            return manager
         }
     }
 }

@@ -82,7 +82,7 @@ class CompareFragment : Fragment() {
                     Toast.makeText(requireContext(), "Please Log in", Toast.LENGTH_SHORT).show()
                     return@launch
                 }
-                compareManager = CompareManager.loadFavorites(context?: return@launch, userId)
+                compareManager = CompareManager.create(context ?: return@launch, userId)
 
                 if (compareManager?.favoriteListings.isNullOrEmpty()) {
                     Toast.makeText(requireContext(), "No favorites found. Add some items to your favorites first!", Toast.LENGTH_SHORT).show()

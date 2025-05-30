@@ -34,6 +34,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.navigation.fragment.findNavController
 import com.example.lendit.data.local.managers.CartManager
+import com.example.lendit.data.local.managers.CouponManager
 import com.example.lendit.data.repository.RepositoryProvider
 
 class CartFragment : Fragment() {

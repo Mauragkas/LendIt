@@ -9,6 +9,7 @@ import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.example.lendit.data.local.managers.CompareManager
+import com.example.lendit.data.local.managers.CompareResultsManager
 import com.example.lendit.data.repository.RepositoryProvider
 import com.example.lendit.databinding.ActivityCompareResultBinding
 import kotlinx.coroutines.Dispatchers
@@ -19,16 +20,19 @@ class CompareResultActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityCompareResultBinding
     private var listings = mutableListOf<EquipmentListing>()
-    private lateinit var compareResultManager: CompareResultManager
+    private lateinit var compareResultsManager: CompareResultsManager
     private val listingRepository by lazy {
         RepositoryProvider.getListingRepository(this)
     }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityCompareResultBinding.inflate(layoutInflater)
         setContentView(binding.root)
         // Set up back button
         binding.backButton.setOnClickListener { finish() }
+
+        compareResultsManager  = CompareResultsManager()
 
         // Get the listing IDs from the intent
         val listingIds = intent.getIntArrayExtra("LISTING_IDS") ?: return
@@ -39,27 +43,23 @@ class CompareResultActivity : AppCompatActivity() {
 
     private suspend fun loadListings(listingIds: List<Int>) {
         try {
-            // Load each listing - explicitly specifying the return type
-            listings =
-                    withContext(Dispatchers.IO) {
-                        val resultList = mutableListOf<EquipmentListing>()
-                        for (id in listingIds) {
-                            val listing = listingRepository.getListingById(id)
-                            if (listing != null) {
-                                resultList.add(listing)
-                            }
-                        }
-                        resultList
-                    }
+            val comparisonResult = compareResultsManager.loadAndCompareListings(listingIds, listingRepository)
 
-            if (listings.size < 2) {
+            listings = comparisonResult.listings.toMutableList()
+
+            if (comparisonResult.summary == "Not enough listings to compare.") {
                 binding.errorMessage.visibility = View.VISIBLE
-                binding.errorMessage.text = "Not enough listings to compare"
+                binding.errorMessage.text = comparisonResult.summary
                 binding.comparisonContent.visibility = View.GONE
                 return
             }
 
-            compareListings()
+            // Update UI with listings and summary
+            displayListings()
+            binding.aiComparisonText.text = comparisonResult.summary
+            binding.errorMessage.visibility = View.GONE
+            binding.comparisonContent.visibility = View.VISIBLE
+
         } catch (e: Exception) {
             binding.errorMessage.visibility = View.VISIBLE
             binding.errorMessage.text = "Error loading listings: ${e.message}"
@@ -67,10 +67,13 @@ class CompareResultActivity : AppCompatActivity() {
         }
     }
 
-    private fun compareListings() {
+
+    private fun displayListings() {
         // Make sure the content is visible
         binding.errorMessage.visibility = View.GONE
         binding.comparisonContent.visibility = View.VISIBLE
+
+        // Bind the listings UI (can be kept as is)
 
         // Display first listing
         val listing1 = listings[0]
@@ -81,13 +84,12 @@ class CompareResultActivity : AppCompatActivity() {
         binding.description1.text = listing1.description
         binding.viewButton1.setOnClickListener { selectTool(listing1.listingId) }
 
-        // Use the photos string directly without Converters
         val photoList1 = listing1.photos.split(",").filter { it.isNotEmpty() }
         if (photoList1.isNotEmpty()) {
             Glide.with(this)
-                    .load(photoList1[0])
-                    .apply(RequestOptions().centerCrop())
-                    .into(binding.image1)
+                .load(photoList1[0])
+                .apply(RequestOptions().centerCrop())
+                .into(binding.image1)
         }
 
         // Display second listing
@@ -102,42 +104,22 @@ class CompareResultActivity : AppCompatActivity() {
         val photoList2 = listing2.photos.split(",").filter { it.isNotEmpty() }
         if (photoList2.isNotEmpty()) {
             Glide.with(this)
-                    .load(photoList2[0])
-                    .apply(RequestOptions().centerCrop())
-                    .into(binding.image2)
+                .load(photoList2[0])
+                .apply(RequestOptions().centerCrop())
+                .into(binding.image2)
         }
 
-        // Hide third column if there's no third listing
+        // Handle third listing if present
         if (listings.size < 3) {
             binding.column3.visibility = View.GONE
         } else {
             binding.column3.visibility = View.VISIBLE
-
-            // Display third listing
             val listing3 = listings[2]
             binding.title3.text = listing3.title
             binding.price3.text = "${listing3.price}€"
             binding.category3.text = listing3.category.toString()
             binding.location3.text = listing3.location.toString()
-            binding.description3.text = listing3.description
-            binding.viewButton3.setOnClickListener { selectTool(listing3.listingId) }
-
-            val photoList3 = listing3.photos.split(",").filter { it.isNotEmpty() }
-            if (photoList3.isNotEmpty()) {
-                Glide.with(this)
-                        .load(photoList3[0])
-                        .apply(RequestOptions().centerCrop())
-                        .into(binding.image3)
-            }
         }
-
-        // For now, just show a placeholder AI comparison text
-        // formAnswer()
-        binding.aiComparisonText.text =
-                "AI Comparison: Based on your selected items, the ${listings[0].title} " +
-                        "appears to be more suitable for professional use, while the ${listings[1].title} " +
-                        "might be better for casual users. The first option has better specifications but " +
-                        "costs more, while the second option offers better value for money for occasional use."
     }
 
     private fun selectTool(listingId: Int) {

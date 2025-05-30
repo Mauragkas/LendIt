@@ -38,8 +38,7 @@ class PremiumFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentPremiumBinding.inflate(inflater, container, false)
-        viewModel = ViewModelProvider(this)[PremiumViewModel::class.java]
-        premiumManager = PremiumManager(requireContext(), lifecycleScope)
+        viewModel = ViewModelProvider(this).get(PremiumViewModel::class.java)
         return binding.root
     }
 
@@ -161,7 +160,6 @@ class PremiumFragment : Fragment() {
         }
     }
 
-
     private fun proceedToPayment() {
         val plan = premiumManager.getSelectedPlan()
 
@@ -203,7 +201,6 @@ class PremiumFragment : Fragment() {
             .setNegativeButton("Όχι, θέλω να παραμείνω Premium", null)
             .show()
     }
-
 
     override fun onDestroyView() {
         super.onDestroyView()
