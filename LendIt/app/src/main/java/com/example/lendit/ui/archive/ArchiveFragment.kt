@@ -21,6 +21,7 @@ class ArchiveFragment : Fragment() {
     // This property is only valid between onCreateView and onDestroyView.
     private val binding get() = _binding!!
 
+    private lateinit var archiveManager: ArchiveManager
     private val availableAdapter = OwnerAdapter(mutableListOf())
     private val unavailableAdapter = OwnerAdapter(mutableListOf())
     private val inactiveAdapter = OwnerAdapter(mutableListOf())
@@ -133,19 +134,17 @@ class ArchiveFragment : Fragment() {
                 val allListings = listingRepository.getListingsByOwner(ownerName)
 
                 // Filter listings by status
-                val availableListings = allListings.filter { it.status == ListingStatus.AVAILABLE }
-                val unavailableListings = allListings.filter { it.status == ListingStatus.UNAVAILABLE }
-                val inactiveListings = allListings.filter { it.status == ListingStatus.INACTIVE }
+                archiveManager.refresh(ownerName)
 
                 // Update adapters
-                availableAdapter.update(availableListings)
-                unavailableAdapter.update(unavailableListings)
-                inactiveAdapter.update(inactiveListings)
+                availableAdapter.update(archiveManager.availableListings)
+                unavailableAdapter.update(archiveManager.unavailableListings)
+                inactiveAdapter.update(archiveManager.inactiveListings)
 
                 // Update counters
-                binding.availableCount.text = availableListings.size.toString()
-                binding.unavailableCount.text = unavailableListings.size.toString()
-                binding.inactiveCount.text = inactiveListings.size.toString()
+                binding.availableCount.text = archiveManager.availableListings.size.toString()
+                binding.unavailableCount.text = archiveManager.unavailableListings.size.toString()
+                binding.inactiveCount.text = archiveManager.inactiveListings.size.toString()
 
                 // Show empty state if needed
                 binding.emptyStateGroup.visibility = if (allListings.isEmpty()) View.VISIBLE else View.GONE

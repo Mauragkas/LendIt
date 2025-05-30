@@ -13,6 +13,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.lendit.CompareResultActivity
 import com.example.lendit.SearchActivity
+import com.example.lendit.data.local.entities.CompareManager
 import com.example.lendit.data.repository.RepositoryProvider
 import com.example.lendit.databinding.FragmentCompareBinding
 import kotlinx.coroutines.Dispatchers
@@ -24,7 +25,6 @@ class CompareFragment : Fragment() {
     private var _binding: FragmentCompareBinding? = null
     private val binding get() = _binding!!
     private lateinit var adapter: CompareListingAdapter
-    private val selectedListings = mutableListOf<EquipmentListing>()
 
     private val getFavoriteRepository by lazy {
         RepositoryProvider.getFavoriteRepository(requireContext())
@@ -33,10 +33,12 @@ class CompareFragment : Fragment() {
         RepositoryProvider.getListingRepository(requireContext())
     }
 
+    private var favorites: CompareManager? = null
+
     override fun onCreateView(
-            inflater: LayoutInflater,
-            container: ViewGroup?,
-            savedInstanceState: Bundle?
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
     ): View {
         _binding = FragmentCompareBinding.inflate(inflater, container, false)
         return binding.root
@@ -45,42 +47,36 @@ class CompareFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Setup recycler view with adapter
-        adapter =
-                CompareListingAdapter(
-                        mutableListOf(),
-                        onItemSelected = { listing -> modifyCompare(listing) }
-                )
+        adapter = CompareListingAdapter(
+            mutableListOf(),
+            onItemSelected = { listing -> modifyCompare(listing) }
+        )
+
         binding.favoritesRecyclerView.apply {
             layoutManager = LinearLayoutManager(context)
             adapter = this@CompareFragment.adapter
         }
 
-        // Set up compare button
         binding.compareButton.setOnClickListener {
-            if (selectedListings.size < 2) {
+            val selectedCount = favorites?.selectedListings?.size ?: 0
+            if (selectedCount < 2) {
                 Toast.makeText(
-                                context,
-                                "Please select at least 2 items to compare",
-                                Toast.LENGTH_SHORT
-                        )
-                        .show()
+                    context,
+                    "Please select at least 2 items to compare",
+                    Toast.LENGTH_SHORT
+                ).show()
             } else {
                 performComparison()
             }
         }
 
-        // Set up clear selection button
         binding.clearButton.setOnClickListener {
-            selectedListings.clear()
+            favorites?.clearSelections()
             updateSelectionUI()
-            adapter.clearSelections()
+            adapter.notifyDataSetChanged()
         }
 
-        // Load favorite listings
         getFavorites()
-
-        // Initialize UI
         updateSelectionUI()
     }
 
@@ -94,20 +90,17 @@ class CompareFragment : Fragment() {
                     Toast.makeText(requireContext(), "Please Log in", Toast.LENGTH_SHORT).show()
                     return@launch
                 }
+                favorites = CompareManager.loadFavorites(userId, getFavoriteRepository, getListingRepository)
 
-                val favoriteRecords = getFavoriteRepository.getFavorites(userId)
-                val favorites = favoriteRecords.mapNotNull { favorite ->
-                    getListingRepository.getListingById(favorite.listingId)
-                }
-
-                if (favorites.isEmpty()) {
+                if (favorites?.favoriteListings.isNullOrEmpty()) {
                     Toast.makeText(requireContext(), "No favorites found. Add some items to your favorites first!", Toast.LENGTH_SHORT).show()
                     showSearchActivity()
                 } else {
                     binding.emptyStateContainer.visibility = View.GONE
                     binding.contentContainer.visibility = View.VISIBLE
-                    adapter.update(favorites)
+                    adapter.update(favorites!!.favoriteListings)
                 }
+                updateSelectionUI()
             } catch (e: Exception) {
                 Toast.makeText(requireContext(), "Error Loading Favorites!", Toast.LENGTH_SHORT).show()
             }
@@ -119,51 +112,28 @@ class CompareFragment : Fragment() {
         startActivity(intent)
     }
 
-
-
     private fun modifyCompare(listing: EquipmentListing) {
-        if (selectedListings.any { it.listingId == listing.listingId }) {
-            // If already selected, remove it
-            selectedListings.removeIf { it.listingId == listing.listingId }
-        } else {
-            // If not selected and we have less than 3 items, add it
-            if (selectedListings.size < 3) {
-                selectedListings.add(listing)
-            } else {
-                Toast.makeText(
-                                context,
-                                "You can compare up to 3 items at a time",
-                                Toast.LENGTH_SHORT
-                        )
-                        .show()
-            }
-        }
+        favorites?.toggleSelection(listing)
         updateSelectionUI()
+        adapter.notifyDataSetChanged()
     }
 
     private fun updateSelectionUI() {
-        // Update the selected count and enable/disable compare button
-        binding.selectedCount.text = "${selectedListings.size} items selected"
-        binding.compareButton.isEnabled = selectedListings.size >= 2
+        val selected = favorites?.selectedListings ?: emptyList()
 
-        // Update the selection slots
-        binding.selection1.text =
-                if (selectedListings.size > 0) selectedListings[0].title else "Selection 1"
-        binding.selection2.text =
-                if (selectedListings.size > 1) selectedListings[1].title else "Selection 2"
-        binding.selection3.text =
-                if (selectedListings.size > 2) selectedListings[2].title
-                else "Selection 3 (optional)"
+        binding.selectedCount.text = "${selected.size} items selected"
+        binding.compareButton.isEnabled = selected.size >= 2
+
+        binding.selection1.text = selected.getOrNull(0)?.title ?: "Selection 1"
+        binding.selection2.text = selected.getOrNull(1)?.title ?: "Selection 2"
+        binding.selection3.text = selected.getOrNull(2)?.title ?: "Selection 3 (optional)"
     }
 
     private fun performComparison() {
-        // Store the IDs to pass to the comparison activity
-        val listingIds = selectedListings.map { it.listingId }.toIntArray()
-
-        // Launch the comparison activity
-        val intent = Intent(requireContext(), CompareResultActivity::class.java)
-        intent.putExtra("LISTING_IDS", listingIds)
-        startActivity(intent)
+        favorites?.let {
+            val intent = it.createCompareIntent(requireContext())
+            startActivity(intent)
+        }
     }
 
     override fun onDestroyView() {
@@ -171,3 +141,4 @@ class CompareFragment : Fragment() {
         _binding = null
     }
 }
+
