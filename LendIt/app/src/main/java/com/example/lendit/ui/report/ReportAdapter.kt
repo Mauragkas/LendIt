@@ -19,6 +19,7 @@ import com.example.lendit.ListingDetailsActivity
 import com.example.lendit.R
 import com.example.lendit.data.local.ListingManager
 import com.example.lendit.data.local.entities.Report
+import com.example.lendit.data.local.managers.ReportManager
 import com.example.lendit.data.repository.RepositoryProvider
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -38,9 +39,25 @@ class ReportAdapter(
     // Keep track of expanded items
     private val expandedItems = mutableSetOf<Int>()
 
-    private val reportRepository by lazy {
-        RepositoryProvider.getReportRepository(context)
-    }
+    // Create report manager
+    private val reportManager = ReportManager(
+        context = context,
+        coroutineScope = scope,
+        onReportSubmitted = {
+            // This callback won't be used in the adapter
+        },
+        onStatusUpdated = { updatedReport ->
+            val position = reports.indexOfFirst { it.reportId == updatedReport.reportId }
+            if (position != -1) {
+                reports[position] = updatedReport
+                notifyItemChanged(position)
+            }
+        },
+        onError = { errorMessage ->
+            Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+        }
+    )
+
     private val listingRepository by lazy {
         RepositoryProvider.getListingRepository(context)
     }
@@ -104,79 +121,59 @@ class ReportAdapter(
             .show()
     }
 
-    // Add this method to ReportAdapter class
+    // Updated to use ReportManager
     private fun showAllReportsForListingDialog(listingId: Int) {
-        scope.launch {
-            try {
-                val allReportsForListing = reportRepository.getReportsForListing(listingId)
-
-                if (allReportsForListing.isEmpty()) {
-                    withContext(Dispatchers.Main) {
-                        Toast.makeText(context, "No reports found for this listing", Toast.LENGTH_SHORT).show()
-                    }
-                    return@launch
-                }
-
-                // Get listing details
-                val listing = listingRepository.getListingById(listingId)
-                val listingTitle = listing?.title ?: "Unknown Listing"
-
-                // Create a formatted list of all reports for this listing
-                val reportsBuilder = StringBuilder()
-
-                reportsBuilder.append("Listing #$listingId: $listingTitle\n")
-                reportsBuilder.append("Total Reports: ${allReportsForListing.size}\n")
-                reportsBuilder.append("----------------------------------------\n\n")
-
-                // Sort reports by date (newest first)
-                val sortedReports = allReportsForListing.sortedByDescending { it.reportDate }
-
-                sortedReports.forEach { report ->
-                    // Format date
-                    val sdf = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
-                    val dateString = sdf.format(Date(report.reportDate))
-
-                    reportsBuilder.append("REPORT #${report.reportId} (${dateString})\n")
-                    reportsBuilder.append("Status: ${report.status}\n")
-                    reportsBuilder.append("Reason: ${report.reason}\n")
-                    reportsBuilder.append("Comments: ${report.comments}\n")
-
-                    // Add attachment info if available
-                    if (!report.attachments.isNullOrEmpty()) {
-                        reportsBuilder.append("Attachments: ${report.attachments}\n")
-                    }
-
-                    reportsBuilder.append("----------------------------------------\n\n")
-                }
-
-                withContext(Dispatchers.Main) {
-                    // Create scrollable text view for the dialog
-                    val scrollView = ScrollView(context).apply {
-                        val textView = TextView(context).apply {
-                            text = reportsBuilder.toString()
-                            setPadding(30, 30, 30, 30)
-                            textSize = 14f
-                        }
-                        addView(textView)
-                    }
-
-                    // Show dialog with all reports
-                    AlertDialog.Builder(context)
-                        .setTitle("All Reports for This Listing")
-                        .setView(scrollView)
-                        .setPositiveButton("Close", null)
-                        .create()
-                        .show()
-                }
-            } catch (e: Exception) {
-                withContext(Dispatchers.Main) {
-                    Toast.makeText(
-                        context,
-                        "Error loading reports: ${e.message}",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
+        reportManager.getReportsForListing(listingId) { allReportsForListing ->
+            if (allReportsForListing.isEmpty()) {
+                Toast.makeText(context, "No reports found for this listing", Toast.LENGTH_SHORT).show()
+                return@getReportsForListing
             }
+
+            // Create a formatted list of all reports for this listing
+            val reportsBuilder = StringBuilder()
+
+            reportsBuilder.append("Listing #$listingId\n")
+            reportsBuilder.append("Total Reports: ${allReportsForListing.size}\n")
+            reportsBuilder.append("----------------------------------------\n\n")
+
+            // Sort reports by date (newest first)
+            val sortedReports = allReportsForListing.sortedByDescending { it.reportDate }
+
+            sortedReports.forEach { report ->
+                // Format date
+                val sdf = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
+                val dateString = sdf.format(Date(report.reportDate))
+
+                reportsBuilder.append("REPORT #${report.reportId} (${dateString})\n")
+                reportsBuilder.append("Status: ${report.status}\n")
+                reportsBuilder.append("Reason: ${report.reason}\n")
+                reportsBuilder.append("Comments: ${report.comments}\n")
+
+                // Add attachment info if available
+                if (!report.attachments.isNullOrEmpty()) {
+                    reportsBuilder.append("Attachments: ${report.attachments}\n")
+                }
+
+                reportsBuilder.append("----------------------------------------\n\n")
+            }
+
+            // Create scrollable text view for the dialog
+            val scrollView = ScrollView(context).apply {
+                val textView = TextView(context).apply {
+                    text = reportsBuilder.toString()
+                    setPadding(30, 30, 30, 30)
+                    textSize = 14f
+                }
+                addView(textView)
+            }
+
+            // Show dialog with all reports
+            AlertDialog.Builder(context)
+                .setTitle("All Reports for This Listing")
+                .setView(scrollView)
+                .setPositiveButton("Close", null)
+                .create()
+                .show()
         }
     }
 
@@ -316,25 +313,8 @@ class ReportAdapter(
     }
 
     private fun markAsReviewed(report: Report) {
-        scope.launch {
-            try {
-                val updatedReport = report.copy(status = "REVIEWED")
-                reportRepository.updateReport(updatedReport)
-
-                withContext(Dispatchers.Main) {
-                    Toast.makeText(context, "Report marked as reviewed", Toast.LENGTH_SHORT).show()
-                    val position = reports.indexOf(report)
-                    if (position != -1) {
-                        reports[position] = updatedReport
-                        notifyItemChanged(position)
-                    }
-                }
-            } catch (e: Exception) {
-                withContext(Dispatchers.Main) {
-                    Toast.makeText(context, "Error updating report: ${e.message}", Toast.LENGTH_SHORT).show()
-                }
-            }
-        }
+        reportManager.updateReportStatus(report, "REVIEWED")
+        Toast.makeText(context, "Report marked as reviewed", Toast.LENGTH_SHORT).show()
     }
 
     private fun showRemoveListingConfirmation(report: Report) {
@@ -347,118 +327,34 @@ class ReportAdapter(
     }
 
     private fun removeListing(report: Report) {
-        scope.launch {
-            try {
-                val listing = listingRepository.getListingById(report.listingId)
-
-                if (listing != null) {
-                    listingRepository.deleteListing(listing)
-
-                    // Update all related reports
-                    val relatedReports = reportRepository.getReportsForListing(report.listingId)
-                    for (relatedReport in relatedReports) {
-                        val updatedReport = relatedReport.copy(status = "CLOSED")
-                        reportRepository.updateReport(updatedReport)
-                    }
-
-                    withContext(Dispatchers.Main) {
-                        Toast.makeText(context, "Listing removed successfully", Toast.LENGTH_SHORT).show()
-                        // Refresh the adapter with updated data
-                        val reportsToUpdate = reports.filter { it.listingId == report.listingId }
-                        for (reportToUpdate in reportsToUpdate) {
-                            val position = reports.indexOf(reportToUpdate)
-                            if (position != -1) {
-                                reports[position] = reportToUpdate.copy(status = "CLOSED")
-                                notifyItemChanged(position)
-                            }
-                        }
-                    }
-                } else {
-                    withContext(Dispatchers.Main) {
-                        Toast.makeText(context, "Listing not found", Toast.LENGTH_SHORT).show()
-                    }
-                }
-            } catch (e: Exception) {
-                withContext(Dispatchers.Main) {
-                    Toast.makeText(context, "Error removing listing: ${e.message}", Toast.LENGTH_SHORT).show()
+        reportManager.removeListing(report) {
+            Toast.makeText(context, "Listing removed successfully", Toast.LENGTH_SHORT).show()
+            // Refresh the adapter with updated data
+            val reportsToUpdate = reports.filter { it.listingId == report.listingId }
+            for (reportToUpdate in reportsToUpdate) {
+                val position = reports.indexOf(reportToUpdate)
+                if (position != -1) {
+                    reports[position] = reportToUpdate.copy(status = "CLOSED")
+                    notifyItemChanged(position)
                 }
             }
         }
     }
 
     private fun deactivateListing(report: Report) {
-        scope.launch {
-            try {
-                val result = ListingManager.updateListingStatus(context, report.listingId, ListingStatus.INACTIVE)
-
-                if (result) {
-                    // Update report status
-                    val updatedReport = report.copy(status = "REVIEWED")
-                    reportRepository.updateReport(updatedReport)
-
-                    withContext(Dispatchers.Main) {
-                        Toast.makeText(context, "Listing deactivated", Toast.LENGTH_SHORT).show()
-                        val position = reports.indexOf(report)
-                        if (position != -1) {
-                            reports[position] = updatedReport
-                            notifyItemChanged(position)
-                        }
-                    }
-                } else {
-                    withContext(Dispatchers.Main) {
-                        Toast.makeText(context, "Failed to deactivate listing", Toast.LENGTH_SHORT).show()
-                    }
-                }
-            } catch (e: Exception) {
-                withContext(Dispatchers.Main) {
-                    Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
-                }
-            }
+        reportManager.deactivateListing(report) {
+            Toast.makeText(context, "Listing deactivated", Toast.LENGTH_SHORT).show()
         }
     }
 
     private fun dismissReport(report: Report) {
-        scope.launch {
-            try {
-                val updatedReport = report.copy(status = "CLOSED")
-                reportRepository.updateReport(updatedReport)
-
-                withContext(Dispatchers.Main) {
-                    Toast.makeText(context, "Report dismissed", Toast.LENGTH_SHORT).show()
-                    val position = reports.indexOf(report)
-                    if (position != -1) {
-                        reports[position] = updatedReport
-                        notifyItemChanged(position)
-                    }
-                }
-            } catch (e: Exception) {
-                withContext(Dispatchers.Main) {
-                    Toast.makeText(context, "Error dismissing report: ${e.message}", Toast.LENGTH_SHORT).show()
-                }
-            }
-        }
+        reportManager.updateReportStatus(report, "CLOSED")
+        Toast.makeText(context, "Report dismissed", Toast.LENGTH_SHORT).show()
     }
 
     private fun closeReport(report: Report) {
-        scope.launch {
-            try {
-                val updatedReport = report.copy(status = "CLOSED")
-                reportRepository.updateReport(updatedReport)
-
-                withContext(Dispatchers.Main) {
-                    Toast.makeText(context, "Report closed", Toast.LENGTH_SHORT).show()
-                    val position = reports.indexOf(report)
-                    if (position != -1) {
-                        reports[position] = updatedReport
-                        notifyItemChanged(position)
-                    }
-                }
-            } catch (e: Exception) {
-                withContext(Dispatchers.Main) {
-                    Toast.makeText(context, "Error closing report: ${e.message}", Toast.LENGTH_SHORT).show()
-                }
-            }
-        }
+        reportManager.updateReportStatus(report, "CLOSED")
+        Toast.makeText(context, "Report closed", Toast.LENGTH_SHORT).show()
     }
 
     // Update this method to include handling of expanded items
