@@ -27,6 +27,9 @@ interface UserDao {
     @Query("UPDATE user SET premiumStatus = :premiumStatus, premiumPlan = :premiumPlan WHERE email = :email")
     suspend fun updateUserStatus(email: String, premiumStatus: Boolean, premiumPlan: String?)
 
+    @Query("SELECT * FROM user WHERE userId = :userId LIMIT 1")
+    suspend fun getUserById(userId: Int): UserEntity?
+
     @Update
     suspend fun updateUser(user: UserEntity)
 
