@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    android:padding="16dp"
+>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+    >
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="59dp"
+        >
+
+            <ImageButton
+                android:id="@+id/backButtonListingStep2"
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:backgroundTint="#ffffff"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/ic_backbutton_24dp"
+            />
+
+            <TextView
+                android:id="@+id/listingStep2Title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Νέα Αγγελία - Βήμα 2"
+                android:textAlignment="viewStart"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.431"
+                app:layout_constraintStart_toEndOf="@+id/backButtonListingStep2"
+                app:layout_constraintTop_toTopOf="parent"
+            />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <!-- Image Upload Section -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Φωτογραφίες Εργαλείου"
+            android:textSize="16sp"
+            android:textStyle="bold"
+        />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="Προσθέστε έως 5 φωτογραφίες του εργαλείου σας"
+            android:textSize="14sp"
+        />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:orientation="horizontal"
+        >
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/addPhotoCard"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_margin="4dp"
+                app:cardCornerRadius="8dp"
+                app:cardElevation="2dp"
+            >
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                >
+
+                    <ImageView
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:src="@drawable/ic_plussign"
+                    />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Προσθήκη"
+                    />
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- Image preview placeholders -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/photosRecyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                android:orientation="horizontal"
+            />
+        </LinearLayout>
+
+        <!-- Usage Instructions Section -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="Οδηγίες Χρήσης"
+            android:textSize="16sp"
+            android:textStyle="bold"
+        />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+        >
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/usageInstructionsInput"
+                android:layout_width="match_parent"
+                android:layout_height="120dp"
+                android:gravity="top"
+                android:hint="Προσθέστε οδηγίες χρήσης για το εργαλείο"
+                android:inputType="textMultiLine"
+            />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Terms and Conditions Checkbox -->
+        <CheckBox
+            android:id="@+id/termsCheckBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Αποδέχομαι τους όρους και προϋποθέσεις της πλατφόρμας"
+        />
+
+        <!-- Publish Button -->
+        <Button
+            android:id="@+id/publishListingButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="16dp"
+            android:text="Δημοσίευση Αγγελίας"
+        />
+    </LinearLayout>
+</ScrollView>

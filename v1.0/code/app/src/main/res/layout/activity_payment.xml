@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/payment_scrollview"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_marginHorizontal="32dp"
+    android:layout_marginTop="50dp"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:id="@+id/payment_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/payment_method_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Επιλέξτε τρόπο πληρωμής:"
+            android:textSize="18sp"
+            android:layout_marginBottom="8dp" />
+
+        <RadioGroup
+            android:id="@+id/payment_method_group"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <RadioButton
+                android:id="@+id/radio_credit_card"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Πιστωτική / Χρεωστική Κάρτα" />
+
+            <RadioButton
+                android:id="@+id/radio_bank_transfer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Τραπεζική Κατάθεση" />
+        </RadioGroup>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/bank_details_form"
+            android:orientation="vertical"
+            android:visibility="gone"
+            android:layout_marginTop="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Στοιχεία Τράπεζας"
+                android:textSize="18sp"
+                android:layout_marginBottom="8dp" />
+
+            <EditText
+                android:id="@+id/edit_bank_number"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="iBan"
+                android:maxLength="27" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/card_details_form"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone"
+            android:layout_marginTop="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Στοιχεία Κάρτας"
+                android:textSize="18sp"
+                android:layout_marginBottom="8dp" />
+
+            <EditText
+                android:id="@+id/edit_card_number"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Αριθμός Κάρτας"
+                android:inputType="number"
+                android:maxLength="16" />
+
+            <EditText
+                android:id="@+id/edit_cardholder_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Όνομα Κατόχου"
+                android:inputType="textPersonName"
+                android:layout_marginTop="8dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="8dp">
+
+                <EditText
+                    android:id="@+id/edit_expiry_date"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:hint="Ημ. Λήξης (MM/YY)"
+                    android:maxLength="5"
+                    android:inputType="number" />
+
+
+                <EditText
+                    android:id="@+id/edit_cvv"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:maxLength="3"
+                    android:hint="CVV"
+                    android:inputType="numberPassword"
+                    android:layout_marginStart="8dp" />
+            </LinearLayout>
+        </LinearLayout>
+
+            <!-- Complete button -->
+            <Button
+                android:id="@+id/button_complete_payment"
+                android:visibility="gone"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Ολοκλήρωση"
+                android:layout_marginTop="24dp" />
+
+
+
+    </LinearLayout>
+
+</ScrollView>

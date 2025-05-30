@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">LendIt</string>
+    <string name="title_home">Home</string>
+    <string name="title_profile">Profile</string>
+    <string name="title_notifications">Notifications</string>
+    <string name="title_favorites">Favorites</string>
+    <string name="title_cart">Cart</string>
+    <string name="title_search">Search</string>
+    <string name="SearchButton">SearchButton</string>
+    <string name="title_archive">Archive</string>
+    <string name="title_create_listing">New Listing\n</string>
+    <string name="listing_image">image\n</string>
+    <string name="title_premium">premium\n</string>
+    <string name="title_reports">Reports</string>
+    <string name="title_compare">compare\n</string>
+</resources>
