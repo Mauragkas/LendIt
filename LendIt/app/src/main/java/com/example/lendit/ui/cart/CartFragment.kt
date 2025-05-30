@@ -34,30 +34,25 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.navigation.fragment.findNavController
 import com.example.lendit.data.local.entities.CartManager
+import com.example.lendit.data.local.managers.CouponManager
 import com.example.lendit.data.repository.RepositoryProvider
-
 
 class CartFragment : Fragment() {
 
     private var _binding: FragmentCartBinding? = null
 
     private val binding get() = _binding!!
-    // lateinit var listings: List<EquipmentListing>
     var userId by Delegates.notNull<Int>()
     private lateinit var adapter: CartAdapter
-    private var total = 0.0
     private lateinit var cartManager: CartManager
+    private lateinit var couponManager: CouponManager
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
         adapter = CartAdapter(context, mutableListOf())
-        cartManager= CartManager(requireContext(), adapter, couponRepository)
-    }
-    private val couponRepository by lazy {
-        RepositoryProvider.getCouponRepository(requireContext())
+        cartManager = CartManager(requireContext(), adapter, RepositoryProvider.getCouponRepository(requireContext()))
     }
 
-    // CartFragment.kt
     private val paymentLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
@@ -66,39 +61,34 @@ class CartFragment : Fragment() {
             }
         }
 
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-
         //get the user Name to properly save it
         val sharedPref = requireContext().getSharedPreferences("MyAppPrefs", MODE_PRIVATE)
         userId = sharedPref.getInt("userId", -1)
 
         _binding = FragmentCartBinding.inflate(inflater, container, false)
-        val root: View = binding.root
-
-        return root
-    }
-
-
-    private fun displayPayment() {
-        val intent = Intent(requireContext(), PaymentActivity::class.java).apply {
-            putExtra("userId", userId)
-            putExtra("price", total)
-            putIntegerArrayListExtra("listingIds", ArrayList(cartManager.listings.map { it.listingId }))
-        }
-        paymentLauncher.launch(intent)   // ✅ use the already-registered launcher
-    }
-
-
-    private fun getProduct() {
-        displayPayment()
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        // Initialize the coupon manager
+        couponManager = CouponManager(
+            context = requireContext(),
+            lifecycleScope = viewLifecycleOwner.lifecycleScope,
+            onDiscountApplied = { discount ->
+                updateTotalPrice()
+            },
+            onError = { message ->
+                Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+            }
+        )
+
         // Load the listings
         binding.cartRecyclerView.layoutManager = LinearLayoutManager(requireContext())
         binding.cartRecyclerView.adapter = adapter
@@ -107,12 +97,9 @@ class CartFragment : Fragment() {
         binding.applyCouponButton.setOnClickListener {
             val couponCode = binding.couponEditText.text.toString()
             if (couponCode.isNotBlank()) {
-                cartManager.calculateTotal()
-                viewLifecycleOwner.lifecycleScope.launch {
-                    cartManager.validateCoupon(couponCode)
-                    cartManager.calculateTotal()
-                    binding.totalPriceTextView.text = cartManager.getFormattedTotal()
-                }
+                couponManager.validateCoupon(couponCode)
+            } else {
+                Toast.makeText(requireContext(), "Please enter a coupon code", Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -121,10 +108,9 @@ class CartFragment : Fragment() {
 
         continueToPaymentButton.isEnabled = false // Disable by default
 
-
         // Listener for Continue to Payment button
         binding.continueToPaymentButton.setOnClickListener {
-            getProduct()
+            displayPayment()
         }
 
         viewLifecycleOwner.lifecycleScope.launch {
@@ -143,10 +129,9 @@ class CartFragment : Fragment() {
                     override fun afterTextChanged(s: Editable?) {}
                 })
 
-                if (cartManager.listings .isNotEmpty()) {
+                if (cartManager.listings.isNotEmpty()) {
                     adapter.update(cartManager.listings)                         // refresh rows
-                    adapter.getTotalPrice()
-                    binding.totalPriceTextView.text = cartManager.getFormattedTotal()
+                    updateTotalPrice()
                 } else {
                     Toast.makeText(context, "No listings available.", Toast.LENGTH_SHORT).show()
                 }
@@ -156,7 +141,35 @@ class CartFragment : Fragment() {
             }
         }
     }
-        override fun onDestroyView() {
+
+    private fun updateTotalPrice() {
+        val basePrice = adapter.getTotalPrice()
+        val finalPrice = couponManager.calculateDiscountedPrice(basePrice)
+        binding.totalPriceTextView.text = "Total: %.2f€".format(finalPrice)
+
+        // If there's a discount, show it
+        if (couponManager.getCurrentDiscount() > 0) {
+            binding.discountTextView.visibility = View.VISIBLE
+            binding.discountTextView.text = "Discount: ${couponManager.getFormattedDiscountAmount(basePrice)}"
+        } else {
+            binding.discountTextView.visibility = View.GONE
+        }
+    }
+
+    private fun displayPayment() {
+        val basePrice = adapter.getTotalPrice()
+        val finalPrice = couponManager.calculateDiscountedPrice(basePrice)
+
+        val intent = Intent(requireContext(), PaymentActivity::class.java).apply {
+            putExtra("userId", userId)
+            putExtra("price", finalPrice)
+            putIntegerArrayListExtra("listingIds", ArrayList(cartManager.listings.map { it.listingId }))
+            putExtra("discountPercentage", couponManager.getCurrentDiscount())
+        }
+        paymentLauncher.launch(intent)
+    }
+
+    override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
     }
