@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<navigation
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mobile_navigation_admin"
+    app:startDestination="@+id/navigation_reports"
+>
+    <fragment
+        android:id="@+id/navigation_reports"
+        android:name="com.example.lendit.ui.report.ReportsFragment"
+        android:label="@string/title_reports"
+        tools:layout="@layout/fragment_reports"
+    />
+
+    <fragment
+        android:id="@+id/navigation_home"
+        android:name="com.example.lendit.ui.home.HomeFragment"
+        android:label="@string/title_home"
+        tools:layout="@layout/fragment_home"
+    />
+
+    <fragment
+        android:id="@+id/navigation_profile"
+        android:name="com.example.lendit.ui.profile.ProfileFragment"
+        android:label="@string/title_profile"
+        tools:layout="@layout/fragment_profile"
+    />
+</navigation>

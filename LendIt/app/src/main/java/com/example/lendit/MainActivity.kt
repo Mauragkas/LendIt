@@ -1,23 +1,19 @@
 package com.example.lendit
 
+import android.content.Intent
 import android.os.Bundle
-import android.widget.Toast
-import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.navigation.fragment.NavHostFragment // Import NavHostFragment
+import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.example.lendit.databinding.ActivityMainBinding
-
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.button.MaterialButton
-import kotlin.jvm.java
-import android.content.Intent
+import com.google.android.material.bottomnavigation.BottomNavigationView
 
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
+    private lateinit var navView: BottomNavigationView
+    private lateinit var navController: androidx.navigation.NavController
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -25,19 +21,30 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val searchButton = findViewById<MaterialButton>(R.id.search_button)
-        val navView: BottomNavigationView = binding.navView
+        navView = binding.navView
 
-        val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment_activity_main) as NavHostFragment
-        val navController = navHostFragment.navController
+        val navHostFragment = supportFragmentManager.findFragmentById(
+            R.id.nav_host_fragment_activity_main
+        ) as NavHostFragment
+
+        navController = navHostFragment.navController
 
         navView.setupWithNavController(navController)
 
-        searchButton.setOnClickListener {
-            val intent = Intent(this, SearchActivity::class.java)
-            startActivity(intent)
+        // Handle navigation from intent
+        if (intent.getBooleanExtra("NAVIGATE_TO_FAVORITES", false)) {
+            navView.selectedItemId = R.id.navigation_favorites
         }
     }
 
+    // Handle new intents when activity is already running
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
 
+        // Check if we need to navigate to favorites
+        if (intent.getBooleanExtra("NAVIGATE_TO_FAVORITES", false)) {
+            navView.selectedItemId = R.id.navigation_favorites
+        }
+    }
 }

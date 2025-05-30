@@ -6,66 +6,130 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.widget.Button
 import android.widget.EditText
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
+import android.content.Context
+import com.example.lendit.data.repository.RepositoryProvider
+
 
 class LoginActivity : AppCompatActivity() {
 
     private lateinit var emailField: EditText
     private lateinit var passwordField: EditText
     private lateinit var loginBtn: Button
-
     private lateinit var signupBtn: Button
 
+    private val userRepository by lazy {
+        RepositoryProvider.getUserRepository(this)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
 
-       loginBtn = findViewById<Button>(R.id.button)
-       emailField = findViewById<EditText>(R.id.editTextTextEmailAddress)
-       passwordField = findViewById<EditText>(R.id.editTextTextPassword)
+        // Check if user is already logged in
+        val sharedPref = getSharedPreferences("MyAppPrefs", MODE_PRIVATE)
+        val isLoggedIn = sharedPref.getInt("userId", -1)
+        val savedUserType = sharedPref.getString("userType", "renter")
 
-        loginBtn.isEnabled = false
+        AppDatabase.getLogin(applicationContext, lifecycleScope)
 
-        emailField.addTextChangedListener(loginTextWatcher)
-        passwordField.addTextChangedListener(loginTextWatcher)
+        if (isLoggedIn != -1) {
+            // Redirect based on saved user type
+            val destination = when (savedUserType?.lowercase()) {
+                "owner" -> MainOwnerActivity::class.java
+                "admin" -> AdminActivity::class.java
+                else -> MainActivity::class.java
+            }
+            startActivity(Intent(this, destination))
+            finish()
+            return
+        }
 
-        loginBtn.setOnClickListener {
-            val email = emailField.text.toString()
-            val password = passwordField.text.toString()
+        // Initialize UI components
+        loginBtn = findViewById(R.id.button)
+        emailField = findViewById(R.id.editTextTextEmailAddress)
+        passwordField = findViewById(R.id.editTextTextPassword)
+        signupBtn = findViewById(R.id.signUpButtonLogin)
 
-            // Replace this with real login logic
-            if (true) {
-                // Start main activity
-                val intent = Intent(this, MainActivity::class.java)
-                startActivity(intent)
-                finish() // Close LoginActivity
+        // Set up text watcher for login button state
+        val loginTextWatcher = object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: Editable?) {
+                loginBtn.isEnabled = emailField.text.toString().isNotBlank() &&
+                        passwordField.text.toString().isNotBlank()
             }
         }
 
-        signupBtn = findViewById<Button>(R.id.signUpButtonLogin)
+        emailField.addTextChangedListener(loginTextWatcher)
+        passwordField.addTextChangedListener(loginTextWatcher)
+        loginBtn.isEnabled = false
 
+        // Login button click handler
+        loginBtn.setOnClickListener {
+            val email = emailField.text.toString().trim()
+            val password = passwordField.text.toString().trim()
+
+            if (email.isEmpty() || password.isEmpty()) {
+                Toast.makeText(this, "Please enter both email and password", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            lifecycleScope.launch {
+                try {
+                    val user = userRepository.getUserByEmailAndPassword(email, password)
+
+                    if (user != null) {
+                        // Save login state and user info
+                        with(sharedPref.edit()) {
+                            putString("email", email)
+                            putString("userType", user.userType)
+                            putInt("userId", user.userId)
+                            putString("userName", user.name)
+                            // Also save premium status from database to SharedPreferences
+                            putBoolean("isPremium", user.premiumStatus ?: false)
+                            putString("premiumPlan", user.premiumPlan)
+                            apply()
+                        }
+
+                        // Redirect based on user type
+                        val destination = when (user.userType?.lowercase()) {
+                            "owner" -> MainOwnerActivity::class.java
+                            "admin" -> AdminActivity::class.java
+                            else -> MainActivity::class.java
+                        }
+
+                        val sharedPref = getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+                        sharedPref.edit().putInt("user_id", user.userId).apply()
+
+                        startActivity(Intent(this@LoginActivity, destination))
+                        finish()
+
+                    } else {
+                            Toast.makeText(
+                                this@LoginActivity,
+                                "Invalid email or password",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                    }
+                } catch (e: Exception) {
+                    runOnUiThread {
+                        Toast.makeText(
+                            this@LoginActivity,
+                            "Login failed: ${e.message}",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+            }
+        }
+
+        // Signup button click handler
         signupBtn.setOnClickListener {
-            val intent = Intent(this, SignupActivity::class.java)
-            startActivity(intent)
-            finish()
-        }
-
-    }
-    private val loginTextWatcher = object : TextWatcher {
-        override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-        override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-
-        override fun afterTextChanged(s: Editable?) {
-            val email = emailField.text.toString()
-            val password = passwordField.text.toString()
-
-            // Your condition: email AND password is not blank
-            val conditionMet = email.isNotBlank() && password.isNotBlank()
-
-            // Enable or disable the button based on the condition
-            loginBtn.isEnabled = conditionMet
+            startActivity(Intent(this, SignupActivity::class.java))
         }
     }
-
 }
