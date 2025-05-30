@@ -1,8 +1,10 @@
 package com.example.lendit.ui.payment
 
+import android.app.Activity
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
@@ -10,7 +12,6 @@ import androidx.lifecycle.lifecycleScope
 import com.example.lendit.R
 import com.example.lendit.data.local.entities.PaymentMethod
 import com.example.lendit.data.local.managers.PaymentManager
-import kotlinx.coroutines.launch
 
 class PaymentActivity : AppCompatActivity() {
 
@@ -19,7 +20,9 @@ class PaymentActivity : AppCompatActivity() {
     private lateinit var bankDetailsForm: View
     private lateinit var completePaymentButton: Button
     private lateinit var expiryEditText: EditText
-    private val paymentManager = PaymentManager()
+
+    // Create payment manager
+    private lateinit var paymentManager: PaymentManager
 
     private fun sendReceipt() {
         Toast.makeText(this@PaymentActivity, "Η παραγγελία καταχωρήθηκε!", Toast.LENGTH_LONG).show()
@@ -29,7 +32,21 @@ class PaymentActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_payment)
 
-        // Initialize repository
+        // Initialize payment manager
+        paymentManager = PaymentManager(
+            context = this,
+            coroutineScope = lifecycleScope,
+            onPaymentSuccess = {
+                Toast.makeText(this, "Payment processed successfully", Toast.LENGTH_SHORT).show()
+                setResult(RESULT_OK)
+                finish()
+            },
+            onPaymentError = { message ->
+                Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+                setResult(RESULT_CANCELED)
+                finish()
+            }
+        )
 
         expiryEditText = findViewById(R.id.edit_expiry_date)
         bankDetailsForm = findViewById<View>(R.id.bank_details_form)
@@ -60,7 +77,9 @@ class PaymentActivity : AppCompatActivity() {
             private var isFormatting = false
 
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+
             override fun afterTextChanged(s: Editable?) {
                 if (isFormatting) return
 
@@ -78,12 +97,9 @@ class PaymentActivity : AppCompatActivity() {
             }
         })
 
-
-        // completePayment()
+        // Complete payment button click handler
         completePaymentButton.setOnClickListener {
             val selectedPaymentId = paymentMethodGroup.checkedRadioButtonId
-            lateinit var paymentMethod: PaymentMethod
-            var isValidPayment = true
 
             when (selectedPaymentId) {
                 R.id.radio_credit_card -> {
@@ -91,71 +107,18 @@ class PaymentActivity : AppCompatActivity() {
                     val cvv = findViewById<EditText>(R.id.edit_cvv).text.toString()
                     val cardHolderName = findViewById<EditText>(R.id.edit_cardholder_name).text.toString()
                     val expiryDate = expiryEditText.text.toString().trim()
-            when (selectedPaymentId) {
-                R.id.radio_credit_card -> {
-                    val cardNumber = findViewById<EditText>(R.id.edit_card_number).text.toString()
-                    val cvv = findViewById<EditText>(R.id.edit_cvv).text.toString()
-                    val cardHolderName = findViewById<EditText>(R.id.edit_cardholder_name).text.toString()
-                    val expiryDate = expiryEditText.text.toString().trim()
 
-                    val encrypted = paymentManager.encryptCardData(cardNumber, expiryDate, cvv, cardHolderName)
-                    isValidPayment = paymentManager.validateCardData(encrypted)
-
-                    paymentMethod = PaymentMethod.CREDIT_CARD
+                    paymentManager.processCreditCardPayment(cardNumber, expiryDate, cvv, cardHolderName)
                 }
-
+                R.id.radio_cash_on_delivery -> {
+                    paymentManager.processCashOnDeliveryPayment()
+                }
                 R.id.radio_bank_transfer -> {
                     val iban = findViewById<EditText>(R.id.edit_bank_number).text.toString()
-                    val encrypted = paymentManager.encryptIban(iban)
-                    isValidPayment = paymentManager.validateIban(encrypted)
-
-                    paymentMethod = PaymentMethod.BANK_TRANSFER
+                    paymentManager.processBankTransferPayment(iban)
                 }
-
-// cash on delivery for easier debug purposes / will go away in prod
-                R.id.radio_cash_on_delivery -> {
-                    paymentMethod = PaymentMethod.CASH_ON_DELIVERY
-                }
-
-                else -> isValidPayment = false
-            }
-
-            if (!isValidPayment) {
-                Toast.makeText(this, "Η πληρωμή δεν είναι έγκυρη", Toast.LENGTH_SHORT).show()
-                setResult(RESULT_CANCELED)
-                finish()
-                return@setOnClickListener
-            } else {
-                sendReceipt()
-                Toast.makeText(this, "Η παραγγελία καταχωρήθηκε!", Toast.LENGTH_LONG).show()
-            }
-
-            // launch order creation
-            lifecycleScope.launch {
-                try {
-                    val userId = intent.getIntExtra("userId", -1)
-                    val price = intent.getDoubleExtra("price", 0.0)
-                    val listingIds = intent.getIntegerArrayListExtra("listingIds") ?: arrayListOf()
-
-                    val success = paymentManager.processPaymentAndCreateOrder(
-                        context = this@PaymentActivity,
-                        userId = userId,
-                        listingIds = listingIds.toList(),
-                        totalPrice = price,
-                        paymentMethod = paymentMethod,
-                        startDate = intent.getIntExtra("startDate", -1),
-                        endDate = intent.getIntExtra("endDate", -1)
-                    )
-
-                    if (success) {
-                        setResult(RESULT_OK)
-                        finish()
-                    } else {
-                        Toast.makeText(this@PaymentActivity, "Σφάλμα κατά την επεξεργασία της παραγγελίας.", Toast.LENGTH_SHORT).show()
-                    }
-
-                } catch (e: Exception) {
-                    Toast.makeText(this@PaymentActivity, "Error processing payment: ${e.message}", Toast.LENGTH_SHORT).show()
+                else -> {
+                    Toast.makeText(this, "Please select a payment method", Toast.LENGTH_SHORT).show()
                 }
             }
         }

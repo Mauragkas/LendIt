@@ -31,7 +31,7 @@ import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.fragment.findNavController
 import com.example.lendit.data.repository.RepositoryProvider
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.example.lendit.data.local.FavoritesManager
+import com.example.lendit.data.local.managers.FavoritesManager
 
 class ListingAdapter(
     private val context: Context,
