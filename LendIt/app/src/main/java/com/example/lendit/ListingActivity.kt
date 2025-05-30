@@ -151,6 +151,38 @@ class ListingActivity : AppCompatActivity() {
             ListingCategory.MANUAL -> bindingStep1.dropdownCategoryListing.setText("Χειροκίνητο")
         }
 
+        // Also populate the date fields with existing data
+        if (listing.availableFrom != null && listing.availableUntil != null) {
+            formattedStart = listing.availableFrom
+            formattedEnd = listing.availableUntil
+
+            // Format dates for display
+            val startDate = Converters().toLocalDate(listing.availableFrom)
+            val endDate = Converters().toLocalDate(listing.availableUntil)
+
+            if (startDate != null && endDate != null) {
+                val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+                val startDisplay =
+                        formatter.format(
+                                java.util.Date.from(
+                                        startDate.atStartOfDay(ZoneId.systemDefault()).toInstant()
+                                )
+                        )
+                val endDisplay =
+                        formatter.format(
+                                java.util.Date.from(
+                                        endDate.atStartOfDay(ZoneId.systemDefault()).toInstant()
+                                )
+                        )
+
+                bindingStep1.dateButton.text = "$startDisplay - $endDisplay"
+            } else {
+                bindingStep1.dateButton.text = "Επιλέξτε εύρος ημερομηνιών"
+            }
+        } else {
+            bindingStep1.dateButton.text = "Επιλέξτε εύρος ημερομηνιών"
+        }
+
         // Update button text
         bindingStep1.buttonPostListing.text = "Ενημέρωση"
     }
@@ -258,11 +290,19 @@ class ListingActivity : AppCompatActivity() {
             return false
         }
 
+        // Add extra check to ensure formattedStart and formattedEnd are not null
+        if (formattedStart == null || formattedEnd == null) {
+            Toast.makeText(this, "Παρακαλώ επιλέξτε σωστή περίοδο ενοικίασης", Toast.LENGTH_SHORT)
+                    .show()
+            return false
+        }
+
         val price = bindingStep1.priceField.text.toString()
         if (price.isBlank() || price.toDoubleOrNull() == null) {
             Toast.makeText(this, "Παρακαλώ εισάγετε έγκυρη τιμή", Toast.LENGTH_SHORT).show()
             return false
         }
+
         val db = AppDatabase.getInstance(this@ListingActivity)
 
         lifecycleScope.launch {
@@ -284,7 +324,6 @@ class ListingActivity : AppCompatActivity() {
             }
         }
         return true
-
     }
 
     private fun temporarySave1() {
