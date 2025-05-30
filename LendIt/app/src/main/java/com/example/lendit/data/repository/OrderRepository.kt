@@ -2,24 +2,15 @@ package com.example.lendit.data.repository
 
 import AppDatabase
 import com.example.lendit.data.local.entities.Order
+import com.example.lendit.data.local.entities.OrderClass
 import com.example.lendit.data.local.entities.PaymentMethod
 import com.example.lendit.data.local.entities.Rental
 
-/**
- * Repository for handling order-related operations
- */
 class OrderRepository(private val db: AppDatabase) {
-
-    /**
-     * Creates a new order in the database
-     */
     suspend fun createOrder(order: Order): Long {
         return db.OrderDao().insert(order)
     }
 
-    /**
-     * Creates an order and related rental records from cart items
-     */
     suspend fun createOrderFromCart(
         userId: Int,
         listingIds: List<Int>,
@@ -55,9 +46,21 @@ class OrderRepository(private val db: AppDatabase) {
         return orderId
     }
 
-    /**
-     * Validates a coupon code
-     */
+    suspend fun getAllOrders(): List<OrderClass> {
+        val orders = db.OrderDao().getAllOrders()
+        return OrderClass.convertToOrderClassList(orders)
+    }
+
+    suspend fun getOrdersByRenter(renterId: Int): List<OrderClass> {
+        val orders = db.OrderDao().getOrdersByRenter(renterId)
+        return OrderClass.convertToOrderClassList(orders)
+    }
+
+    suspend fun getOrdersForListing(listingId: Int): List<OrderClass> {
+        val orders = db.OrderDao().getOrdersForListing(listingId)
+        return OrderClass.convertToOrderClassList(orders)
+    }
+
     suspend fun validateCoupon(couponCode: String): Int {
         return db.couponDao().validateCoupon(couponCode)
     }
