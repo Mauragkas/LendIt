@@ -13,7 +13,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.lendit.CompareResultActivity
 import com.example.lendit.SearchActivity
-import com.example.lendit.data.local.entities.CompareManager
+import com.example.lendit.data.local.managers.CompareManager
 import com.example.lendit.data.repository.RepositoryProvider
 import com.example.lendit.databinding.FragmentCompareBinding
 import kotlinx.coroutines.Dispatchers
@@ -25,15 +25,7 @@ class CompareFragment : Fragment() {
     private var _binding: FragmentCompareBinding? = null
     private val binding get() = _binding!!
     private lateinit var adapter: CompareListingAdapter
-
-    private val getFavoriteRepository by lazy {
-        RepositoryProvider.getFavoriteRepository(requireContext())
-    }
-    private val getListingRepository by lazy {
-        RepositoryProvider.getListingRepository(requireContext())
-    }
-
-    private var favorites: CompareManager? = null
+    private var compareManager: CompareManager? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -58,7 +50,7 @@ class CompareFragment : Fragment() {
         }
 
         binding.compareButton.setOnClickListener {
-            val selectedCount = favorites?.selectedListings?.size ?: 0
+            val selectedCount = compareManager?.selectedListings?.size ?: 0
             if (selectedCount < 2) {
                 Toast.makeText(
                     context,
@@ -71,7 +63,7 @@ class CompareFragment : Fragment() {
         }
 
         binding.clearButton.setOnClickListener {
-            favorites?.clearSelections()
+            compareManager?.clearSelections()
             updateSelectionUI()
             adapter.notifyDataSetChanged()
         }
@@ -90,15 +82,15 @@ class CompareFragment : Fragment() {
                     Toast.makeText(requireContext(), "Please Log in", Toast.LENGTH_SHORT).show()
                     return@launch
                 }
-                favorites = CompareManager.loadFavorites(userId, getFavoriteRepository, getListingRepository)
+                compareManager = CompareManager.loadFavorites(context?: return@launch, userId)
 
-                if (favorites?.favoriteListings.isNullOrEmpty()) {
+                if (compareManager?.favoriteListings.isNullOrEmpty()) {
                     Toast.makeText(requireContext(), "No favorites found. Add some items to your favorites first!", Toast.LENGTH_SHORT).show()
                     showSearchActivity()
                 } else {
                     binding.emptyStateContainer.visibility = View.GONE
                     binding.contentContainer.visibility = View.VISIBLE
-                    adapter.update(favorites!!.favoriteListings)
+                    adapter.update(compareManager!!.favoriteListings)
                 }
                 updateSelectionUI()
             } catch (e: Exception) {
@@ -113,13 +105,13 @@ class CompareFragment : Fragment() {
     }
 
     private fun modifyCompare(listing: EquipmentListing) {
-        favorites?.toggleSelection(listing)
+        compareManager?.toggleSelection(listing)
         updateSelectionUI()
         adapter.notifyDataSetChanged()
     }
 
     private fun updateSelectionUI() {
-        val selected = favorites?.selectedListings ?: emptyList()
+        val selected = compareManager?.selectedListings ?: emptyList()
 
         binding.selectedCount.text = "${selected.size} items selected"
         binding.compareButton.isEnabled = selected.size >= 2
@@ -130,8 +122,8 @@ class CompareFragment : Fragment() {
     }
 
     private fun performComparison() {
-        favorites?.let {
-            val intent = it.createCompareIntent(requireContext())
+        compareManager ?.let {
+            val intent = it.createCompareIntent()
             startActivity(intent)
         }
     }

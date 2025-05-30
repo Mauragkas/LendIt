@@ -8,6 +8,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
+import com.example.lendit.data.local.managers.CompareManager
 import com.example.lendit.data.repository.RepositoryProvider
 import com.example.lendit.databinding.ActivityCompareResultBinding
 import kotlinx.coroutines.Dispatchers
@@ -18,7 +19,7 @@ class CompareResultActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityCompareResultBinding
     private var listings = mutableListOf<EquipmentListing>()
-
+    private lateinit var compareResultManager: CompareResultManager
     private val listingRepository by lazy {
         RepositoryProvider.getListingRepository(this)
     }
@@ -26,7 +27,6 @@ class CompareResultActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityCompareResultBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
         // Set up back button
         binding.backButton.setOnClickListener { finish() }
 

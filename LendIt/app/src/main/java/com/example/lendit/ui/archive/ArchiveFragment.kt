@@ -25,9 +25,6 @@ class ArchiveFragment : Fragment() {
     private val availableAdapter = OwnerAdapter(mutableListOf())
     private val unavailableAdapter = OwnerAdapter(mutableListOf())
     private val inactiveAdapter = OwnerAdapter(mutableListOf())
-    private val listingRepository by lazy {
-        RepositoryProvider.getListingRepository(requireContext())
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -40,6 +37,7 @@ class ArchiveFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        archiveManager = ArchiveManager(requireContext())
 
         // Get owner name from shared preferences
         val sharedPref = requireActivity().getSharedPreferences("MyAppPrefs", 0)
@@ -131,7 +129,7 @@ class ArchiveFragment : Fragment() {
     private fun loadListingsByOwner(ownerName: String) {
         lifecycleScope.launch {
             try {
-                val allListings = listingRepository.getListingsByOwner(ownerName)
+                val allListings = archiveManager.getOwnersListings(ownerName)
 
                 // Filter listings by status
                 archiveManager.refresh(ownerName)

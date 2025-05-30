@@ -201,6 +201,7 @@ class SearchActivity : AppCompatActivity() {
     fun updateAdapter() {
         adapter.update(listings)
     }
+
     private fun getFilters(): ListingFilters {
         var category: ListingCategory? = null
         var sortBy: SortBy? = null

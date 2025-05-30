@@ -27,18 +27,18 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import com.example.lendit.data.local.entities.Favorite
 import com.example.lendit.data.local.entities.UserCart
+import com.example.lendit.data.local.managers.CartManager
 import com.example.lendit.data.repository.RepositoryProvider
 import com.example.lendit.ui.cart.CartFragment
 
 
 class CartAdapter(
     private val context: Context,
+
     private val items: MutableList<EquipmentListing>) :
     RecyclerView.Adapter<CartAdapter.MyViewHolder>() {
 
-    private val cartRepository by lazy {
-        RepositoryProvider.getCartRepository(context)
-    }
+    private var cartManager = CartManager(context, this)
 
     class MyViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val titleTextView: TextView = itemView.findViewById(R.id.listingTitle)
@@ -121,21 +121,19 @@ class CartAdapter(
 
         // Set click listener
         holder.cartButton.setOnClickListener {
-            (context as AppCompatActivity).lifecycleScope.launch(Dispatchers.IO) {
-                val isInCart = cartRepository.checkCart(userId, currentItem.listingId)
-                if (isInCart) {
-                    // Remove from cart in db
-                    cartRepository.deleteFromCart(userId, currentItem.listingId)
-                    // Remove from cart in adapter
-                    items.removeAt(holder.adapterPosition)
-
-                    //show toast and refresh
-                    withContext(Dispatchers.Main) {
+            (context as AppCompatActivity).lifecycleScope.launch {
+                val removed = cartManager.removeFromCart(userId, currentItem.listingId)
+                withContext(Dispatchers.Main) {
+                    if (removed) {
+                        val index = cartManager.listings.indexOfFirst { it.listingId == currentItem.listingId }
+                        if (index >= 0) {
+                            cartManager.listings.removeAt(index)
+                            cartManager.adapter.update(cartManager.listings)
+                        }
                         Toast.makeText(context, "Removed from cart", Toast.LENGTH_SHORT).show()
-                        notifyDataSetChanged()
+                    } else {
+                        Toast.makeText(context, "Item not in cart!", Toast.LENGTH_SHORT).show()
                     }
-                } else {
-                    Toast.makeText(context, "Item not in cart!", Toast.LENGTH_SHORT).show()
                 }
             }
         }

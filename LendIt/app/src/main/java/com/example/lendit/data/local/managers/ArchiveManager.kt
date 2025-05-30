@@ -1,14 +1,15 @@
 package com.example.lendit.ui.archive
 
 import EquipmentListing
+import android.content.Context
 import com.example.lendit.data.repository.ListingRepository
+import com.example.lendit.data.repository.RepositoryProvider
 
-class ArchiveManager(
-    private val listingRepository: ListingRepository
-) {
+class ArchiveManager(context: Context) {
     var availableListings: List<EquipmentListing> = emptyList()
     var unavailableListings: List<EquipmentListing> = emptyList()
     var inactiveListings: List<EquipmentListing> = emptyList()
+    private val listingRepository: ListingRepository = RepositoryProvider.getListingRepository(context)
 
     val availableCount get() = availableListings.size
     val unavailableCount get() = unavailableListings.size
@@ -24,5 +25,9 @@ class ArchiveManager(
         availableListings   = all.filter { it.status == ListingStatus.AVAILABLE   }
         unavailableListings = all.filter { it.status == ListingStatus.UNAVAILABLE }
         inactiveListings    = all.filter { it.status == ListingStatus.INACTIVE    }
+    }
+
+    suspend fun getOwnersListings(ownerName: String): List<EquipmentListing> {
+        return listingRepository.getListingsByOwner(ownerName)
     }
 }

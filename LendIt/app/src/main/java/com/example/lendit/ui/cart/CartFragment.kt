@@ -33,16 +33,14 @@ import android.text.TextWatcher
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.navigation.fragment.findNavController
-import com.example.lendit.data.local.entities.CartManager
+import com.example.lendit.data.local.managers.CartManager
 import com.example.lendit.data.repository.RepositoryProvider
 
 
 class CartFragment : Fragment() {
 
     private var _binding: FragmentCartBinding? = null
-
     private val binding get() = _binding!!
-    // lateinit var listings: List<EquipmentListing>
     var userId by Delegates.notNull<Int>()
     private lateinit var adapter: CartAdapter
     private var total = 0.0
@@ -51,10 +49,7 @@ class CartFragment : Fragment() {
     override fun onAttach(context: Context) {
         super.onAttach(context)
         adapter = CartAdapter(context, mutableListOf())
-        cartManager= CartManager(requireContext(), adapter, couponRepository)
-    }
-    private val couponRepository by lazy {
-        RepositoryProvider.getCouponRepository(requireContext())
+        cartManager= CartManager(requireContext(), adapter)
     }
 
     // CartFragment.kt
@@ -129,9 +124,8 @@ class CartFragment : Fragment() {
 
         viewLifecycleOwner.lifecycleScope.launch {
             try {
-                cartManager.listings = withContext(Dispatchers.IO) {
-                    AppDatabase.showCart(requireContext(), userId)
-                }
+                cartManager.loadCartForUser(userId)
+
                 deliveryAddressEditText.addTextChangedListener(object : TextWatcher {
                     override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
 

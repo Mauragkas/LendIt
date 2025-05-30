@@ -15,6 +15,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.example.lendit.R
+import com.example.lendit.data.local.managers.PremiumManager
 import com.example.lendit.data.repository.RepositoryProvider
 import com.example.lendit.databinding.FragmentPremiumBinding
 import com.example.lendit.ui.payment.PaymentActivity
@@ -28,10 +29,8 @@ class PremiumFragment : Fragment() {
     private lateinit var paymentLauncher: ActivityResultLauncher<Intent>
     private lateinit var sharedPref: SharedPreferences
     private lateinit var userEmail: String
+    private lateinit var premiumManager: PremiumManager
 
-    private val userRepository by lazy {
-        RepositoryProvider.getUserRepository(requireContext())
-    }
     fun showProfile() {
         findNavController().navigate(R.id.navigation_profile)
     }
@@ -46,7 +45,8 @@ class PremiumFragment : Fragment() {
         userEmail = sharedPref.getString("email", "") ?: ""
 
         _binding = FragmentPremiumBinding.inflate(inflater, container, false)
-        viewModel = ViewModelProvider(this).get(PremiumViewModel::class.java)
+        viewModel = ViewModelProvider(this)[PremiumViewModel::class.java]
+        premiumManager = PremiumManager(requireContext(), lifecycleScope)
         return binding.root
     }
 
@@ -166,16 +166,10 @@ class PremiumFragment : Fragment() {
 
     fun updateUserStatus(hasPremium: Boolean) {
         lifecycleScope.launch {
-            // Update premium status in database
-            userRepository.updateUserStatus(userEmail,hasPremium, null)
-
-            // Update shared preferences
-            with(sharedPref.edit()) {
-                putBoolean("isPremium", hasPremium)
-                apply()
-            }
+            premiumManager.setPremiumStatus(hasPremium)
         }
     }
+
 
     private fun proceedToPayment() {
         AlertDialog.Builder(requireContext())
@@ -204,16 +198,13 @@ class PremiumFragment : Fragment() {
     }
 
     private fun clickConfirm() {
+        val userEmail = premiumManager.getUserEmail()
         if (userEmail.isNotEmpty()) {
-            // Update database
             lifecycleScope.launch {
                 try {
-                    updateUserStatus(hasPremium = false)
-                    // Update UI on main thread
+                    premiumManager.setPremiumStatus(false)
                     requireActivity().runOnUiThread {
                         updateUI(false)
-
-                        // Show confirmation
                         AlertDialog.Builder(requireContext())
                             .setTitle("Η συνδρομή σας ακυρώθηκε")
                             .setMessage("Η συνδρομή σας έχει ακυρωθεί. Θα διατηρήσετε τα προνόμια Premium μέχρι το τέλος της τρέχουσας περιόδου χρέωσης.")
@@ -234,6 +225,7 @@ class PremiumFragment : Fragment() {
             }
         }
     }
+
 
     override fun onDestroyView() {
         super.onDestroyView()
