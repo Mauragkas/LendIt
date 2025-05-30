@@ -2,7 +2,6 @@ package com.example.lendit.ui.premium
 
 import android.app.Activity
 import android.content.Intent
-import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -12,14 +11,14 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.example.lendit.R
 import com.example.lendit.data.local.managers.PremiumManager
-import com.example.lendit.data.repository.RepositoryProvider
 import com.example.lendit.databinding.FragmentPremiumBinding
 import com.example.lendit.ui.payment.PaymentActivity
-import kotlinx.coroutines.launch
+import android.widget.Toast
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 
 class PremiumFragment : Fragment() {
 
@@ -27,8 +26,6 @@ class PremiumFragment : Fragment() {
     private val binding get() = _binding!!
     private lateinit var viewModel: PremiumViewModel
     private lateinit var paymentLauncher: ActivityResultLauncher<Intent>
-    private lateinit var sharedPref: SharedPreferences
-    private lateinit var userEmail: String
     private lateinit var premiumManager: PremiumManager
 
     fun showProfile() {
@@ -40,10 +37,6 @@ class PremiumFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-
-        sharedPref = requireActivity().getSharedPreferences("MyAppPrefs", 0)
-        userEmail = sharedPref.getString("email", "") ?: ""
-
         _binding = FragmentPremiumBinding.inflate(inflater, container, false)
         viewModel = ViewModelProvider(this)[PremiumViewModel::class.java]
         premiumManager = PremiumManager(requireContext(), lifecycleScope)
@@ -53,29 +46,40 @@ class PremiumFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Get premium status from SharedPreferences
-        val sharedPref = requireActivity().getSharedPreferences("MyAppPrefs", 0)
-        val isPremium = sharedPref.getBoolean("isPremium", false)
+        // Initialize PremiumManager using a simple CoroutineScope
+        premiumManager = PremiumManager(
+            context = requireContext(),
+            coroutineScope = CoroutineScope(Dispatchers.Main),
+            onStatusUpdated = { isPremium ->
+                updateUI(isPremium)
+                if (isPremium) {
+                    Toast.makeText(requireContext(), "You are now a Premium member!", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(requireContext(), "Premium subscription canceled", Toast.LENGTH_SHORT).show()
+                }
+            },
+            onError = { errorMessage ->
+                Toast.makeText(requireContext(), errorMessage, Toast.LENGTH_SHORT).show()
+            }
+        )
 
         // Initially hide plan selection and duration selection
         binding.planDetailsContainer.visibility = View.GONE
         binding.planDurationContainer.visibility = View.GONE
 
         // Update UI based on premium status
-        updateUI(isPremium)
+        updateUI(premiumManager.isPremiumUser())
 
-
+        // Register payment result handler
         paymentLauncher = registerForActivityResult(
             ActivityResultContracts.StartActivityForResult()
         ) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
                 // Payment was successful
-                updateUserStatus(hasPremium = true)
-                android.widget.Toast.makeText(requireContext(), "Είστε πλέον Premium!", android.widget.Toast.LENGTH_SHORT).show()
+                premiumManager.activatePremium()
             } else {
                 // Payment was cancelled or failed
-                // notifyUser()
-                android.widget.Toast.makeText(requireContext(), "Η πληρωμή ακυρώθηκε ή απέτυχε.", android.widget.Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "Payment was cancelled or failed.", Toast.LENGTH_SHORT).show()
             }
             showProfile()
         }
@@ -86,15 +90,11 @@ class PremiumFragment : Fragment() {
             binding.planDetailsContainer.visibility = View.VISIBLE
         }
 
-        fun showOptions(){
+        // Setup get premium button
+        binding.getPremiumButton.setOnClickListener {
             // Show duration selection
             binding.planDurationContainer.visibility = View.VISIBLE
             binding.subscribeButton.isEnabled = false
-        }
-
-        // Setup get premium button
-        binding.getPremiumButton.setOnClickListener {
-            showOptions()
         }
 
         // Setup view benefits button for premium users
@@ -136,49 +136,47 @@ class PremiumFragment : Fragment() {
         }
     }
 
-    private fun selectPlan(plan: String) {
+    private fun selectPlan(planName: String) {
         // Deselect all plans
         binding.monthlyPlanCard.strokeWidth = 0
         binding.quarterlyPlanCard.strokeWidth = 0
         binding.yearlyPlanCard.strokeWidth = 0
 
-        // Select chosen plan
-        when (plan) {
-            "monthly" -> {
-                binding.monthlyPlanCard.strokeWidth = 4
-                viewModel.selectedPlan = "monthly"
-                viewModel.planPrice = 9.99
-            }
-            "quarterly" -> {
-                binding.quarterlyPlanCard.strokeWidth = 4
-                viewModel.selectedPlan = "quarterly"
-                viewModel.planPrice = 24.99
-            }
-            "yearly" -> {
-                binding.yearlyPlanCard.strokeWidth = 4
-                viewModel.selectedPlan = "yearly"
-                viewModel.planPrice = 89.99
-            }
-        }
+        // Select the plan using the manager
+        val plan = premiumManager.selectPlan(planName)
 
-        binding.subscribeButton.isEnabled = true
-    }
+        if (plan != null) {
+            // Select chosen plan UI
+            when (planName) {
+                "monthly" -> binding.monthlyPlanCard.strokeWidth = 4
+                "quarterly" -> binding.quarterlyPlanCard.strokeWidth = 4
+                "yearly" -> binding.yearlyPlanCard.strokeWidth = 4
+            }
 
-    fun updateUserStatus(hasPremium: Boolean) {
-        lifecycleScope.launch {
-            premiumManager.setPremiumStatus(hasPremium)
+            // Update ViewModel for sharing data with PaymentActivity
+            viewModel.selectedPlan = plan.name
+            viewModel.planPrice = plan.price
+
+            binding.subscribeButton.isEnabled = true
         }
     }
 
 
     private fun proceedToPayment() {
+        val plan = premiumManager.getSelectedPlan()
+
+        if (plan == null) {
+            Toast.makeText(requireContext(), "Please select a plan first", Toast.LENGTH_SHORT).show()
+            return
+        }
+
         AlertDialog.Builder(requireContext())
             .setTitle("Επιβεβαίωση αγοράς")
-            .setMessage("Είστε βέβαιοι ότι θέλετε να αποκτήσετε το πλάνο ${viewModel.selectedPlan} για €${viewModel.planPrice}?")
+            .setMessage("Είστε βέβαιοι ότι θέλετε να αποκτήσετε το πλάνο ${plan.name} για €${plan.price}?")
             .setPositiveButton("Συνέχεια στην πληρωμή") { _, _ ->
                 val intent = Intent(context, PaymentActivity::class.java).apply {
-                    putExtra("selectedPlan", viewModel.selectedPlan)
-                    putExtra("planPrice", viewModel.planPrice)
+                    putExtra("selectedPlan", plan.name)
+                    putExtra("planPrice", plan.price)
                 }
                 paymentLauncher.launch(intent)
             }
@@ -191,39 +189,19 @@ class PremiumFragment : Fragment() {
             .setTitle("Ακύρωση συνδρομής Premium")
             .setMessage("Είστε βέβαιοι ότι θέλετε να ακυρώσετε τη συνδρομή σας; Θα χάσετε όλα τα προνόμια Premium.")
             .setPositiveButton("Ακύρωση συνδρομής") { _, _ ->
-                clickConfirm()
+                premiumManager.cancelPremium()
+
+                // Show confirmation
+                AlertDialog.Builder(requireContext())
+                    .setTitle("Η συνδρομή σας ακυρώθηκε")
+                    .setMessage("Η συνδρομή σας έχει ακυρώθηκε. Θα διατηρήσετε τα προνόμια Premium μέχρι το τέλος της τρέχουσας περιόδου χρέωσης.")
+                    .setPositiveButton("OK") { _, _ ->
+                        showProfile()
+                    }
+                    .show()
             }
             .setNegativeButton("Όχι, θέλω να παραμείνω Premium", null)
             .show()
-    }
-
-    private fun clickConfirm() {
-        val userEmail = premiumManager.getUserEmail()
-        if (userEmail.isNotEmpty()) {
-            lifecycleScope.launch {
-                try {
-                    premiumManager.setPremiumStatus(false)
-                    requireActivity().runOnUiThread {
-                        updateUI(false)
-                        AlertDialog.Builder(requireContext())
-                            .setTitle("Η συνδρομή σας ακυρώθηκε")
-                            .setMessage("Η συνδρομή σας έχει ακυρωθεί. Θα διατηρήσετε τα προνόμια Premium μέχρι το τέλος της τρέχουσας περιόδου χρέωσης.")
-                            .setPositiveButton("OK") { _, _ ->
-                                showProfile()
-                            }
-                            .show()
-                    }
-                } catch (e: Exception) {
-                    requireActivity().runOnUiThread {
-                        android.widget.Toast.makeText(
-                            requireContext(),
-                            "Σφάλμα κατά την ακύρωση: ${e.message}",
-                            android.widget.Toast.LENGTH_SHORT
-                        ).show()
-                    }
-                }
-            }
-        }
     }
 
 

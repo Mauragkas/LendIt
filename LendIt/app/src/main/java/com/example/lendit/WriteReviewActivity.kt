@@ -14,12 +14,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.lendit.data.local.entities.Review
-import com.example.lendit.data.repository.RepositoryProvider
+import com.example.lendit.data.local.managers.ReviewManager
 import com.google.android.material.textfield.TextInputEditText
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class WriteReviewActivity : AppCompatActivity() {
 
@@ -30,27 +26,15 @@ class WriteReviewActivity : AppCompatActivity() {
     private lateinit var backButton: ImageButton
     private lateinit var addPhotoButton: Button
     private lateinit var photosRecyclerView: RecyclerView
-    private val reviewRepository by lazy {
-        RepositoryProvider.getReviewRepository(applicationContext)
-    }
-    private val selectedPhotos = mutableListOf<Uri>()
+    private lateinit var reviewManager: ReviewManager
     private lateinit var photoAdapter: PhotoAdapter
-
-    // For identifying inappropriate content
-    private val inappropriateWords =
-            listOf("shit", "fuck", "ass", "dick", "bitch", "bastard", "cunt")
 
     private val getContent =
             registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
                 if (result.resultCode == RESULT_OK) {
                     result.data?.data?.let { uri ->
-                        if (selectedPhotos.size < 5) {
-                            selectedPhotos.add(uri)
-                            photoAdapter.updatePhotos(selectedPhotos)
-                        } else {
-                            Toast.makeText(this, "Maximum 5 photos allowed", Toast.LENGTH_SHORT)
-                                    .show()
-                        }
+                        reviewManager.addPhoto(uri)
+                        updatePhotosList()
                     }
                 }
             }
@@ -75,17 +59,26 @@ class WriteReviewActivity : AppCompatActivity() {
         // Set item title
         itemTitleText.text = itemTitle
 
+        // Initialize ReviewManager
+        reviewManager = ReviewManager(
+            context = this,
+            lifecycleScope = lifecycleScope,
+            listingId = rentalId,
+            onReviewSubmitted = { listingId ->
+                Toast.makeText(this, "Review submitted successfully", Toast.LENGTH_SHORT).show()
+                // Navigate to listing details
+                val intent = Intent(this, ListingDetailsActivity::class.java)
+                intent.putExtra("listing_id", listingId)
+                startActivity(intent)
+                finish()
+            },
+            onError = { message ->
+                Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+            }
+        )
+
         // Setup photos recycler view
-        photosRecyclerView.layoutManager =
-                LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-        photoAdapter =
-                PhotoAdapter(selectedPhotos) { position ->
-                    if (position >= 0 && position < selectedPhotos.size) {
-                        selectedPhotos.removeAt(position)
-                        photoAdapter.notifyDataSetChanged()
-                    }
-                }
-        photosRecyclerView.adapter = photoAdapter
+        setupPhotosRecyclerView()
 
         // Set up back button
         backButton.setOnClickListener { finish() }
@@ -111,88 +104,28 @@ class WriteReviewActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            // Check for inappropriate content
-            if (containsInappropriateContent(review)) {
-                Toast.makeText(
-                                this,
-                                "Your review contains inappropriate content. Please revise it.",
-                                Toast.LENGTH_LONG
-                        )
-                        .show()
-                return@setOnClickListener
-            }
-
-            // Submit review
-            submitReview(rentalId, rating, review)
+            // Submit through manager
+            reviewManager.submitReview(rating, review)
         }
     }
 
-    private fun containsInappropriateContent(text: String): Boolean {
-        val lowerText = text.lowercase()
-        return inappropriateWords.any { lowerText.contains(it) }
+    private fun setupPhotosRecyclerView() {
+        photosRecyclerView.layoutManager =
+                LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        photoAdapter =
+                PhotoAdapter(reviewManager.getPhotos()) { position ->
+                    reviewManager.removePhoto(position)
+                    updatePhotosList()
+                }
+        photosRecyclerView.adapter = photoAdapter
     }
 
-    private fun submitReview(listingId: Int, rating: Float, comment: String) {
-        lifecycleScope.launch {
-            try {
-                // Get user ID from SharedPreferences
-                val sharedPref = getSharedPreferences("MyAppPrefs", MODE_PRIVATE)
-                val userId = sharedPref.getInt("userId", -1)
-
-                if (userId == -1) {
-                    Toast.makeText(
-                                    this@WriteReviewActivity,
-                                    "Please log in to submit a review",
-                                    Toast.LENGTH_SHORT
-                            )
-                            .show()
-                    return@launch
-                }
-
-                // Convert photo URIs to string
-                val photoUrisString = selectedPhotos.joinToString(",") { it.toString() }
-
-                // Create review object
-                val review =
-                        Review(
-                                userId = userId,
-                                listingId = listingId,
-                                rating = rating,
-                                comment = comment,
-                                photos = photoUrisString
-                        )
-
-                // Save to database
-                reviewRepository.addReview(review)
-                reviewRepository.markRentalAsReviewed(userId, listingId)
-
-                withContext(Dispatchers.Main) {
-                    Toast.makeText(
-                                    this@WriteReviewActivity,
-                                    "Review submitted successfully",
-                                    Toast.LENGTH_SHORT
-                            )
-                            .show()
-
-                    // Navigate to listing details
-                    val intent =
-                            Intent(this@WriteReviewActivity, ListingDetailsActivity::class.java)
-                    intent.putExtra("listing_id", listingId)
-                    startActivity(intent)
-
-                    // Close the review activity
-                    finish()
-                }
-            } catch (e: Exception) {
-                withContext(Dispatchers.Main) {
-                    Toast.makeText(
-                                    this@WriteReviewActivity,
-                                    "Error submitting review: ${e.message}",
-                                    Toast.LENGTH_SHORT
-                            )
-                            .show()
-                }
-            }
-        }
+    private fun updatePhotosList() {
+        photoAdapter.notifyDataSetChanged()
+        Toast.makeText(
+                this,
+                "Photos: ${reviewManager.getPhotoCount()}/5",
+                Toast.LENGTH_SHORT
+        ).show()
     }
 }
